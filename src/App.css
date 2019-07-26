@@ -1,0 +1,8 @@
+.logo {
+  color: #FFF;
+  font-weight: bold;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+}

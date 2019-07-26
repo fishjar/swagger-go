@@ -1,0 +1,58 @@
+{
+  "name": "electron-react-boilerplate",
+  "version": "0.1.0",
+  "author": "Gabe Yuan <yugang2002@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "main": "public/electron.js",
+  "homepage": "./",
+  "dependencies": {
+    "antd": "^3.20.7",
+    "electron-is-dev": "^1.1.0",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-scripts": "3.0.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "dev": "cross-env concurrently \"BROWSER=none yarn start\" \"wait-on http://localhost:3000 && electron .\"",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "dist-mwl": "electron-builder -mwl",
+    "dist-windows": "electron-builder --windows nsis:ia32",
+    "dist-linux": "electron-builder --linux deb tar.xz"
+  },
+  "build": {
+    "appId": "your.id",
+    "mac": {
+      "category": "your.app.category.type"
+    }
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "concurrently": "^4.1.1",
+    "cross-env": "^5.2.0",
+    "devtron": "^1.4.0",
+    "electron": "^5.0.7",
+    "electron-builder": "^21.0.15",
+    "electron-devtools-installer": "^2.2.4",
+    "wait-on": "^3.3.0"
+  }
+}
