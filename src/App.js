@@ -1,4 +1,6 @@
-import React, { Fragment, useState, useEffect, useReducer } from "react";
+import React from "react";
+
+import { useDataUpload } from "./hooks";
 import "./App.css";
 import "antd/dist/antd.css";
 import {
@@ -10,86 +12,26 @@ import {
   Input,
   Divider,
   Popconfirm,
-  Table
+  Table,
+  Spin,
+  Alert
 } from "antd";
 const { Header, Content, Footer } = Layout;
 const { Panel } = Collapse;
 
+const electron = window.electron;
+const { dialog } = electron.remote;
 
-
-const dataFetchReducer = (state, action) => {
-  switch (action.type) {
-    case "FETCH_INIT":
-      return { ...state, isLoading: true, isError: false };
-    case "FETCH_SUCCESS":
-      return {
-        ...state,
-        isLoading: false,
-        isError: false,
-        data: action.payload
-      };
-    case "FETCH_FAILURE":
-      return {
-        ...state,
-        isLoading: false,
-        isError: true
-      };
-    default:
-      throw new Error();
-  }
-};
-
-const useDataApi = (initialUrl, initialData) => {
-  const [url, setUrl] = useState(initialUrl);
-
-  const [state, dispatch] = useReducer(dataFetchReducer, {
-    isLoading: false,
-    isError: false,
-    data: initialData
-  });
-
-  useEffect(() => {
-    let didCancel = false;
-
-    const fetchData = async () => {
-      dispatch({ type: "FETCH_INIT" });
-
-      try {
-        const result = await axios(url);
-
-        if (!didCancel) {
-          dispatch({ type: "FETCH_SUCCESS", payload: result.data });
-        }
-      } catch (error) {
-        if (!didCancel) {
-          dispatch({ type: "FETCH_FAILURE" });
-        }
-      }
-    };
-
-    fetchData();
-
-    return () => {
-      didCancel = true;
-    };
-  }, [url]);
-
-  return [state, setUrl];
-};
+// https://github.com/electron/electron/blob/master/docs/api/dialog.md
+// https://electronjs.org/docs/api/dialog
 
 function App() {
-  
-  function beforeUpload(file) {
-    console.log(file);
-    console.log(file.path);
-    // https://developer.mozilla.org/zh-CN/docs/Web/API/FileReader
-    const fileReader = new FileReader();
-    fileReader.onload = event => {
-      console.log(JSON.parse(event.target.result));
-    };
-    fileReader.readAsText(file);
-    return false;
-  }
+  const [
+    { data, isLoading, isError, errorMsg },
+    setFile,
+    dispatch
+  ] = useDataUpload();
+  console.log(data);
 
   const columns = [
     {
@@ -205,83 +147,152 @@ function App() {
           <div className="header">
             <div className="logo">TEST</div>
             <div className="header_buttons">
-              <Upload showUploadList={false} beforeUpload={beforeUpload}>
-                <Button type="upload" shape="round" icon="upload">
+              {/* <Upload
+                showUploadList={false}
+                beforeUpload={file => {
+                  setFile(file);
+                  return false;
+                }}
+              >
+                <Button type="upload" icon="upload">
                   Upload
                 </Button>
-              </Upload>
-              <Button shape="round" icon="download">
+              </Upload> */}
+              <Button
+                type="upload"
+                icon="upload"
+                onClick={() => {
+                  dialog.showOpenDialog(
+                    {
+                      properties: ["openFile"]
+                    },
+                    files => {
+                      console.log(files);
+                      if (files) {
+                        // handle files
+                      }
+                    }
+                  );
+                }}
+              >
+                Upload
+              </Button>
+              <Button
+                icon="download"
+                onClick={() => {
+                  console.log(
+                    dialog.showOpenDialog({ properties: ["openDirectory"] })
+                  );
+                }}
+              >
                 Download
               </Button>
+              <Button
+                icon="plus"
+                onClick={() => {
+                  dispatch({
+                    type: "NEW_DATA"
+                  });
+                }}
+              >
+                New
+              </Button>
+              <Button onClick={()=>{
+                dialog.showErrorBox('An Error Message', 'Demonstrating an error message.')
+              }}>TEST</Button>
             </div>
           </div>
         </Header>
         <Content>
-          <div style={{ background: "#fff", padding: 24 }}>
-            <Collapse defaultActiveKey={["1"]}>
-              <Panel
-                header="This is panel header 1"
-                key="1"
-                extra={
-                  <Icon
-                    type="setting"
-                    onClick={event => {
-                      // If you don't want click extra trigger collapse, you can prevent this:
-                      event.stopPropagation();
-                    }}
-                  />
-                }
-              >
-                <p>This is panel header 1</p>
-                <Collapse defaultActiveKey={["1"]}>
-                  <Panel header="This is panel header 1" key="1">
-                    <p>This is panel header 1</p>
-                  </Panel>
-                  <Panel header="This is panel header 2" key="2">
-                    <p>This is panel header 1</p>
-                  </Panel>
-                  <Panel header="This is panel header 3" key="3">
-                    <p>This is panel header 1</p>
-                  </Panel>
-                </Collapse>
-              </Panel>
-              <Panel header="This is panel header 2" key="2">
-                <p>This is panel header 1</p>
-                <Table
-                  columns={columns}
-                  dataSource={[
-                    {
-                      key: `NEW_TEMP_ID_1`,
-                      workId: "",
-                      name: "",
-                      department: "",
-                      editable: true,
-                      isNew: true
-                    }
-                  ]}
-                  pagination={false}
-                  // rowClassName={record => {
-                  //   return record.editable ? styles.editable : "";
-                  // }}
-                />
-                <Button
-                  style={{ width: "100%", marginTop: 16, marginBottom: 8 }}
-                  type="dashed"
-                  onClick={() => {}}
-                  icon="plus"
+          {isError && (
+            <div
+              style={{
+                background: "#fff",
+                padding: 24,
+                textAlign: "center"
+              }}
+            >
+              <Alert message={errorMsg} type="error" closable />
+            </div>
+          )}
+
+          {isLoading && (
+            <div
+              style={{
+                background: "#fff",
+                padding: 24,
+                textAlign: "center"
+              }}
+            >
+              <Spin tip="Loading..." />
+            </div>
+          )}
+
+          {data && (
+            <div style={{ background: "#fff", padding: 24 }}>
+              <Collapse defaultActiveKey={["1"]}>
+                <Panel
+                  header="This is panel header 1"
+                  key="1"
+                  extra={
+                    <Icon
+                      type="setting"
+                      onClick={event => {
+                        // If you don't want click extra trigger collapse, you can prevent this:
+                        event.stopPropagation();
+                      }}
+                    />
+                  }
                 >
-                  新增成员
-                </Button>
-              </Panel>
-              <Panel header="This is panel header 3" key="3">
-                <p>This is panel header 1</p>
-              </Panel>
-            </Collapse>
-          </div>
+                  <p>This is panel header 1</p>
+                  <Collapse defaultActiveKey={["1"]}>
+                    <Panel header="This is panel header 1" key="1">
+                      <p>This is panel header 1</p>
+                    </Panel>
+                    <Panel header="This is panel header 2" key="2">
+                      <p>This is panel header 1</p>
+                    </Panel>
+                    <Panel header="This is panel header 3" key="3">
+                      <p>This is panel header 1</p>
+                    </Panel>
+                  </Collapse>
+                </Panel>
+                <Panel header="This is panel header 2" key="2">
+                  <p>This is panel header 1</p>
+                  <Table
+                    columns={columns}
+                    dataSource={[
+                      {
+                        key: `NEW_TEMP_ID_1`,
+                        workId: "",
+                        name: "",
+                        department: "",
+                        editable: true,
+                        isNew: true
+                      }
+                    ]}
+                    pagination={false}
+                    // rowClassName={record => {
+                    //   return record.editable ? styles.editable : "";
+                    // }}
+                  />
+                  <Button
+                    style={{ width: "100%", marginTop: 16, marginBottom: 8 }}
+                    type="dashed"
+                    onClick={() => {}}
+                    icon="plus"
+                  >
+                    新增成员
+                  </Button>
+                </Panel>
+                <Panel header="This is panel header 3" key="3">
+                  <p>This is panel header 1</p>
+                </Panel>
+              </Collapse>
+            </div>
+          )}
         </Content>
-        <Footer style={{ textAlign: "center" }}>
-          Ant Design ©2018 Created by Ant UED
-        </Footer>
+        <Footer style={{ textAlign: "center" }}>©2018</Footer>
       </Layout>
     </div>
   );
