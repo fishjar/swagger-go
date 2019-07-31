@@ -23,14 +23,12 @@ const ButtonGroup = Button.Group;
 function App() {
   const {
     state,
-    msgs,
     isLoading,
     isSaving,
     isResetting,
     setLoading,
     setSaving,
     setResetting,
-    setMsgs,
     dispatch
   } = useData();
   console.log(state);
@@ -213,20 +211,6 @@ function App() {
             <p>{"isSaving: " + isSaving}</p>
             <p>{"isResetting: " + isResetting}</p>
           </div> */}
-
-          {msgs.length > 0 && (
-            <div
-              style={{
-                background: "#fff",
-                padding: "24px 50px",
-                textAlign: "center"
-              }}
-            >
-              {msgs.map((item, index) => (
-                <Alert message={item} key={index} type="error" closable />
-              ))}
-            </div>
-          )}
 
           {state && (
             <div style={{ background: "#fff", padding: "24px 50px" }}>

@@ -87,3 +87,31 @@ ipcMain.on("read-default-data", event => {
     }
   });
 });
+
+/**
+ * 监听读取缓存数据
+ */
+ipcMain.on("read-cache", event => {
+  const filePath = path.join(__dirname, "cache.yaml");
+  fs.readFile(filePath, (err, data) => {
+    if (err) {
+      event.sender.send("read-cache-err", err);
+    } else {
+      event.sender.send("read-cache-ok", data);
+    }
+  });
+});
+
+/**
+ * 监听写入缓存
+ */
+ipcMain.on("write-cache", (event, data) => {
+  const filePath = path.join(__dirname, "cache.yaml");
+  fs.writeFile(filePath, data, err => {
+    if (err) {
+      event.sender.send("write-cache-err", err);
+    } else {
+      event.sender.send("write-cache-ok");
+    }
+  });
+});

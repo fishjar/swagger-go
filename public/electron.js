@@ -49,7 +49,7 @@ function createWindow() {
 
     // 参考：https://electronjs.org/devtron
     // devtron
-    require("devtron").install();
+    // require("devtron").install();
 
     // 参考：https://github.com/MarshallOfSound/electron-devtools-installer
     // 可能网络问题，此方法未能安装成功
@@ -69,18 +69,18 @@ function createWindow() {
     // Redux DevTools
     // 参考：https://electronjs.org/docs/tutorial/devtools-extension
     // 注意：以下路径请改成本人实际路径
-    BrowserWindow.addDevToolsExtension(
-      path.join(
-        os.homedir(),
-        ".config/chromium/Default/Extensions/fmkadmapgofadopljbjfkapdkoienihi/3.6.0_0"
-      )
-    );
-    BrowserWindow.addDevToolsExtension(
-      path.join(
-        os.homedir(),
-        ".config/chromium/Default/Extensions/lmhkpmbekcpmknklioeibfkpmmfibljd/2.17.0_0"
-      )
-    );
+    // BrowserWindow.addDevToolsExtension(
+    //   path.join(
+    //     os.homedir(),
+    //     ".config/chromium/Default/Extensions/fmkadmapgofadopljbjfkapdkoienihi/3.6.0_0"
+    //   )
+    // );
+    // BrowserWindow.addDevToolsExtension(
+    //   path.join(
+    //     os.homedir(),
+    //     ".config/chromium/Default/Extensions/lmhkpmbekcpmknklioeibfkpmmfibljd/2.17.0_0"
+    //   )
+    // );
   }
 }
 

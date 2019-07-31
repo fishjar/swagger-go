@@ -41,8 +41,8 @@ export const openFile = () => {
     ipcRenderer.on("open-file-ok", (event, filePaths) => {
       resolve(filePaths[0]);
     });
-    ipcRenderer.on("open-file-err", (event) => {
-      reject(new Error("打开文件失败或已取消"))
+    ipcRenderer.on("open-file-err", event => {
+      reject(new Error("打开文件失败或已取消"));
     });
   });
 };
@@ -93,8 +93,8 @@ export const saveFile = () => {
     ipcRenderer.on("save-file-ok", (event, filePath) => {
       resolve(filePath);
     });
-    ipcRenderer.on("save-file-err", (event) => {
-      reject(new Error("保存文件失败或已取消"))
+    ipcRenderer.on("save-file-err", event => {
+      reject(new Error("保存文件失败或已取消"));
     });
   });
 };
@@ -152,6 +152,45 @@ export const readDefaultData = () => {
     ipcRenderer.on("read-default-data-err", (event, err) => {
       console.log(err);
       reject(new Error("读取默认数据错误"));
+    });
+  });
+};
+
+/**
+ * 读取缓存数据
+ */
+export const readCache = () => {
+  return new Promise((resolve, reject) => {
+    ipcRenderer.send("read-cache");
+    ipcRenderer.on("read-cache-ok", (event, data) => {
+      try {
+        resolve(yaml.safeLoad(data));
+      } catch (err) {
+        console.log(err);
+        reject(new Error("解析缓存数据错误"));
+      }
+    });
+    ipcRenderer.on("read-cache-err", (event, err) => {
+      console.log(err);
+      reject(new Error("读取缓存数据错误"));
+    });
+  });
+};
+
+/**
+ * 写入缓存数据
+ * @param {String} filePath
+ * @param {String} data
+ */
+export const writeCache = data => {
+  return new Promise((resolve, reject) => {
+    ipcRenderer.send("write-cache", yaml.dump(data));
+    ipcRenderer.on("write-cache-ok", event => {
+      resolve("写入缓存数据成功");
+    });
+    ipcRenderer.on("write-cache-err", (event, err) => {
+      console.log(err);
+      reject(new Error("写入缓存数据错误"));
     });
   });
 };
