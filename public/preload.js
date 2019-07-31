@@ -5,4 +5,5 @@
 //     document.getElementById(`${versionType}-version`).innerText = process.versions[versionType]
 //   }
 // })
-window.electron = require('electron');
+
+global.electron = require("electron");

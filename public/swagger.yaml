@@ -1,0 +1,462 @@
+---
+swagger: "2.0"
+info:
+  version: "0.0.1"
+  title: "Hello World App"
+host: "localhost:3000"
+basePath: "/"
+schemes:
+- "http"
+- "https"
+consumes:
+- "application/json"
+produces:
+- "application/json"
+securityDefinitions:
+  APIKeyHeader:
+    type: apiKey
+    in: header
+    name: X-API-Key
+  JWT:
+    description: "Authorization: Bearer {token}"
+    type: "apiKey"
+    name: "Authorization"
+    in: "header"
+security:
+  - APIKeyHeader: []
+    JWT: []
+paths:
+  /account/login:
+    post:
+      summary: "登录"
+      description: "登录..."
+      security: []
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "登录参数"
+        required: true
+        schema:
+          $ref: "#/definitions/LoginBody"
+      responses:
+        "200":
+          description: "登录成功"
+          schema:
+            $ref: "#/definitions/LoginResponse"
+  /account/user:
+    get:
+      summary: "查询当前用户"
+      description: "查询当前用户.."
+      responses:
+        "200":
+          description: "查询成功"
+          headers:
+            authtoken:
+              type: string
+              description: 新token续期
+          schema:
+            $ref: "#/definitions/UserDemo"
+        "401":
+          $ref: "#/responses/Unauthorized"
+        "404":
+          $ref: "#/responses/NotFound"
+  /foos:
+    post:
+      summary: "创建单个"
+      description: "创建单个..."
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "模型参数"
+        required: true
+        schema:
+          $ref: "#/definitions/Foo"
+      responses:
+        "200":
+          description: "创建成功"
+    get:
+      summary: "查询集合"
+      description: "查询集合..."
+      parameters:
+      - in: "query"
+        name: "page_num"
+        type: "integer"
+        description: "页码"
+        default: 1
+      - in: "query"
+        name: "page_size"
+        type: "integer"
+        description: "分页大小"
+        default: 10
+      - in: "query"
+        name: "sorter"
+        type: "string"
+        description: "排序(created_at__desc)"
+        # pattern: "^\w+__\w+$"
+      responses:
+        "200":
+          description: "查询成功"
+          schema:
+            type: "object"
+            properties:
+              count:
+                type: "integer"
+              rows:
+                type: "array"
+                items:
+                  $ref: "#/definitions/Foo"
+    patch:
+      summary: "更新集合"
+      description: "更新集合..."
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "body参数"
+        schema:
+          type: "array"
+          items:
+            $ref: "#/definitions/Foo"
+      responses:
+        "200":
+          description: "更新成功"
+    delete:
+      summary: "删除集合"
+      description: "删除集合..."
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "body参数"
+        schema:
+          type: "object"
+          example:
+            id: ["1","2"]
+      responses:
+        "200":
+          description: "更新成功"
+  /foos/{id}:
+    get:
+      summary: "查询单个"
+      description: "查询单个.."
+      parameters:
+      - in: "path"
+        name: "id"
+        type: "string"
+        required: true
+        description: "ID"
+      responses:
+        "200":
+          description: "查询成功"
+          schema:
+            $ref: "#/definitions/Foo"
+    patch:
+      summary: "修改单个"
+      description: "修改单个.."
+      parameters:
+      - in: "path"
+        name: "id"
+        type: "string"
+        required: true
+        description: "ID"
+      - in: "body"
+        name: "body"
+        description: "模型参数"
+        required: true
+        schema:
+          $ref: "#/definitions/Foo"
+      responses:
+        "200":
+          description: "修改成功"
+    delete:
+      summary: "删除单个"
+      description: "删除单个.."
+      parameters:
+      - in: "path"
+        name: "id"
+        type: "string"
+        required: true
+        description: "ID"
+      responses:
+        "200":
+          description: "删除成功"
+  /foos/multiple:
+    post:
+      summary: "创建集合"
+      description: "创建集合..."
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "body参数"
+        schema:
+          type: "array"
+          items:
+            $ref: "#/definitions/Foo"
+      responses:
+        "200":
+          description: "创建成功"
+  /foo:
+    get:
+      summary: "查询单个"
+      description: "查询单个.."
+      parameters:
+      - in: "query"
+        name: "id"
+        type: "string"
+        required: true
+        description: "可以是任意参数"
+      responses:
+        "200":
+          description: "查询成功"
+          schema:
+            $ref: "#/definitions/Foo"
+    post:
+      summary: "查找或创建单个"
+      description: "查找或创建单个..."
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "模型参数"
+        required: true
+        schema:
+          $ref: "#/definitions/Foo"
+      responses:
+        "200":
+          description: "创建成功"
+          schema:
+            $ref: "#/definitions/Foo"
+definitions:
+  Foo:
+    type: "object"
+    x-isModel: true
+    x-plural: "Foos"
+    x-tableName: "foo"
+    description: "测试模型"
+    required:
+      - "id"
+      - "name"
+      - "good_time"
+      - "is_good"
+      - "status"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        description: "ID"
+        uniqueItems: true
+      name:
+        type: "string"
+        format: "string(20)"
+        description: "名称"
+        uniqueItems: true
+        minLength: 3
+        maxLength: 20
+        x-message: "请输入"
+        x-showTable: true
+        x-showFilter: true
+      age:
+        type: "integer"
+        format: "int4"
+        description: "年龄"
+        minimum: 0
+        maximum: 100
+        x-message: "请输入"
+        x-showTable: true
+        x-showFilter: true
+        x-showSorter: true
+      weight:
+        type: "number"
+        format: "float"
+        description: "体重（单位:kg）"
+        minimum: 0.01
+        maximum: 200.0
+        x-message: "请输入"
+        x-showTable: true
+        x-showFilter: true
+        x-showSorter: true
+      birthday:
+        type: "string"
+        format: "date"
+        description: "生日"
+        x-message: "请选择"
+        x-showTable: true
+        x-showSorter: true
+      good_time:
+        type: "string"
+        format: "date-time"
+        description: "快乐时光"
+        x-message: "请选择"
+        x-showTable: true
+        x-showSorter: true
+      email:
+        type: "string"
+        format: "email"
+        description: "邮箱"
+        uniqueItems: true
+        x-message: "请输入"
+        x-showTable: true
+        x-showFilter: true
+      homepage:
+        type: "string"
+        format: "uri"
+        description: "主页"
+        x-message: "请输入"
+      notice:
+        type: "string"
+        format: "text"
+        description: "备注"
+        x-message: "请输入"
+      intro:
+        type: "string"
+        format: "text"
+        description: "介绍"
+        x-message: "请输入"
+        x-isRichText: true
+      is_good:
+        type: "boolean"
+        format: "boolean"
+        description: "是否安好"
+        default: true
+        x-message: "请选择"
+        x-showTable: true
+        x-showFilter: true
+      my_extra:
+        type: "object"
+        format: "object"
+        description: "扩展字段1"
+        x-message: "请输入"
+        properties:
+          id:
+            type: "integer"
+            description: "ID"
+          username:
+            type: "string"
+            description: "用户名"
+      my_extra_array:
+        type: "array"
+        format: "array"
+        description: "扩展字段2"
+        items:
+          $ref: '#/definitions/UserDemo'
+      status:
+        type: "integer"
+        format: "int4"
+        enum: [1,2,3]
+        default: 1
+        x-message: "请选择"
+        x-showTable: true
+        x-showFilter: true
+        x-enumMap: {
+          1: "正常",
+          2: "异常",
+          3: "禁用",
+        }
+        x-description: "状态"
+        description: >
+          "状态"
+            * 1 - 正常
+            * 2 - 异常
+            * 3 - 禁用
+    example:
+      id: "123"
+      age: 12
+      name: "foo"
+      birthday: "2012-12-12"
+      good_time: "2012-12-12 12:12:12"
+      email: "test@test.com"
+      notice: "备注"
+      is_good: true
+      status: 1
+  UserDemo:
+    type: "object"
+    description: "用户模型"
+    required:
+      - "id"
+      - "name"
+    properties:
+      id:
+        type: "integer"
+        description: "ID"
+      name:
+        type: "string"
+        description: "用户名"
+      avatar:
+        type: "string"
+        description: "头像"
+      email:
+        type: "string"
+        description: "邮箱"
+    example:
+      name: 'Admin'
+      avatar: 'https://gw.alipayobjects.com/zos/rmsportal/BiazfanxmamNRoxxVxka.png'
+      id: '00000001'
+      email: 'test@test.com'
+  LoginBody:
+    type: "object"
+    description: "登录参数模型"
+    required:
+      - "userName"
+      - "password"
+      - "type"
+    properties:
+      userName:
+        type: "string"
+        description: "用户名"
+      password:
+        type: "string"
+        description: "密码"
+      type:
+        type: "string"
+        description: "账户类型"
+    example:
+      userName: 'admin'
+      password: '123456'
+      type: 'username'
+  LoginResponse:
+    type: "object"
+    description: "登录返回数据模型"
+    required:
+      - "status"
+      - "type"
+      - "currentAuthority"
+      - "authtoken"
+    properties:
+      status:
+        type: "string"
+        description: "登录状态"
+      type:
+        type: "string"
+        description: "账号类型"
+      currentAuthority:
+        type: "string"
+        description: "当前角色"
+      authtoken:
+        type: "string"
+        description: "秘钥"
+  Error:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+      errors:
+        type: "array"
+        items:
+          $ref: '#/definitions/ErrorItem'
+    required:
+      - "message"
+  ErrorItem:
+    type: "object"
+    properties:
+      errcode:
+        type: "integer"
+      errmsg:
+        type: "string"
+responses:
+  NotFound:
+    description: The specified resource was not found
+    schema:
+      $ref: "#/definitions/Error"
+  Unauthorized:
+    description: Unauthorized
+    schema:
+      $ref: "#/definitions/Error"
+      
+      

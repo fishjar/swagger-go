@@ -1,12 +1,11 @@
 import React from "react";
 
-import { useDataUpload } from "./hooks";
+import { useData } from "./hooks";
 import "./App.css";
 import "antd/dist/antd.css";
 import {
   Layout,
   Button,
-  Upload,
   Collapse,
   Icon,
   Input,
@@ -16,22 +15,25 @@ import {
   Spin,
   Alert
 } from "antd";
+
 const { Header, Content, Footer } = Layout;
 const { Panel } = Collapse;
-
-const electron = window.electron;
-const { dialog } = electron.remote;
-
-// https://github.com/electron/electron/blob/master/docs/api/dialog.md
-// https://electronjs.org/docs/api/dialog
+const ButtonGroup = Button.Group;
 
 function App() {
-  const [
-    { data, isLoading, isError, errorMsg },
-    setFile,
+  const {
+    state,
+    msgs,
+    isLoading,
+    isSaving,
+    isResetting,
+    setLoading,
+    setSaving,
+    setResetting,
+    setMsgs,
     dispatch
-  ] = useDataUpload();
-  console.log(data);
+  } = useData();
+  console.log(state);
 
   const columns = [
     {
@@ -143,93 +145,91 @@ function App() {
   return (
     <div className="App">
       <Layout className="layout">
-        <Header>
+        <Header style={{ position: "fixed", zIndex: 1, width: "100%" }}>
           <div className="header">
             <div className="logo">TEST</div>
             <div className="header_buttons">
-              {/* <Upload
-                showUploadList={false}
-                beforeUpload={file => {
-                  setFile(file);
-                  return false;
-                }}
-              >
-                <Button type="upload" icon="upload">
-                  Upload
+              <ButtonGroup>
+                {isLoading ? (
+                  <Button icon="upload" loading>
+                    Upload
+                  </Button>
+                ) : (
+                  <Button
+                    icon="upload"
+                    onClick={() => {
+                      setLoading(true);
+                    }}
+                  >
+                    Upload
+                  </Button>
+                )}
+
+                {state &&
+                  (isSaving ? (
+                    <Button icon="download" loading>
+                      Download
+                    </Button>
+                  ) : (
+                    <Button
+                      icon="download"
+                      onClick={() => {
+                        setSaving(true);
+                      }}
+                    >
+                      Download
+                    </Button>
+                  ))}
+
+                {isResetting ? (
+                  <Button icon="plus" loading>
+                    New
+                  </Button>
+                ) : (
+                  <Button
+                    icon="plus"
+                    onClick={() => {
+                      setResetting(true);
+                    }}
+                  >
+                    New
+                  </Button>
+                )}
+
+                <Button
+                  onClick={() => {
+                    //
+                  }}
+                >
+                  TEST
                 </Button>
-              </Upload> */}
-              <Button
-                type="upload"
-                icon="upload"
-                onClick={() => {
-                  dialog.showOpenDialog(
-                    {
-                      properties: ["openFile"]
-                    },
-                    files => {
-                      console.log(files);
-                      if (files) {
-                        // handle files
-                      }
-                    }
-                  );
-                }}
-              >
-                Upload
-              </Button>
-              <Button
-                icon="download"
-                onClick={() => {
-                  console.log(
-                    dialog.showOpenDialog({ properties: ["openDirectory"] })
-                  );
-                }}
-              >
-                Download
-              </Button>
-              <Button
-                icon="plus"
-                onClick={() => {
-                  dispatch({
-                    type: "NEW_DATA"
-                  });
-                }}
-              >
-                New
-              </Button>
-              <Button onClick={()=>{
-                dialog.showErrorBox('An Error Message', 'Demonstrating an error message.')
-              }}>TEST</Button>
+              </ButtonGroup>
             </div>
           </div>
         </Header>
-        <Content>
-          {isError && (
+        <Content style={{ marginTop: 64 }}>
+          {/* <div>
+            <p>{"isLoading: " + isLoading}</p>
+            <p>{"isSaving: " + isSaving}</p>
+            <p>{"isResetting: " + isResetting}</p>
+          </div> */}
+
+          {msgs.length > 0 && (
             <div
               style={{
                 background: "#fff",
-                padding: 24,
+                padding: "24px 50px",
                 textAlign: "center"
               }}
             >
-              <Alert message={errorMsg} type="error" closable />
+              {msgs.map((item, index) => (
+                <Alert message={item} key={index} type="error" closable />
+              ))}
             </div>
           )}
 
-          {isLoading && (
-            <div
-              style={{
-                background: "#fff",
-                padding: 24,
-                textAlign: "center"
-              }}
-            >
-              <Spin tip="Loading..." />
-            </div>
-          )}
-
-          {data && (
-            <div style={{ background: "#fff", padding: 24 }}>
+          {state && (
+            <div style={{ background: "#fff", padding: "24px 50px" }}>
               <Collapse defaultActiveKey={["1"]}>
                 <Panel
                   header="This is panel header 1"
@@ -292,7 +292,7 @@ function App() {
             </div>
           )}
         </Content>
-        <Footer style={{ textAlign: "center" }}>©2018</Footer>
+        {/* <Footer style={{ textAlign: "center" }}>©2018</Footer> */}
       </Layout>
     </div>
   );

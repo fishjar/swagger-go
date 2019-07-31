@@ -1,5 +1,5 @@
 import { useState, useEffect, useReducer } from "react";
-import { readFile } from "./utils";
+import { openAndReadFile, saveAndWriteFile, readDefaultData } from "./utils";
 
 /**
  * 数据reducer
@@ -7,51 +7,18 @@ import { readFile } from "./utils";
  * @param {Object} state
  * @param {Object} action
  */
-const dataUploadReducer = (state, action) => {
+const dataReducer = (state, action) => {
   switch (action.type) {
-    case "UPLOAD_INIT":
-      return { ...state, isLoading: true, isError: false, errorMsg: "" };
-    case "UPLOAD_SUCCESS":
+    case "DATA_INIT":
+      return null;
+    case "DATA_RESET":
       return {
-        ...state,
-        isLoading: false,
-        data: action.payload
+        ...action.payload
       };
-    case "UPLOAD_FAILURE":
+    case "DATA_UPDATE":
       return {
-        ...state,
-        isLoading: false,
-        isError: true,
-        errorMsg: action.payload
-      };
-    case "NEW_DATA":
-      return {
-        isLoading: false,
-        isError: false,
-        errorMsg: "",
-        data: {
-          swagger: "2.0",
-          info: {
-            version: "0.1.0",
-            title: "new app"
-          },
-          host: "localhost:3000",
-          basePath: "/",
-          schemes: ["http", "https"],
-          consumes: ["application/json"],
-          produces: ["application/json"],
-          securityDefinitions: {
-            JWT: {
-              description: "Authorization: Bearer {token}",
-              in: "header",
-              name: "Authorization",
-              type: "apiKey"
-            }
-          },
-          security: {
-            JWT: []
-          }
-        }
+        ...(state || {}),
+        ...action.payload
       };
     default:
       return state;
@@ -59,34 +26,71 @@ const dataUploadReducer = (state, action) => {
 };
 
 /**
- * 数据上传自定义hook
+ * 数据自定义hook
  * https://zh-hans.reactjs.org/docs/hooks-custom.html
  */
-export const useDataUpload = () => {
-  const [file, setFile] = useState(null);
+export const useData = () => {
+  const [isLoading, setLoading] = useState(false);
+  const [isSaving, setSaving] = useState(false);
+  const [isResetting, setResetting] = useState(false);
+  const [msgs, setMsgs] = useState([]);
 
-  const [state, dispatch] = useReducer(dataUploadReducer, {
-    isLoading: false,
-    isError: false,
-    errorMsg: "",
-    data: null
-  });
+  const [state, dispatch] = useReducer(dataReducer, null);
 
   useEffect(() => {
-    const readData = async () => {
-      dispatch({ type: "UPLOAD_INIT" });
+    const loadFile = async () => {
       try {
-        const data = await readFile(file);
-        dispatch({ type: "UPLOAD_SUCCESS", payload: data });
-      } catch (error) {
-        dispatch({
-          type: "UPLOAD_FAILURE",
-          payload: error.message || "文件上传失败"
-        });
+        const data = await openAndReadFile();
+        dispatch({ type: "DATA_RESET", payload: data });
+        setMsgs([...msgs, "文件上传成功"]);
+      } catch (err) {
+        setMsgs([...msgs, err.message || "文件上传失败"]);
+      } finally {
+        setLoading(false);
       }
     };
-    file && readData();
-  }, [file]);
+    isLoading && loadFile();
+  }, [isLoading]);
 
-  return [state, setFile, dispatch];
+  useEffect(() => {
+    const saveFile = async () => {
+      try {
+        await saveAndWriteFile(state);
+        setMsgs([...msgs, "文件保存成功"]);
+      } catch (err) {
+        setMsgs([...msgs, err.message || "文件保存失败"]);
+      } finally {
+        setSaving(false);
+      }
+    };
+    isSaving && saveFile();
+  }, [isSaving]);
+
+  useEffect(() => {
+    const resetData = async () => {
+      try {
+        const data = await readDefaultData(state);
+        dispatch({ type: "DATA_RESET", payload: data });
+        setMsgs([...msgs, "数据重置成功"]);
+      } catch (err) {
+        setMsgs([...msgs, err.message || "数据重置失败"]);
+      } finally {
+        setResetting(false);
+      }
+    };
+    isResetting && resetData();
+  }, [isResetting]);
+
+  return {
+    state,
+    msgs,
+    isLoading,
+    isSaving,
+    isResetting,
+    setLoading,
+    setSaving,
+    setResetting,
+    setMsgs,
+    dispatch
+  };
 };
