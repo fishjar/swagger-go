@@ -4,8 +4,17 @@ import {
   openAndReadFile,
   saveAndWriteFile,
   readDefaultData,
-  writeCache
+  writeLocalStorage,
+  readLocalStorage
 } from "./utils";
+
+/**
+ * 初始化state
+ * @param {String} key
+ */
+const init = key => {
+  return readLocalStorage(key);
+};
 
 /**
  * 数据reducer
@@ -40,7 +49,7 @@ export const useData = () => {
   const [isSaving, setSaving] = useState(false);
   const [isResetting, setResetting] = useState(false);
 
-  const [state, dispatch] = useReducer(dataReducer, null);
+  const [state, dispatch] = useReducer(dataReducer, "state", init);
 
   useEffect(() => {
     const loadFile = async () => {
@@ -87,15 +96,16 @@ export const useData = () => {
   }, [isResetting]);
 
   useEffect(() => {
-    const saveCache = async () => {
+    const saveCache = () => {
       try {
-        await writeCache(state);
+        // await writeCache(state);
+        writeLocalStorage("state", state);
         message.success("写入缓存成功");
       } catch (err) {
         message.error(err.message || "写入缓存失败");
       }
     };
-    state && saveCache();
+    saveCache();
   }, [state]);
 
   return {

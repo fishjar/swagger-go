@@ -179,18 +179,53 @@ export const readCache = () => {
 
 /**
  * 写入缓存数据
- * @param {String} filePath
- * @param {String} data
+ * @param {Object} data
  */
 export const writeCache = data => {
   return new Promise((resolve, reject) => {
     ipcRenderer.send("write-cache", yaml.dump(data));
     ipcRenderer.on("write-cache-ok", event => {
-      resolve("写入缓存数据成功");
+      resolve(new Error("写入缓存数据成功"));
     });
     ipcRenderer.on("write-cache-err", (event, err) => {
       console.log(err);
       reject(new Error("写入缓存数据错误"));
     });
   });
+};
+
+/**
+ * 写入浏览器缓存
+ * @param {String} key
+ * @param {*} data
+ */
+export const writeLocalStorage = (key, data) => {
+  if (!key) {
+    return;
+  }
+  if (data !== null && typeof data === "object") {
+    localStorage.setItem(key, JSON.stringify(data));
+    return;
+  }
+  localStorage.setItem(key, data || "");
+};
+
+/**
+ * 读取浏览器缓存
+ * @param {String} key
+ */
+export const readLocalStorage = key => {
+  if (!key) {
+    return null;
+  }
+  const data = localStorage.getItem(key);
+  if (!data) {
+    return null;
+  }
+  try {
+    return JSON.parse(data);
+  } catch (err) {
+    console.log(err);
+  }
+  return data;
 };

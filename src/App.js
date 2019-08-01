@@ -3,6 +3,8 @@ import React from "react";
 import { useData } from "./hooks";
 import "./App.css";
 import "antd/dist/antd.css";
+
+import SwaggerInfo from "./components/swaggerInfo";
 import {
   Layout,
   Button,
@@ -12,8 +14,7 @@ import {
   Divider,
   Popconfirm,
   Table,
-  Spin,
-  Alert
+  Card
 } from "antd";
 
 const { Header, Content, Footer } = Layout;
@@ -206,17 +207,11 @@ function App() {
           </div>
         </Header>
         <Content style={{ marginTop: 64 }}>
-          {/* <div>
-            <p>{"isLoading: " + isLoading}</p>
-            <p>{"isSaving: " + isSaving}</p>
-            <p>{"isResetting: " + isResetting}</p>
-          </div> */}
-
           {state && (
             <div style={{ background: "#fff", padding: "24px 50px" }}>
               <Collapse defaultActiveKey={["1"]}>
                 <Panel
-                  header="This is panel header 1"
+                  header="Swagger Info"
                   key="1"
                   extra={
                     <Icon
@@ -228,10 +223,59 @@ function App() {
                     />
                   }
                 >
+                  <SwaggerInfo state={state} dispatch={dispatch} />
+                </Panel>
+                <Panel header="This is panel header 2" key="2">
+                  <Card
+                    style={{ marginTop: 16 }}
+                    type="inner"
+                    title="Inner Card title"
+                    extra={<a href="#">More</a>}
+                  >
+                    Inner Card content
+                  </Card>
+                  <Card
+                    style={{ marginTop: 16 }}
+                    type="inner"
+                    title="Inner Card title"
+                    extra={<a href="#">More</a>}
+                  >
+                    Inner Card content
+                  </Card>
+                </Panel>
+                <Panel header="This is panel header 3" key="3">
                   <p>This is panel header 1</p>
                   <Collapse defaultActiveKey={["1"]}>
                     <Panel header="This is panel header 1" key="1">
-                      <p>This is panel header 1</p>
+                      <Table
+                        columns={columns}
+                        dataSource={[
+                          {
+                            key: `NEW_TEMP_ID_1`,
+                            workId: "",
+                            name: "",
+                            department: "",
+                            editable: true,
+                            isNew: true
+                          }
+                        ]}
+                        pagination={false}
+                        // rowClassName={record => {
+                        //   return record.editable ? styles.editable : "";
+                        // }}
+                      />
+                      <Button
+                        style={{
+                          width: "100%",
+                          marginTop: 16,
+                          marginBottom: 8
+                        }}
+                        type="dashed"
+                        onClick={() => {}}
+                        icon="plus"
+                      >
+                        新增成员
+                      </Button>
                     </Panel>
                     <Panel header="This is panel header 2" key="2">
                       <p>This is panel header 1</p>
@@ -241,35 +285,7 @@ function App() {
                     </Panel>
                   </Collapse>
                 </Panel>
-                <Panel header="This is panel header 2" key="2">
-                  <p>This is panel header 1</p>
-                  <Table
-                    columns={columns}
-                    dataSource={[
-                      {
-                        key: `NEW_TEMP_ID_1`,
-                        workId: "",
-                        name: "",
-                        department: "",
-                        editable: true,
-                        isNew: true
-                      }
-                    ]}
-                    pagination={false}
-                    // rowClassName={record => {
-                    //   return record.editable ? styles.editable : "";
-                    // }}
-                  />
-                  <Button
-                    style={{ width: "100%", marginTop: 16, marginBottom: 8 }}
-                    type="dashed"
-                    onClick={() => {}}
-                    icon="plus"
-                  >
-                    新增成员
-                  </Button>
-                </Panel>
-                <Panel header="This is panel header 3" key="3">
+                <Panel header="This is panel header 4" key="4">
                   <p>This is panel header 1</p>
                 </Panel>
               </Collapse>

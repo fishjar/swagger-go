@@ -1,21 +1,5 @@
 swagger: '2.0'
 info:
-  version: 0.1.0
-  title: new app
-host: 'localhost:3000'
-basePath: /
-schemes:
-  - http
-  - https
-consumes:
-  - application/json
-produces:
-  - application/json
-securityDefinitions:
-  JWT:
-    description: 'Authorization: Bearer {token}'
-    in: header
-    name: Authorization
-    type: apiKey
-security:
-  JWT: []
+  version: 0.0.1
+  title: Hello World App
+  
