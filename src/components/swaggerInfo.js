@@ -82,8 +82,7 @@ function SecurityModal({
   );
 }
 
-export default function SwaggerInfo(props) {
-  const { state, dispatch } = props;
+export default function SwaggerInfo({ state, dispatch }) {
   const [modalVisible, setModalVisible] = useState(false);
 
   function handlerInputChange(e) {
@@ -246,14 +245,9 @@ export default function SwaggerInfo(props) {
         </Form.Item>
         <Form.Item label="securityDefinitions">
           {Object.keys(state.securityDefinitions).map(key => (
-            <Card key={key} style={{ marginBottom: 24, position: "relative" }}>
-              <Form.Item {...formItemLayout} label="Key">
-                <Input
-                  name="securityKey"
-                  placeholder="apiKey"
-                  value={key}
-                  disabled
-                />
+            <Card key={key} style={{ marginBottom: 16, position: "relative" }}>
+              <Form.Item {...formItemLayout} label="security">
+                {key}
               </Form.Item>
               <Form.Item {...formItemLayout} label="type">
                 <Radio.Group
