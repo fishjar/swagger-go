@@ -191,6 +191,18 @@ export default function SwaggerInfo({ state, dispatch }) {
             onChange={handlerInputInfoChange}
           />
         </Form.Item>
+        <Form.Item label="schemes">
+          <CheckboxGroup
+            options={["http", "https"]}
+            value={state.schemes}
+            onChange={checkedList => {
+              dispatch({
+                type: "DATA_UPDATE",
+                payload: { schemes: checkedList }
+              });
+            }}
+          />
+        </Form.Item>
         <Form.Item label="host">
           <Input
             name="host"
@@ -205,18 +217,6 @@ export default function SwaggerInfo({ state, dispatch }) {
             placeholder="/api"
             value={state.basePath}
             onChange={handlerInputChange}
-          />
-        </Form.Item>
-        <Form.Item label="schemes">
-          <CheckboxGroup
-            options={["http", "https"]}
-            value={state.schemes}
-            onChange={checkedList => {
-              dispatch({
-                type: "DATA_UPDATE",
-                payload: { schemes: checkedList }
-              });
-            }}
           />
         </Form.Item>
         <Form.Item label="consumes">

@@ -14,7 +14,7 @@ import {
   Collapse,
   Table,
   Divider,
-  Popconfirm
+  Popconfirm,
 } from "antd";
 const { Panel } = Collapse;
 const CheckboxGroup = Checkbox.Group;
@@ -22,24 +22,57 @@ const CheckboxGroup = Checkbox.Group;
 export default function Definitions({ state, dispatch }) {
   const definitions = Object.keys(state.definitions).map(key => ({
     ...state.definitions[key],
-    key
+    key,
   }));
   // console.log(definitions);
+  const optionsWithDisabled = [
+    { label: "Apple", value: "Apple" },
+    { label: "Pear", value: "Pear" },
+    { label: "Orange", value: "Orange", disabled: false },
+    { label: "Apple", value: "Apple" },
+    { label: "Pear", value: "Pear" },
+    { label: "Orange", value: "Orange", disabled: false },
+    { label: "Apple", value: "Apple" },
+    { label: "Pear", value: "Pear" },
+    { label: "Orange", value: "Orange", disabled: false },
+  ];
   return (
     <Fragment>
       <Collapse defaultActiveKey={[]}>
         {definitions.map(item => (
           <Panel
-            header={item.key}
+            header={
+              item["x-isModel"]
+                ? `${item.key} (${item["x-plural"]})(${item["x-tableName"]}) (${
+                    item.description
+                  })`
+                : `${item.key} (${item.description})`
+            }
             key={item.key}
             extra={
-              <Icon
-                type="close"
-                onClick={event => {
-                  // If you don't want click extra trigger collapse, you can prevent this:
-                  event.stopPropagation();
-                }}
-              />
+              <span>
+                <Checkbox.Group
+                  options={optionsWithDisabled}
+                  disabled
+                  defaultValue={["Apple"]}
+                  style={{ marginRight: 12 }}
+                />
+                <Icon
+                  type="edit"
+                  onClick={event => {
+                    // If you don't want click extra trigger collapse, you can prevent this:
+                    event.stopPropagation();
+                  }}
+                  style={{ marginRight: 12 }}
+                />
+                <Icon
+                  type="close"
+                  onClick={event => {
+                    // If you don't want click extra trigger collapse, you can prevent this:
+                    event.stopPropagation();
+                  }}
+                />
+              </span>
             }
           >
             <Definition key={item.key} definition={item} dispatch={dispatch} />
@@ -50,7 +83,7 @@ export default function Definitions({ state, dispatch }) {
         style={{
           width: "100%",
           marginTop: 16,
-          marginBottom: 8
+          marginBottom: 8,
         }}
         type="dashed"
         onClick={() => {}}

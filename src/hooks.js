@@ -5,7 +5,7 @@ import {
   saveAndWriteFile,
   readDefaultData,
   writeLocalStorage,
-  readLocalStorage
+  readLocalStorage,
 } from "./utils";
 
 /**
@@ -28,12 +28,12 @@ const dataReducer = (state, action) => {
       return null;
     case "DATA_RESET":
       return {
-        ...action.payload
+        ...action.payload,
       };
     case "DATA_UPDATE":
       return {
         ...(state || {}),
-        ...action.payload
+        ...action.payload,
       };
     default:
       return state;
@@ -116,6 +116,6 @@ export const useData = () => {
     setLoading,
     setSaving,
     setResetting,
-    dispatch
+    dispatch,
   };
 };
