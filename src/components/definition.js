@@ -29,135 +29,64 @@ const formItemLayout = {
   },
 };
 
-function DefinitionDrawer({ title, visible, handlerVisible }) {
+function DefinitionDrawer({ children, title = "新增", defaultData = {} }) {
+  const [visible, setVisible] = useState(false);
+  const [data, setData] = useState(defaultData);
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setData({
+      ...data,
+      [name]: value,
+    });
+  }
+  function handleHide() {
+    setData({ ...defaultData });
+    setVisible(false);
+  }
   return (
-    <Drawer
-      title={title}
-      width="50%"
-      onClose={()=>{handlerVisible(false)}}
-      visible={visible}
-    >
-      <Form {...formItemLayout}>
-        <Form.Item label="info.title">
-          <Input
-            name="title"
-            placeholder="Swagger Petstore"
-            value={0}
-            onChange={() => {}}
-          />
-        </Form.Item>
-        <Form.Item label="info.title">
-          <Input
-            name="title"
-            placeholder="Swagger Petstore"
-            value={0}
-            onChange={() => {}}
-          />
-        </Form.Item>
-        <Form.Item label="info.title">
-          <Input
-            name="title"
-            placeholder="Swagger Petstore"
-            value={0}
-            onChange={() => {}}
-          />
-        </Form.Item>
-        <Form.Item label="info.title">
-          <Input
-            name="title"
-            placeholder="Swagger Petstore"
-            value={0}
-            onChange={() => {}}
-          />
-        </Form.Item>
-        <Form.Item label="info.title">
-          <Input
-            name="title"
-            placeholder="Swagger Petstore"
-            value={0}
-            onChange={() => {}}
-          />
-        </Form.Item>
-        <Form.Item label="info.title">
-          <Input
-            name="title"
-            placeholder="Swagger Petstore"
-            value={0}
-            onChange={() => {}}
-          />
-        </Form.Item>
-        <Form.Item label="info.title">
-          <Input
-            name="title"
-            placeholder="Swagger Petstore"
-            value={0}
-            onChange={() => {}}
-          />
-        </Form.Item>
-        <Form.Item label="info.title">
-          <Input
-            name="title"
-            placeholder="Swagger Petstore"
-            value={0}
-            onChange={() => {}}
-          />
-        </Form.Item>
-        <Form.Item label="info.title">
-          <Input
-            name="title"
-            placeholder="Swagger Petstore"
-            value={0}
-            onChange={() => {}}
-          />
-        </Form.Item>
-        <Form.Item label="info.title">
-          <Input
-            name="title"
-            placeholder="Swagger Petstore"
-            value={0}
-            onChange={() => {}}
-          />
-        </Form.Item>
-        <Form.Item label="info.title">
-          <Input
-            name="title"
-            placeholder="Swagger Petstore"
-            value={0}
-            onChange={() => {}}
-          />
-        </Form.Item>
-        <Form.Item label="info.title">
-          <Input
-            name="title"
-            placeholder="Swagger Petstore"
-            value={0}
-            onChange={() => {}}
-          />
-        </Form.Item>
-      </Form>
-      <div
+    <span>
+      <span
+        onClick={() => {
+          setVisible(true);
+        }}
         style={{
-          borderTop: "1px solid #e9e9e9",
-          padding: "10px 16px",
-          background: "#fff",
-          textAlign: "right",
+          cursor: "pointer",
         }}
       >
-        <Button onClick={() => {}} style={{ marginRight: 8 }}>
-          Cancel
-        </Button>
-        <Button onClick={() => {}} type="primary">
-          Submit
-        </Button>
-      </div>
-    </Drawer>
+        {children}
+      </span>
+      <Drawer title={title} width="50%" onClose={handleHide} visible={visible}>
+        <Form {...formItemLayout}>
+          <Form.Item label="Field">
+            <Input
+              name="key"
+              placeholder="keyName"
+              value={data.key}
+              onChange={handleChange}
+            />
+          </Form.Item>
+        </Form>
+        <div
+          style={{
+            borderTop: "1px solid #e9e9e9",
+            padding: "10px 16px",
+            background: "#fff",
+            textAlign: "right",
+          }}
+        >
+          <Button onClick={handleHide} style={{ marginRight: 8 }}>
+            Cancel
+          </Button>
+          <Button onClick={() => {}} type="primary">
+            Submit
+          </Button>
+        </div>
+      </Drawer>
+    </span>
   );
 }
 
 export default function Definition({ definition, dispatch }) {
-  const [drawerTitle, setDrawerTitle] = useState("新增");
-  const [drawerVisible, setDrawerVisible] = useState(false);
-
   const data = Object.keys(definition.properties).map((key, index) => ({
     ...definition.properties[key],
     key,
@@ -172,7 +101,7 @@ export default function Definition({ definition, dispatch }) {
       render: text => text,
     },
     {
-      title: "Key",
+      title: "Field",
       dataIndex: "key",
       render: (text, record) => (
         <Badge
@@ -253,15 +182,18 @@ export default function Definition({ definition, dispatch }) {
       key: "action",
       render: (text, record) => (
         <span>
-          <Icon
+          {/* <Icon
             type="edit"
             onClick={event => {
-              // If you don't want click extra trigger collapse, you can prevent this:
               setDrawerVisible(true);
-              setDrawerTitle("编辑")
+              setDrawerTitle("编辑");
+              setDrawerData(record);
               event.stopPropagation();
             }}
-          />
+          /> */}
+          <DefinitionDrawer defaultData={record}>
+            <Icon type="edit" />
+          </DefinitionDrawer>
           <Divider type="vertical" />
           <Icon
             type="close"
@@ -296,11 +228,12 @@ export default function Definition({ definition, dispatch }) {
       >
         新增成员
       </Button>
-      <DefinitionDrawer
+      {/* <DefinitionDrawer
         title={drawerTitle}
         visible={drawerVisible}
         handlerVisible={setDrawerVisible}
-      />
+        defaultData={drawerData}
+      /> */}
     </Fragment>
   );
 }
