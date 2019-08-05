@@ -229,6 +229,7 @@ definitions:
     x-isModel: true
     x-plural: "Foos"
     x-tableName: "foo"
+    x-apis: [1,3,5]
     description: "测试模型"
     required:
       - "id"

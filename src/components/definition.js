@@ -12,16 +12,156 @@ import {
   Table,
   Divider,
   Popconfirm,
-  Badge
+  Badge,
+  Drawer,
 } from "antd";
 const { Panel } = Collapse;
 const CheckboxGroup = Checkbox.Group;
 
+const formItemLayout = {
+  labelCol: {
+    xs: { span: 24 },
+    sm: { span: 4 },
+  },
+  wrapperCol: {
+    xs: { span: 24 },
+    sm: { span: 16 },
+  },
+};
+
+function DefinitionDrawer({ title, visible, handlerVisible }) {
+  return (
+    <Drawer
+      title={title}
+      width="50%"
+      onClose={()=>{handlerVisible(false)}}
+      visible={visible}
+    >
+      <Form {...formItemLayout}>
+        <Form.Item label="info.title">
+          <Input
+            name="title"
+            placeholder="Swagger Petstore"
+            value={0}
+            onChange={() => {}}
+          />
+        </Form.Item>
+        <Form.Item label="info.title">
+          <Input
+            name="title"
+            placeholder="Swagger Petstore"
+            value={0}
+            onChange={() => {}}
+          />
+        </Form.Item>
+        <Form.Item label="info.title">
+          <Input
+            name="title"
+            placeholder="Swagger Petstore"
+            value={0}
+            onChange={() => {}}
+          />
+        </Form.Item>
+        <Form.Item label="info.title">
+          <Input
+            name="title"
+            placeholder="Swagger Petstore"
+            value={0}
+            onChange={() => {}}
+          />
+        </Form.Item>
+        <Form.Item label="info.title">
+          <Input
+            name="title"
+            placeholder="Swagger Petstore"
+            value={0}
+            onChange={() => {}}
+          />
+        </Form.Item>
+        <Form.Item label="info.title">
+          <Input
+            name="title"
+            placeholder="Swagger Petstore"
+            value={0}
+            onChange={() => {}}
+          />
+        </Form.Item>
+        <Form.Item label="info.title">
+          <Input
+            name="title"
+            placeholder="Swagger Petstore"
+            value={0}
+            onChange={() => {}}
+          />
+        </Form.Item>
+        <Form.Item label="info.title">
+          <Input
+            name="title"
+            placeholder="Swagger Petstore"
+            value={0}
+            onChange={() => {}}
+          />
+        </Form.Item>
+        <Form.Item label="info.title">
+          <Input
+            name="title"
+            placeholder="Swagger Petstore"
+            value={0}
+            onChange={() => {}}
+          />
+        </Form.Item>
+        <Form.Item label="info.title">
+          <Input
+            name="title"
+            placeholder="Swagger Petstore"
+            value={0}
+            onChange={() => {}}
+          />
+        </Form.Item>
+        <Form.Item label="info.title">
+          <Input
+            name="title"
+            placeholder="Swagger Petstore"
+            value={0}
+            onChange={() => {}}
+          />
+        </Form.Item>
+        <Form.Item label="info.title">
+          <Input
+            name="title"
+            placeholder="Swagger Petstore"
+            value={0}
+            onChange={() => {}}
+          />
+        </Form.Item>
+      </Form>
+      <div
+        style={{
+          borderTop: "1px solid #e9e9e9",
+          padding: "10px 16px",
+          background: "#fff",
+          textAlign: "right",
+        }}
+      >
+        <Button onClick={() => {}} style={{ marginRight: 8 }}>
+          Cancel
+        </Button>
+        <Button onClick={() => {}} type="primary">
+          Submit
+        </Button>
+      </div>
+    </Drawer>
+  );
+}
+
 export default function Definition({ definition, dispatch }) {
+  const [drawerTitle, setDrawerTitle] = useState("新增");
+  const [drawerVisible, setDrawerVisible] = useState(false);
+
   const data = Object.keys(definition.properties).map((key, index) => ({
     ...definition.properties[key],
     key,
-    index
+    index,
   }));
   const requiredArr = definition.required || [];
   const exampleArr = Object.keys(definition.example || {});
@@ -29,7 +169,7 @@ export default function Definition({ definition, dispatch }) {
     {
       title: "Index",
       dataIndex: "index",
-      render: text => text
+      render: text => text,
     },
     {
       title: "Key",
@@ -40,19 +180,19 @@ export default function Definition({ definition, dispatch }) {
           text={text}
           style={record.uniqueItems ? { color: "#52c41a" } : {}}
         />
-      )
+      ),
     },
     {
       title: "Format ( Type )",
       dataIndex: "format",
       render: (text, record) =>
-        `${text} ( ${record.type} )` + `${record.enum ? " ( enum )" : ""}`
+        `${text} ( ${record.type} )` + `${record.enum ? " ( enum )" : ""}`,
     },
     {
       title: "Description ( Placeholder )",
       dataIndex: "description",
       render: (text, record) =>
-        `${text}` + (record["x-message"] ? ` (${record["x-message"]})` : "")
+        `${text}` + (record["x-message"] ? ` (${record["x-message"]})` : ""),
     },
     {
       title: "Form",
@@ -75,7 +215,7 @@ export default function Definition({ definition, dispatch }) {
             </div>
           )}
         </div>
-      )
+      ),
     },
     {
       title: "Default",
@@ -94,7 +234,7 @@ export default function Definition({ definition, dispatch }) {
           {record.minimum !== undefined && <div>minimum: {record.minimum}</div>}
           {record.maximum !== undefined && <div>maximum: {record.maximum}</div>}
         </div>
-      )
+      ),
     },
     {
       title: "Example",
@@ -106,24 +246,33 @@ export default function Definition({ definition, dispatch }) {
           />
           {text}
         </div>
-      )
+      ),
     },
     {
       title: "操作",
       key: "action",
       render: (text, record) => (
         <span>
-          <a onClick={e => this.toggleEditable(e, record.key)}>编辑</a>
+          <Icon
+            type="edit"
+            onClick={event => {
+              // If you don't want click extra trigger collapse, you can prevent this:
+              setDrawerVisible(true);
+              setDrawerTitle("编辑")
+              event.stopPropagation();
+            }}
+          />
           <Divider type="vertical" />
-          <Popconfirm
-            title="是否要删除此行？"
-            onConfirm={() => this.remove(record.key)}
-          >
-            <a>删除</a>
-          </Popconfirm>
+          <Icon
+            type="close"
+            onClick={event => {
+              // If you don't want click extra trigger collapse, you can prevent this:
+              event.stopPropagation();
+            }}
+          />
         </span>
-      )
-    }
+      ),
+    },
   ];
 
   return (
@@ -131,7 +280,6 @@ export default function Definition({ definition, dispatch }) {
       <Table
         columns={columns}
         bordered
-        title={() => "Header"}
         dataSource={data}
         pagination={false}
         size="middle"
@@ -140,7 +288,7 @@ export default function Definition({ definition, dispatch }) {
         style={{
           width: "100%",
           marginTop: 16,
-          marginBottom: 8
+          marginBottom: 8,
         }}
         type="dashed"
         onClick={() => {}}
@@ -148,6 +296,11 @@ export default function Definition({ definition, dispatch }) {
       >
         新增成员
       </Button>
+      <DefinitionDrawer
+        title={drawerTitle}
+        visible={drawerVisible}
+        handlerVisible={setDrawerVisible}
+      />
     </Fragment>
   );
 }

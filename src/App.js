@@ -119,10 +119,10 @@ function App() {
                 <Panel header="Swagger Info" key="info">
                   <SwaggerInfo state={state} dispatch={dispatch} />
                 </Panel>
-                <Panel header="definitions" key="definitions">
+                <Panel header="Definitions" key="definitions">
                   <Definitions state={state} dispatch={dispatch} />
                 </Panel>
-                <Panel header="paths" key="paths">
+                <Panel header="Paths" key="paths">
                   <p>This is panel header 1</p>
                 </Panel>
               </Collapse>

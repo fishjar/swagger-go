@@ -15,6 +15,8 @@ import {
   Table,
   Divider,
   Popconfirm,
+  Tag,
+  Badge,
 } from "antd";
 const { Panel } = Collapse;
 const CheckboxGroup = Checkbox.Group;
@@ -25,38 +27,108 @@ export default function Definitions({ state, dispatch }) {
     key,
   }));
   // console.log(definitions);
-  const optionsWithDisabled = [
-    { label: "Apple", value: "Apple" },
-    { label: "Pear", value: "Pear" },
-    { label: "Orange", value: "Orange", disabled: false },
-    { label: "Apple", value: "Apple" },
-    { label: "Pear", value: "Pear" },
-    { label: "Orange", value: "Orange", disabled: false },
-    { label: "Apple", value: "Apple" },
-    { label: "Pear", value: "Pear" },
-    { label: "Orange", value: "Orange", disabled: false },
+  const apiOptions = [
+    {
+      method: "get",
+      path: "",
+      key: "findOne",
+      notice: "根据条件查找单条",
+    },
+    {
+      method: "post",
+      path: "",
+      key: "findOrCreate",
+      notice: "查找或创建单条",
+    },
+    {
+      method: "get",
+      path: "s",
+      key: "findAndCountAll",
+      notice: "获取多条",
+    },
+    {
+      method: "post",
+      path: "s",
+      key: "singleCreate",
+      notice: "创建单条",
+    },
+    {
+      method: "patch",
+      path: "s",
+      key: "bulkUpdate",
+      notice: "更新多条",
+    },
+    {
+      method: "delete",
+      path: "s",
+      key: "bulkDestroy",
+      notice: "删除多条",
+    },
+    {
+      method: "get",
+      path: "s/:id",
+      key: "findById",
+      notice: "根据ID查找单条",
+    },
+    {
+      method: "patch",
+      path: "s/:id",
+      key: "updateById",
+      notice: "更新单条",
+    },
+    {
+      method: "delete",
+      path: "s/:id",
+      key: "destroyById",
+      notice: "删除单条",
+    },
+    {
+      method: "post",
+      path: "s/multiple",
+      key: "bulkCreate",
+      notice: "创建多条",
+    },
   ];
+
   return (
     <Fragment>
       <Collapse defaultActiveKey={[]}>
-        {definitions.map(item => (
+        {definitions.map(definition => (
           <Panel
             header={
-              item["x-isModel"]
-                ? `${item.key} (${item["x-plural"]})(${item["x-tableName"]}) (${
-                    item.description
-                  })`
-                : `${item.key} (${item.description})`
+              definition["x-isModel"]
+                ? `${definition.key} [${definition["x-plural"]}][${
+                    definition["x-tableName"]
+                  }] (${definition.description})`
+                : `${definition.key} (${definition.description || ""})`
             }
-            key={item.key}
+            key={definition.key}
             extra={
               <span>
-                <Checkbox.Group
-                  options={optionsWithDisabled}
-                  disabled
-                  defaultValue={["Apple"]}
-                  style={{ marginRight: 12 }}
-                />
+                {definition["x-isModel"] && (
+                  <span style={{ marginRight: 12 }}>
+                    {apiOptions.map((api, index) => (
+                      <Badge
+                        key={index}
+                        count={index}
+                        showZero
+                        style={{
+                          backgroundColor: "#fff",
+                          color: (definition["x-apis"] || []).includes(index)
+                            ? "#52c41a"
+                            : "#999",
+                          boxShadow: "0 0 0 1px #d9d9d9 inset",
+                        }}
+                        title={`${
+                          api.method
+                        }("/${definition.key.toLowerCase()}${api.path}") ${
+                          api.notice
+                        }(${api.key})`}
+                      />
+                    ))}
+                  </span>
+                )}
+
                 <Icon
                   type="edit"
                   onClick={event => {
@@ -75,7 +147,7 @@ export default function Definitions({ state, dispatch }) {
               </span>
             }
           >
-            <Definition key={item.key} definition={item} dispatch={dispatch} />
+            <Definition definition={definition} dispatch={dispatch} />
           </Panel>
         ))}
       </Collapse>

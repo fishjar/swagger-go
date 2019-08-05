@@ -16,8 +16,8 @@ const formItemLayout = {
 function SecurityModal({
   state: { securityDefinitions },
   dispatch,
-  isVisible,
-  handlerModalVisible
+  visible,
+  handlerVisible
 }) {
   const [key, setKey] = useState("JWT");
   const [validateStatus, setValidateStatus] = useState("success");
@@ -48,17 +48,17 @@ function SecurityModal({
         }
       }
     });
-    handlerModalVisible(false);
+    handlerVisible(false);
     setKey("JWT");
   }
 
   return (
     <Modal
-      visible={isVisible}
+      visible={visible}
       title="Create a new security"
       onOk={handlerOk}
       onCancel={() => {
-        handlerModalVisible(false);
+        handlerVisible(false);
         setKey("JWT");
       }}
       okButtonProps={{ disabled: validateStatus !== "success" }}
@@ -338,8 +338,8 @@ export default function SwaggerInfo({ state, dispatch }) {
           <SecurityModal
             state={state}
             dispatch={dispatch}
-            isVisible={modalVisible}
-            handlerModalVisible={setModalVisible}
+            visible={modalVisible}
+            handlerVisible={setModalVisible}
           />
         </Form.Item>
       </Form>
