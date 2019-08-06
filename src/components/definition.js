@@ -21,6 +21,8 @@ import {
 const { Panel } = Collapse;
 const { Option } = Select;
 const CheckboxGroup = Checkbox.Group;
+const InputGroup = Input.Group;
+const { TextArea } = Input;
 
 function DefinitionDrawer({
   children,
@@ -30,7 +32,7 @@ function DefinitionDrawer({
   exampleArr = [],
 }) {
   const [visible, setVisible] = useState(false);
-  const [data, setData] = useState(defaultData);
+  const [data, setData] = useState({ ...defaultData });
   const [inRequired, setInRequired] = useState(
     requiredArr.includes(defaultData.key)
   );
@@ -59,10 +61,13 @@ function DefinitionDrawer({
       [name]: checked,
     });
   }
-  function handleHide() {
+  function handleReset() {
     setData({ ...defaultData });
     setInRequired(requiredArr.includes(defaultData.key));
     setInExample(exampleArr.includes(defaultData.key));
+  }
+  function handleHide() {
+    handleReset();
     setVisible(false);
   }
   function handleFormatChange(value) {
@@ -77,6 +82,16 @@ function DefinitionDrawer({
       ...data,
       [key]: value,
     });
+  }
+  function handleEnum(e) {
+    const { checked } = e.target;
+    const newData = { ...data };
+    if (checked) {
+      newData.enum = [];
+    } else {
+      delete newData.enum;
+    }
+    setData(newData);
   }
   function handleSubmit() {
     console.log(data);
@@ -96,7 +111,7 @@ function DefinitionDrawer({
       >
         {children}
       </span>
-      <Drawer title={title} width="50%" onClose={handleHide} visible={visible}>
+      <Drawer title={title} width="60%" onClose={handleHide} visible={visible}>
         <Form {...formItemLayout}>
           <Form.Item label="Field">
             <Input
@@ -110,7 +125,7 @@ function DefinitionDrawer({
             <Select
               name="format"
               placeholder="请选择"
-              defaultValue={data.format}
+              value={data.format}
               onChange={handleFormatChange}
               showSearch
               filterOption={(input, option) =>
@@ -131,8 +146,13 @@ function DefinitionDrawer({
               ))}
             </Select>
           </Form.Item>
+          <Form.Item label="Enum">
+            <Checkbox name="enum" checked={!!data.enum} onChange={handleEnum}>
+              isEnum
+            </Checkbox>
+          </Form.Item>
           {(data.format === "string" || data.format === "char") && (
-            <Form.Item label="Length">
+            <Form.Item label="Limit">
               <InputNumber
                 name="x-length"
                 placeholder="请输入"
@@ -146,65 +166,95 @@ function DefinitionDrawer({
             </Form.Item>
           )}
           {data.format === "string" && (
-            <Form.Item label="MinLength">
-              <InputNumber
-                name="minLength"
-                placeholder="请输入"
-                value={data.minLength}
-                min={0}
-                max={255}
-                onChange={value => {
-                  handleKvChange("minLength", value);
-                }}
-              />
-            </Form.Item>
-          )}
-          {data.format === "string" && (
-            <Form.Item label="MaxLength">
-              <InputNumber
-                name="maxLength"
-                placeholder="请输入"
-                value={data.maxLength}
-                min={0}
-                max={255}
-                onChange={value => {
-                  handleKvChange("maxLength", value);
-                }}
-              />
-            </Form.Item>
-          )}
-          {numTypes.includes(data.format) && (
-            <Form.Item label="Minimum">
-              <InputNumber
-                name="minimum"
-                placeholder="请输入"
-                value={data.minimum}
-                onChange={value => {
-                  handleKvChange("minimum", value);
-                }}
-              />
+            <Form.Item label="Between">
+              <InputGroup compact>
+                <InputNumber
+                  style={{ width: 100, textAlign: "center" }}
+                  placeholder="MinLength"
+                  value={data.minLength}
+                  min={0}
+                  max={255}
+                  onChange={value => {
+                    handleKvChange("minLength", value);
+                  }}
+                />
+                <Input
+                  style={{
+                    width: 30,
+                    borderLeft: 0,
+                    pointerEvents: "none",
+                    backgroundColor: "#fff",
+                  }}
+                  placeholder="~"
+                  disabled
+                />
+                <InputNumber
+                  style={{ width: 100, textAlign: "center", borderLeft: 0 }}
+                  placeholder="MaxLength"
+                  value={data.maxLength}
+                  min={0}
+                  max={255}
+                  onChange={value => {
+                    handleKvChange("maxLength", value);
+                  }}
+                />
+              </InputGroup>
             </Form.Item>
           )}
           {numTypes.includes(data.format) && (
-            <Form.Item label="Maximum">
-              <InputNumber
-                name="maximum"
-                placeholder="请输入"
-                value={data.maximum}
-                onChange={value => {
-                  handleKvChange("maximum", value);
-                }}
-              />
+            <Form.Item label="Between">
+              <InputGroup compact>
+                <InputNumber
+                  style={{ width: 100, textAlign: "center" }}
+                  placeholder="Minimum"
+                  value={data.minimum}
+                  onChange={value => {
+                    handleKvChange("minimum", value);
+                  }}
+                />
+                <Input
+                  style={{
+                    width: 30,
+                    borderLeft: 0,
+                    pointerEvents: "none",
+                    backgroundColor: "#fff",
+                  }}
+                  placeholder="~"
+                  disabled
+                />
+                <InputNumber
+                  style={{ width: 100, textAlign: "center", borderLeft: 0 }}
+                  placeholder="Maximum"
+                  value={data.maximum}
+                  onChange={value => {
+                    handleKvChange("maximum", value);
+                  }}
+                />
+              </InputGroup>
             </Form.Item>
           )}
           <Form.Item label="Description">
-            <Input
-              name="description"
-              placeholder="请输入"
-              value={data.description}
-              onChange={handleChange}
-            />
+            {data.enum ? (
+              <TextArea autosize disabled value={data.description} />
+            ) : (
+              <Input
+                name="description"
+                placeholder="请输入"
+                value={data.description}
+                onChange={handleChange}
+              />
+            )}
           </Form.Item>
+          {data.enum && (
+            <Form.Item label="Enum Description">
+              <Input
+                name="x-description"
+                placeholder="请输入"
+                value={data["x-description"]}
+                onChange={handleChange}
+              />
+            </Form.Item>
+          )}
           <Form.Item label="Placeholder">
             <Input
               name="x-message"
@@ -278,13 +328,15 @@ function DefinitionDrawer({
             >
               showSorter
             </Checkbox>
-            <Checkbox
-              name="x-isRichText"
-              checked={data["x-isRichText"]}
-              onChange={handleCheck}
-            >
-              useRichText
-            </Checkbox>
+            {data.format === "text" && (
+              <Checkbox
+                name="x-isRichText"
+                checked={data["x-isRichText"]}
+                onChange={handleCheck}
+              >
+                useRichText
+              </Checkbox>
+            )}
           </Form.Item>
         </Form>
         <div
@@ -297,6 +349,9 @@ function DefinitionDrawer({
         >
           <Button onClick={handleHide} style={{ marginRight: 8 }}>
             Cancel
+          </Button>
+          <Button onClick={handleReset} style={{ marginRight: 8 }}>
+            Reset
           </Button>
           <Button onClick={handleSubmit} type="primary">
             Submit

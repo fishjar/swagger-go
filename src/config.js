@@ -1,5 +1,3 @@
-// https://swagger.io/docs/specification/data-models/data-types/
-
 export const formItemLayout = {
   labelCol: {
     xs: { span: 24 },
@@ -74,6 +72,7 @@ export const apiOptions = [
   },
 ];
 
+// https://swagger.io/docs/specification/data-models/data-types/
 export const dataTypes = [
   "string",
   "number",
@@ -98,7 +97,7 @@ export const dataFormats = {
   date: ["string", "DATEONLY", "DATE"],
   "date-time": ["string", "DATE", "DATETIME"],
   "date-time(6)": ["string", "DATE", "DATETIME"],
-  "time-stamp": ["string", "INTEGER", "TIMESTAMP"],
+  "time-stamp": ["integer", "INTEGER", "TIMESTAMP"],
   email: ["string", "STRING", "VARCHAR"],
   uri: ["string", "STRING", "VARCHAR"],
   hostname: ["string", "STRING", "VARCHAR"],
@@ -124,4 +123,5 @@ export const numTypes = [
   "float",
   "double",
   "decimal",
+  "time-stamp",
 ];

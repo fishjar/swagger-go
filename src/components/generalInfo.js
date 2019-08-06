@@ -72,7 +72,7 @@ function SecurityModal({
   );
 }
 
-export default function SwaggerInfo({ state, dispatch }) {
+export default function GeneralInfo({ state, dispatch }) {
   const [modalVisible, setModalVisible] = useState(false);
 
   function handlerInputChange(e) {

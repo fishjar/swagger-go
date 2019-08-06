@@ -4,7 +4,7 @@ import { useData } from "./hooks";
 import "./App.css";
 import "antd/dist/antd.css";
 
-import SwaggerInfo from "./components/swaggerInfo";
+import GeneralInfo from "./components/generalInfo";
 import Definitions from "./components/definitions";
 
 import {
@@ -122,7 +122,7 @@ function App() {
               />
               <Collapse defaultActiveKey={["definitions"]}>
                 <Panel header="General Info" key="info">
-                  <SwaggerInfo state={state} dispatch={dispatch} />
+                  <GeneralInfo state={state} dispatch={dispatch} />
                 </Panel>
                 <Panel header="Definitions" key="definitions">
                   <Definitions state={state} dispatch={dispatch} />
