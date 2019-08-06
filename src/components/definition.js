@@ -1,4 +1,5 @@
 import React, { Fragment, useState, useEffect } from "react";
+import { formItemLayout, dataFormats, numTypes } from "../config";
 import {
   Form,
   Input,
@@ -14,24 +15,36 @@ import {
   Popconfirm,
   Badge,
   Drawer,
+  Select,
+  InputNumber,
 } from "antd";
 const { Panel } = Collapse;
+const { Option } = Select;
 const CheckboxGroup = Checkbox.Group;
 
-const formItemLayout = {
-  labelCol: {
-    xs: { span: 24 },
-    sm: { span: 4 },
-  },
-  wrapperCol: {
-    xs: { span: 24 },
-    sm: { span: 16 },
-  },
-};
-
-function DefinitionDrawer({ children, title = "新增", defaultData = {} }) {
+function DefinitionDrawer({
+  children,
+  title = "新增",
+  defaultData = {},
+  requiredArr = [],
+  exampleArr = [],
+}) {
   const [visible, setVisible] = useState(false);
   const [data, setData] = useState(defaultData);
+  const [inRequired, setInRequired] = useState(
+    requiredArr.includes(defaultData.key)
+  );
+  const [inExample, setInExample] = useState(
+    exampleArr.includes(defaultData.key)
+  );
+
+  useEffect(() => {
+    setData({
+      ...data,
+      ["x-length"]: defaultData["x-length"] || 255,
+    });
+  }, [data.format]);
+
   function handleChange(e) {
     const { name, value } = e.target;
     setData({
@@ -39,10 +52,38 @@ function DefinitionDrawer({ children, title = "新增", defaultData = {} }) {
       [name]: value,
     });
   }
+  function handleCheck(e) {
+    const { name, checked } = e.target;
+    setData({
+      ...data,
+      [name]: checked,
+    });
+  }
   function handleHide() {
     setData({ ...defaultData });
+    setInRequired(requiredArr.includes(defaultData.key));
+    setInExample(exampleArr.includes(defaultData.key));
     setVisible(false);
   }
+  function handleFormatChange(value) {
+    setData({
+      ...data,
+      format: value,
+      type: dataFormats[value][0],
+    });
+  }
+  function handleKvChange(key, value) {
+    setData({
+      ...data,
+      [key]: value,
+    });
+  }
+  function handleSubmit() {
+    console.log(data);
+    console.log(inRequired);
+    console.log(inExample);
+  }
+
   return (
     <span>
       <span
@@ -60,10 +101,190 @@ function DefinitionDrawer({ children, title = "新增", defaultData = {} }) {
           <Form.Item label="Field">
             <Input
               name="key"
-              placeholder="keyName"
+              placeholder="请输入"
               value={data.key}
               onChange={handleChange}
             />
+          </Form.Item>
+          <Form.Item label="Format">
+            <Select
+              name="format"
+              placeholder="请选择"
+              defaultValue={data.format}
+              onChange={handleFormatChange}
+              showSearch
+              filterOption={(input, option) =>
+                option.key.toLowerCase().indexOf(input.toLowerCase()) >= 0
+              }
+            >
+              {Object.keys(dataFormats).map(key => (
+                <Option value={key} key={key}>
+                  <span>{key}</span>
+                  <span
+                    style={{
+                      color: "#999",
+                    }}
+                  >{` (${dataFormats[key][0]}, ${dataFormats[key][1]}, ${
+                    dataFormats[key][2]
+                  })`}</span>
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+          {(data.format === "string" || data.format === "char") && (
+            <Form.Item label="Length">
+              <InputNumber
+                name="x-length"
+                placeholder="请输入"
+                value={data["x-length"]}
+                min={0}
+                max={255}
+                onChange={value => {
+                  handleKvChange("x-length", value);
+                }}
+              />
+            </Form.Item>
+          )}
+          {data.format === "string" && (
+            <Form.Item label="MinLength">
+              <InputNumber
+                name="minLength"
+                placeholder="请输入"
+                value={data.minLength}
+                min={0}
+                max={255}
+                onChange={value => {
+                  handleKvChange("minLength", value);
+                }}
+              />
+            </Form.Item>
+          )}
+          {data.format === "string" && (
+            <Form.Item label="MaxLength">
+              <InputNumber
+                name="maxLength"
+                placeholder="请输入"
+                value={data.maxLength}
+                min={0}
+                max={255}
+                onChange={value => {
+                  handleKvChange("maxLength", value);
+                }}
+              />
+            </Form.Item>
+          )}
+          {numTypes.includes(data.format) && (
+            <Form.Item label="Minimum">
+              <InputNumber
+                name="minimum"
+                placeholder="请输入"
+                value={data.minimum}
+                onChange={value => {
+                  handleKvChange("minimum", value);
+                }}
+              />
+            </Form.Item>
+          )}
+          {numTypes.includes(data.format) && (
+            <Form.Item label="Maximum">
+              <InputNumber
+                name="maximum"
+                placeholder="请输入"
+                value={data.maximum}
+                onChange={value => {
+                  handleKvChange("maximum", value);
+                }}
+              />
+            </Form.Item>
+          )}
+          <Form.Item label="Description">
+            <Input
+              name="description"
+              placeholder="请输入"
+              value={data.description}
+              onChange={handleChange}
+            />
+          </Form.Item>
+          <Form.Item label="Placeholder">
+            <Input
+              name="x-message"
+              placeholder="请输入"
+              value={data["x-message"]}
+              onChange={handleChange}
+            />
+          </Form.Item>
+          <Form.Item label="Default">
+            <Input
+              name="default"
+              placeholder="请输入"
+              value={data.default}
+              onChange={handleChange}
+            />
+          </Form.Item>
+          <Form.Item label="Example">
+            <Input
+              name="example"
+              placeholder="请输入"
+              value={data.example}
+              onChange={handleChange}
+            />
+          </Form.Item>
+          <Form.Item label="Data Options">
+            <Checkbox
+              name="uniqueItems"
+              checked={data.uniqueItems}
+              onChange={handleCheck}
+            >
+              Unique
+            </Checkbox>
+            <Checkbox
+              name="inRequired"
+              checked={inRequired}
+              onChange={e => {
+                setInRequired(e.target.checked);
+              }}
+            >
+              Required
+            </Checkbox>
+            <Checkbox
+              name="inExample"
+              checked={inExample}
+              onChange={e => {
+                setInExample(e.target.checked);
+              }}
+            >
+              InExample
+            </Checkbox>
+          </Form.Item>
+          <Form.Item label="Form Options">
+            <Checkbox
+              name="x-showTable"
+              checked={data["x-showTable"]}
+              onChange={handleCheck}
+            >
+              showInTable
+            </Checkbox>
+            <Checkbox
+              name="x-showFilter"
+              checked={data["x-showFilter"]}
+              onChange={handleCheck}
+            >
+              showFilter
+            </Checkbox>
+            <Checkbox
+              name="x-showSorter"
+              checked={data["x-showSorter"]}
+              onChange={handleCheck}
+            >
+              showSorter
+            </Checkbox>
+            <Checkbox
+              name="x-isRichText"
+              checked={data["x-isRichText"]}
+              onChange={handleCheck}
+            >
+              useRichText
+            </Checkbox>
           </Form.Item>
         </Form>
         <div
@@ -77,7 +298,7 @@ function DefinitionDrawer({ children, title = "新增", defaultData = {} }) {
           <Button onClick={handleHide} style={{ marginRight: 8 }}>
             Cancel
           </Button>
-          <Button onClick={() => {}} type="primary">
+          <Button onClick={handleSubmit} type="primary">
             Submit
           </Button>
         </div>
@@ -182,16 +403,12 @@ export default function Definition({ definition, dispatch }) {
       key: "action",
       render: (text, record) => (
         <span>
-          {/* <Icon
-            type="edit"
-            onClick={event => {
-              setDrawerVisible(true);
-              setDrawerTitle("编辑");
-              setDrawerData(record);
-              event.stopPropagation();
-            }}
-          /> */}
-          <DefinitionDrawer defaultData={record}>
+          <DefinitionDrawer
+            title="编辑"
+            defaultData={record}
+            requiredArr={requiredArr}
+            exampleArr={exampleArr}
+          >
             <Icon type="edit" />
           </DefinitionDrawer>
           <Divider type="vertical" />

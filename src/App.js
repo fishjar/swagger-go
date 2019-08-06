@@ -18,7 +18,8 @@ import {
   Table,
   Card,
   Radio,
-  Menu
+  Menu,
+  Alert,
 } from "antd";
 
 const { Header, Content, Footer } = Layout;
@@ -35,16 +36,14 @@ function App() {
     setLoading,
     setSaving,
     setResetting,
-    dispatch
+    dispatch,
   } = useData();
   console.log(state);
-
-  
 
   return (
     <div className="App">
       <Layout className="layout">
-        <Header style={{ position: "fixed", zIndex: 1, width: "100%" }}>
+        <Header style={{ position: "fixed", zIndex: 100, width: "100%" }}>
           <div className="header">
             <Menu
               theme="dark"
@@ -64,7 +63,7 @@ function App() {
             <div className="header_buttons">
               <ButtonGroup
                 style={{
-                  marginRight: 16
+                  marginRight: 16,
                 }}
               >
                 <Button icon="undo">Undo</Button>
@@ -115,8 +114,14 @@ function App() {
         <Content style={{ marginTop: 64 }}>
           {state && (
             <div style={{ background: "#fff", padding: "24px 50px" }}>
+              <Alert
+                message="仅支持2.0，未作3.0适配"
+                type="warning"
+                closable
+                style={{ marginBottom: 24, textAlign: "center" }}
+              />
               <Collapse defaultActiveKey={["definitions"]}>
-                <Panel header="Swagger Info" key="info">
+                <Panel header="General Info" key="info">
                   <SwaggerInfo state={state} dispatch={dispatch} />
                 </Panel>
                 <Panel header="Definitions" key="definitions">

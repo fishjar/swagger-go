@@ -245,7 +245,7 @@ definitions:
         uniqueItems: true
       name:
         type: "string"
-        format: "string(20)"
+        format: "string"
         description: "名称"
         uniqueItems: true
         minLength: 3
@@ -253,6 +253,7 @@ definitions:
         x-message: "请输入"
         x-showTable: true
         x-showFilter: true
+        x-length: 20
       age:
         type: "integer"
         format: "int4"

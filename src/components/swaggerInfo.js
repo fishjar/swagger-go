@@ -1,23 +1,13 @@
 import React, { Fragment, useState, useEffect } from "react";
+import { formItemLayout } from "../config";
 import { Form, Input, Checkbox, Card, Icon, Button, Radio, Modal } from "antd";
 const CheckboxGroup = Checkbox.Group;
-
-const formItemLayout = {
-  labelCol: {
-    xs: { span: 24 },
-    sm: { span: 4 }
-  },
-  wrapperCol: {
-    xs: { span: 24 },
-    sm: { span: 16 }
-  }
-};
 
 function SecurityModal({
   state: { securityDefinitions },
   dispatch,
   visible,
-  handlerVisible
+  handlerVisible,
 }) {
   const [key, setKey] = useState("JWT");
   const [validateStatus, setValidateStatus] = useState("success");
@@ -43,10 +33,10 @@ function SecurityModal({
         securityDefinitions: {
           ...securityDefinitions,
           [key]: {
-            type: "basic"
-          }
-        }
-      }
+            type: "basic",
+          },
+        },
+      },
     });
     handlerVisible(false);
     setKey("JWT");
@@ -89,7 +79,7 @@ export default function SwaggerInfo({ state, dispatch }) {
     const { name, value } = e.target;
     dispatch({
       type: "DATA_UPDATE",
-      payload: { [name]: value }
+      payload: { [name]: value },
     });
   }
 
@@ -97,7 +87,7 @@ export default function SwaggerInfo({ state, dispatch }) {
     const { name, value } = e.target;
     dispatch({
       type: "DATA_UPDATE",
-      payload: { info: { ...state.info, [name]: value } }
+      payload: { info: { ...state.info, [name]: value } },
     });
   }
 
@@ -108,9 +98,9 @@ export default function SwaggerInfo({ state, dispatch }) {
         payload: {
           securityDefinitions: {
             ...state.securityDefinitions,
-            [securityKey]: { type: securityType }
-          }
-        }
+            [securityKey]: { type: securityType },
+          },
+        },
       });
     } else if (securityType === "apiKey") {
       dispatch({
@@ -122,10 +112,10 @@ export default function SwaggerInfo({ state, dispatch }) {
               type: securityType,
               in: "header",
               name: "X-Authorization",
-              description: "X-Authorization: Bearer {token}"
-            }
-          }
-        }
+              description: "X-Authorization: Bearer {token}",
+            },
+          },
+        },
       });
     }
   }
@@ -138,10 +128,10 @@ export default function SwaggerInfo({ state, dispatch }) {
           ...state.securityDefinitions,
           [key]: {
             ...state.securityDefinitions[key],
-            [name]: value
-          }
-        }
-      }
+            [name]: value,
+          },
+        },
+      },
     });
   }
 
@@ -151,8 +141,8 @@ export default function SwaggerInfo({ state, dispatch }) {
     dispatch({
       type: "DATA_UPDATE",
       payload: {
-        securityDefinitions: newSecurityDefinitions
-      }
+        securityDefinitions: newSecurityDefinitions,
+      },
     });
   }
 
@@ -198,7 +188,7 @@ export default function SwaggerInfo({ state, dispatch }) {
             onChange={checkedList => {
               dispatch({
                 type: "DATA_UPDATE",
-                payload: { schemes: checkedList }
+                payload: { schemes: checkedList },
               });
             }}
           />
@@ -226,7 +216,7 @@ export default function SwaggerInfo({ state, dispatch }) {
             onChange={checkedList => {
               dispatch({
                 type: "DATA_UPDATE",
-                payload: { consumes: checkedList }
+                payload: { consumes: checkedList },
               });
             }}
           />
@@ -238,7 +228,7 @@ export default function SwaggerInfo({ state, dispatch }) {
             onChange={checkedList => {
               dispatch({
                 type: "DATA_UPDATE",
-                payload: { produces: checkedList }
+                payload: { produces: checkedList },
               });
             }}
           />
@@ -321,7 +311,7 @@ export default function SwaggerInfo({ state, dispatch }) {
                 style={{
                   position: "absolute",
                   top: 0,
-                  right: -20
+                  right: -20,
                 }}
               />
             </Card>
