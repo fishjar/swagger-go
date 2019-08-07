@@ -1,4 +1,5 @@
 import React, { Fragment, useState, useEffect } from "react";
+import moment from "moment";
 import { formItemLayout, dataFormats, numTypes } from "../config";
 import {
   Form,
@@ -17,6 +18,7 @@ import {
   Drawer,
   Select,
   InputNumber,
+  DatePicker,
 } from "antd";
 const { Panel } = Collapse;
 const { Option } = Select;
@@ -58,7 +60,7 @@ function DefinitionDrawer({
   useEffect(() => {
     setData({
       ...data,
-      ["x-length"]: defaultData["x-length"] || 255,
+      "x-length": defaultData["x-length"] || 255,
     });
   }, [data.format]);
 
@@ -66,23 +68,26 @@ function DefinitionDrawer({
     const newEnum = [];
     const describe = {};
     let description = `"${data["x-description"]}"`;
+    if (data.enum) {
+      enumArr
+        .filter(item => item.value)
+        .forEach(item => {
+          newEnum.push(
+            numTypes.includes(data.format) ? ~~item.value : item.value
+          );
+          describe[item.value] = item.describe;
+          description += `\n  * ${item.value} - ${item.describe || ""}`;
+        });
 
-    enumArr
-      .filter(item => item.value)
-      .forEach(item => {
-        newEnum.push(
-          numTypes.includes(data.format) ? ~~item.value : item.value
-        );
-        describe[item.value] = item.describe;
-        description += `\n  * ${item.value} - ${item.describe || ""}`;
+      setData({
+        ...data,
+        enum: [...new Set(newEnum)],
+        description,
+        "x-enumMap": describe,
+        default: newEnum.includes(data.default) ? data.default : newEnum[0],
+        example: newEnum.includes(data.example) ? data.example : newEnum[0],
       });
-
-    setData({
-      ...data,
-      enum: [...new Set(newEnum)],
-      description,
-      "x-enumMap": describe,
-    });
+    }
   }, [enumArr]);
 
   function handleChange(e) {
@@ -135,6 +140,11 @@ function DefinitionDrawer({
       ...data,
       [key]: value,
     });
+  }
+  function handleKvDelete(key) {
+    const newData = { ...data };
+    delete newData[key];
+    setData(newData);
   }
   function handleEnum(e) {
     const { checked } = e.target;
@@ -414,22 +424,164 @@ function DefinitionDrawer({
               onChange={handleChange}
             />
           </Form.Item>
-          <Form.Item label="Default">
-            <Input
-              name="default"
-              placeholder="请输入"
-              value={data.default}
-              onChange={handleChange}
-            />
-          </Form.Item>
-          <Form.Item label="Example">
-            <Input
-              name="example"
-              placeholder="请输入"
-              value={data.example}
-              onChange={handleChange}
-            />
-          </Form.Item>
+
+          {(() => {
+            if (data.enum) {
+              return (
+                <Form.Item label="Default">
+                  <Select
+                    name="default"
+                    placeholder="请选择"
+                    value={data.default}
+                    onChange={value => {
+                      if (value === null) {
+                        handleKvDelete("default");
+                      } else {
+                        handleKvChange("default", value);
+                      }
+                    }}
+                  >
+                    <Option value={null}>
+                      <span>null</span>
+                    </Option>
+                    {data.enum.map(key => (
+                      <Option value={key} key={key}>
+                        <span>{key}</span>
+                        <span
+                          style={{
+                            color: "#999",
+                          }}
+                        >{` (${data["x-enumMap"][key]})`}</span>
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              );
+            } else if (numTypes.includes(data.format)) {
+              return (
+                <Form.Item label="Default">
+                  <InputNumber
+                    name="default"
+                    placeholder="请输入"
+                    value={data.default}
+                    onChange={value => {
+                      handleKvChange("default", value);
+                    }}
+                  />
+                </Form.Item>
+              );
+            } else if (data.format === "date") {
+              return (
+                <Form.Item label="Default">
+                  <DatePicker
+                    name="default"
+                    value={data.default && moment(data.default)}
+                    onChange={(_, dateString) => {
+                      console.log(dateString);
+                      handleKvChange("default", dateString);
+                    }}
+                  />
+                </Form.Item>
+              );
+            } else if (data.format === "date-time") {
+              return (
+                <Form.Item label="Default">
+                  <DatePicker
+                    showTime
+                    name="default"
+                    value={data.default && moment(data.default)}
+                    onChange={(_, dateString) => {
+                      console.log(dateString);
+                      handleKvChange("default", dateString);
+                    }}
+                  />
+                </Form.Item>
+              );
+            } else if (data.format === "text") {
+              return (
+                <Form.Item label="Default">
+                  <TextArea
+                    autosize
+                    name="default"
+                    placeholder="请输入"
+                    value={data.default}
+                    onChange={handleChange}
+                  />
+                </Form.Item>
+              );
+            } else if (data.format !== "object" && data.format !== "array") {
+              return (
+                <Form.Item label="Default">
+                  <Input
+                    name="default"
+                    placeholder="请输入"
+                    value={data.default}
+                    onChange={handleChange}
+                  />
+                </Form.Item>
+              );
+            }
+          })()}
+
+          {(() => {
+            if (data.enum) {
+              return (
+                <Form.Item label="Example">
+                  <Select
+                    name="example"
+                    placeholder="请选择"
+                    value={data.example}
+                    onChange={value => {
+                      if (value === null) {
+                        handleKvDelete("example");
+                      } else {
+                        handleKvChange("example", value);
+                      }
+                    }}
+                  >
+                    <Option value={null}>
+                      <span>null</span>
+                    </Option>
+                    {data.enum.map(key => (
+                      <Option value={key} key={key}>
+                        <span>{key}</span>
+                        <span
+                          style={{
+                            color: "#999",
+                          }}
+                        >{` (${data["x-enumMap"][key]})`}</span>
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              );
+            } else if (numTypes.includes(data.format)) {
+              return (
+                <Form.Item label="Example">
+                  <InputNumber
+                    name="example"
+                    placeholder="请输入"
+                    value={data.example}
+                    onChange={value => {
+                      handleKvChange("example", value);
+                    }}
+                  />
+                </Form.Item>
+              );
+            } else {
+              return (
+                <Form.Item label="Example">
+                  <Input
+                    name="example"
+                    placeholder="请输入"
+                    value={data.example}
+                    onChange={handleChange}
+                  />
+                </Form.Item>
+              );
+            }
+          })()}
+
           <Form.Item label="Data Options">
             <Checkbox
               name="uniqueItems"
@@ -617,6 +769,8 @@ export default function Definition({ definition, dispatch }) {
           >
             <Icon type="edit" />
           </DefinitionDrawer>
+          <Divider type="vertical" />
+          <Icon type="copy" onClick={() => {}} />
           <Divider type="vertical" />
           <Icon
             type="close"

@@ -76,6 +76,14 @@ export default function Definitions({ state, dispatch }) {
                   style={{ marginRight: 12 }}
                 />
                 <Icon
+                  type="copy"
+                  onClick={event => {
+                    // If you don't want click extra trigger collapse, you can prevent this:
+                    event.stopPropagation();
+                  }}
+                  style={{ marginRight: 12 }}
+                />
+                <Icon
                   type="close"
                   onClick={event => {
                     // If you don't want click extra trigger collapse, you can prevent this:

@@ -96,7 +96,7 @@ export const dataFormats = {
   text: ["string", "TEXT", "TEXT"],
   date: ["string", "DATEONLY", "DATE"],
   "date-time": ["string", "DATE", "DATETIME"],
-  "date-time(6)": ["string", "DATE", "DATETIME"],
+  // "date-time(6)": ["string", "DATE", "DATETIME"],
   "time-stamp": ["integer", "INTEGER", "TIMESTAMP"],
   email: ["string", "STRING", "VARCHAR"],
   uri: ["string", "STRING", "VARCHAR"],
@@ -111,7 +111,7 @@ export const dataFormats = {
   object: ["object", "JSON", "JSON"],
   array: ["array", "JSON", "JSON"],
   boolean: ["boolean", "BOOLEAN", "BOOLEAN"],
-  enum: ["*", "ENUM", "ENUM"],
+  // enum: ["*", "ENUM", "ENUM"],
 };
 
 export const numTypes = [
