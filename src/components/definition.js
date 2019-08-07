@@ -39,6 +39,21 @@ function DefinitionDrawer({
   const [inExample, setInExample] = useState(
     exampleArr.includes(defaultData.key)
   );
+  const [enumArr, setEnumArr] = useState(() => {
+    if (!(defaultData.enum && Array.isArray(defaultData.enum))) {
+      return [];
+    }
+    if (defaultData["x-enumMap"]) {
+      return Object.keys(defaultData["x-enumMap"]).map(value => ({
+        value,
+        describe: defaultData["x-enumMap"][value],
+      }));
+    }
+    return defaultData.enum.map(value => ({
+      value,
+      describe: null,
+    }));
+  });
 
   useEffect(() => {
     setData({
@@ -46,6 +61,29 @@ function DefinitionDrawer({
       ["x-length"]: defaultData["x-length"] || 255,
     });
   }, [data.format]);
+
+  useEffect(() => {
+    const newEnum = [];
+    const describe = {};
+    let description = `"${data["x-description"]}"`;
+
+    enumArr
+      .filter(item => item.value)
+      .forEach(item => {
+        newEnum.push(
+          numTypes.includes(data.format) ? ~~item.value : item.value
+        );
+        describe[item.value] = item.describe;
+        description += `\n  * ${item.value} - ${item.describe || ""}`;
+      });
+
+    setData({
+      ...data,
+      enum: [...new Set(newEnum)],
+      description,
+      "x-enumMap": describe,
+    });
+  }, [enumArr]);
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -65,6 +103,21 @@ function DefinitionDrawer({
     setData({ ...defaultData });
     setInRequired(requiredArr.includes(defaultData.key));
     setInExample(exampleArr.includes(defaultData.key));
+    setEnumArr(() => {
+      if (!(defaultData.enum && Array.isArray(defaultData.enum))) {
+        return [];
+      }
+      if (defaultData["x-enumMap"]) {
+        return Object.keys(defaultData["x-enumMap"]).map(value => ({
+          value,
+          describe: defaultData["x-enumMap"][value],
+        }));
+      }
+      return defaultData.enum.map(value => ({
+        value,
+        describe: null,
+      }));
+    });
   }
   function handleHide() {
     handleReset();
@@ -87,16 +140,39 @@ function DefinitionDrawer({
     const { checked } = e.target;
     const newData = { ...data };
     if (checked) {
-      newData.enum = [];
+      newData.enum = enumArr
+        .filter(item => item.value)
+        .map(item =>
+          numTypes.includes(data.format) ? ~~item.value : item.value
+        );
     } else {
       delete newData.enum;
     }
     setData(newData);
   }
+  function handleAddEnum() {
+    setEnumArr([...enumArr, {}]);
+  }
+  function handleRemoveEnum(index) {
+    const newEnumArr = [...enumArr];
+    newEnumArr.splice(index, 1);
+    setEnumArr(newEnumArr);
+  }
+  function handleChangeEnumValue(index, value) {
+    const newEnumArr = [...enumArr];
+    newEnumArr[index] = { ...newEnumArr[index], value };
+    setEnumArr(newEnumArr);
+  }
+  function handleChangeEnumDescribe(index, describe) {
+    const newEnumArr = [...enumArr];
+    newEnumArr[index] = { ...newEnumArr[index], describe };
+    setEnumArr(newEnumArr);
+  }
   function handleSubmit() {
     console.log(data);
     console.log(inRequired);
     console.log(inExample);
+    console.log(enumArr);
   }
 
   return (
@@ -151,6 +227,103 @@ function DefinitionDrawer({
               isEnum
             </Checkbox>
           </Form.Item>
+          <Form.Item label="Description">
+            {data.enum ? (
+              <Input
+                name="x-description"
+                placeholder="请输入"
+                value={data["x-description"]}
+                onChange={handleChange}
+              />
+            ) : (
+              <Input
+                name="description"
+                placeholder="请输入"
+                value={data.description}
+                onChange={handleChange}
+              />
+            )}
+          </Form.Item>
+          {data.enum && (
+            <Form.Item
+              label="Enum Items"
+              validateStatus={
+                enumArr.length === (data.enum || []).length
+                  ? "success"
+                  : "error"
+              }
+            >
+              {enumArr.map((item, index) => (
+                <div
+                  key={index}
+                  style={{
+                    position: "relative",
+                  }}
+                >
+                  <InputGroup compact>
+                    {numTypes.includes(data.format) ? (
+                      <InputNumber
+                        style={{ width: "40%" }}
+                        placeholder="Key"
+                        value={item.value}
+                        onChange={value => {
+                          handleChangeEnumValue(index, value);
+                        }}
+                      />
+                    ) : (
+                      <Input
+                        style={{ width: "40%" }}
+                        placeholder="Key"
+                        value={item.value}
+                        onChange={e => {
+                          handleChangeEnumValue(index, e.target.value);
+                        }}
+                      />
+                    )}
+                    <Input
+                      style={{ width: "60%" }}
+                      placeholder="Value"
+                      value={item.describe}
+                      onChange={e => {
+                        handleChangeEnumDescribe(index, e.target.value);
+                      }}
+                    />
+                  </InputGroup>
+                  <Icon
+                    style={{
+                      position: "absolute",
+                      right: -20,
+                      top: 12,
+                    }}
+                    type="minus-circle-o"
+                    onClick={() => {
+                      handleRemoveEnum(index);
+                    }}
+                  />
+                </div>
+              ))}
+              <Button
+                style={{
+                  width: "100%",
+                  marginTop: 12,
+                }}
+                type="dashed"
+                onClick={handleAddEnum}
+                icon="plus"
+              >
+                Add field
+              </Button>
+              <TextArea
+                autosize
+                disabled
+                value={data.description}
+                style={{
+                  marginTop: 12,
+                }}
+              />
+            </Form.Item>
+          )}
+
           {(data.format === "string" || data.format === "char") && (
             <Form.Item label="Limit">
               <InputNumber
@@ -231,28 +404,6 @@ function DefinitionDrawer({
                   }}
                 />
               </InputGroup>
-            </Form.Item>
-          )}
-          <Form.Item label="Description">
-            {data.enum ? (
-              <TextArea autosize disabled value={data.description} />
-            ) : (
-              <Input
-                name="description"
-                placeholder="请输入"
-                value={data.description}
-                onChange={handleChange}
-              />
-            )}
-          </Form.Item>
-          {data.enum && (
-            <Form.Item label="Enum Description">
-              <Input
-                name="x-description"
-                placeholder="请输入"
-                value={data["x-description"]}
-                onChange={handleChange}
-              />
             </Form.Item>
           )}
           <Form.Item label="Placeholder">
@@ -498,7 +649,7 @@ export default function Definition({ definition, dispatch }) {
         onClick={() => {}}
         icon="plus"
       >
-        新增成员
+        Add field
       </Button>
       {/* <DefinitionDrawer
         title={drawerTitle}
