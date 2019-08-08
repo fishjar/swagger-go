@@ -93,7 +93,7 @@ export default function Definitions({ state, dispatch }) {
               </span>
             }
           >
-            <Definition definition={definition} dispatch={dispatch} />
+            <Definition definitions={definitions} definition={definition} dispatch={dispatch} />
           </Panel>
         ))}
       </Collapse>

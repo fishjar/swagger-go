@@ -1,6 +1,12 @@
 import React, { Fragment, useState, useEffect } from "react";
 import moment from "moment";
-import { formItemLayout, dataFormats, numTypes } from "../config";
+import {
+  formItemLayout,
+  dataFormats,
+  numTypes,
+  isObj,
+  propTypes,
+} from "../config";
 import {
   Form,
   Input,
@@ -19,6 +25,7 @@ import {
   Select,
   InputNumber,
   DatePicker,
+  message,
 } from "antd";
 const { Panel } = Collapse;
 const { Option } = Select;
@@ -28,20 +35,31 @@ const { TextArea } = Input;
 
 function DefinitionDrawer({
   children,
-  title = "新增",
+  dispatch,
+  title = "编辑",
+  formMode = "edit",
+  definitionKey,
   defaultData = {},
   requiredArr = [],
   exampleArr = [],
+  definitions = [],
 }) {
-  const [visible, setVisible] = useState(false);
-  const [data, setData] = useState({ ...defaultData });
-  const [inRequired, setInRequired] = useState(
-    requiredArr.includes(defaultData.key)
-  );
-  const [inExample, setInExample] = useState(
-    exampleArr.includes(defaultData.key)
-  );
-  const [enumArr, setEnumArr] = useState(() => {
+  const getDefinitionProps = definition => {
+    if (!definition || !isObj(definition.properties)) {
+      return [];
+    }
+    return Object.keys(definition.properties).map(key => ({
+      key,
+      type: definition.properties[key].type,
+      description: definition.properties[key].description,
+      example:
+        definition.properties[key].example ||
+        (definition.example &&
+          definition.example[key] &&
+          definition.example[key].toString()),
+    }));
+  };
+  const defaultEnumArr = () => {
     if (!(defaultData.enum && Array.isArray(defaultData.enum))) {
       return [];
     }
@@ -55,14 +73,45 @@ function DefinitionDrawer({
       value,
       describe: null,
     }));
-  });
+  };
+  const defaultPropArr = () => getDefinitionProps(defaultData);
+  const defaultArrayItems = () => {
+    const ref = defaultData.items && defaultData.items["$ref"];
+    if (!ref) {
+      return [];
+    }
+    if (definitions.length === 0) {
+      return [];
+    }
+    const refs = definitions.map(
+      definition => `#/definitions/${definition.key}`
+    );
+    const index = refs.indexOf(ref);
+    if (index === -1) {
+      return [];
+    }
+    return getDefinitionProps(definitions[index]);
+  };
 
-  useEffect(() => {
-    setData({
-      ...data,
-      "x-length": defaultData["x-length"] || 255,
-    });
-  }, [data.format]);
+  const [visible, setVisible] = useState(false);
+  const [data, setData] = useState({ ...defaultData });
+  const [inRequired, setInRequired] = useState(
+    requiredArr.includes(defaultData.key)
+  );
+  const [inExample, setInExample] = useState(
+    exampleArr.includes(defaultData.key)
+  );
+  const [enumArr, setEnumArr] = useState(defaultEnumArr());
+  const [propsSource, setPropsSource] = useState("custom");
+  const [propArr, setPropArr] = useState(defaultPropArr());
+  const [arrayItems, setArrayItems] = useState(defaultArrayItems());
+
+  // useEffect(() => {
+  //   setData({
+  //     ...data,
+  //     "x-length": defaultData["x-length"] || 255,
+  //   });
+  // }, [data.format]);
 
   useEffect(() => {
     const newEnum = [];
@@ -90,6 +139,30 @@ function DefinitionDrawer({
     }
   }, [enumArr]);
 
+  useEffect(() => {
+    const newData = { ...data };
+    if (propArr.length > 0) {
+      const properties = {};
+      propArr
+        .filter(item => item.key && item.type)
+        .forEach(item => {
+          properties[item.key] = {
+            type: item.type,
+            description: item.description,
+            example: item.example,
+          };
+        });
+
+      setData({
+        ...newData,
+        properties,
+      });
+    } else if (newData.properties) {
+      delete newData.properties;
+      setData(newData);
+    }
+  }, [propArr]);
+
   function handleChange(e) {
     const { name, value } = e.target;
     setData({
@@ -102,26 +175,6 @@ function DefinitionDrawer({
     setData({
       ...data,
       [name]: checked,
-    });
-  }
-  function handleReset() {
-    setData({ ...defaultData });
-    setInRequired(requiredArr.includes(defaultData.key));
-    setInExample(exampleArr.includes(defaultData.key));
-    setEnumArr(() => {
-      if (!(defaultData.enum && Array.isArray(defaultData.enum))) {
-        return [];
-      }
-      if (defaultData["x-enumMap"]) {
-        return Object.keys(defaultData["x-enumMap"]).map(value => ({
-          value,
-          describe: defaultData["x-enumMap"][value],
-        }));
-      }
-      return defaultData.enum.map(value => ({
-        value,
-        describe: null,
-      }));
     });
   }
   function handleHide() {
@@ -178,11 +231,64 @@ function DefinitionDrawer({
     newEnumArr[index] = { ...newEnumArr[index], describe };
     setEnumArr(newEnumArr);
   }
+  function handleChangeProp(index, key, value) {
+    const newPropArr = [...propArr];
+    newPropArr[index] = { ...newPropArr[index], [key]: value };
+    setPropArr(newPropArr);
+  }
+  function handleAddProp() {
+    setPropArr([...propArr, {}]);
+  }
+  function handleRemoveProp(index) {
+    const newPropArr = [...propArr];
+    newPropArr.splice(index, 1);
+    setPropArr(newPropArr);
+  }
+  function handleChangePropModel(index) {
+    setPropArr(getDefinitionProps(definitions[index]));
+  }
+  function handleChangeArrayModel(index) {
+    setArrayItems(getDefinitionProps(definitions[index]));
+    setData({
+      ...data,
+      items: {
+        $ref: `#/definitions/${definitions[index].key}`,
+      },
+    });
+  }
+
+  function handleReset() {
+    setData({ ...defaultData });
+    setInRequired(requiredArr.includes(defaultData.key));
+    setInExample(exampleArr.includes(defaultData.key));
+    setEnumArr(defaultEnumArr());
+    setPropsSource("custom");
+    setPropArr(defaultPropArr());
+    setArrayItems(defaultArrayItems());
+  }
   function handleSubmit() {
     console.log(data);
-    console.log(inRequired);
-    console.log(inExample);
-    console.log(enumArr);
+    console.log("inRequired", inRequired);
+    console.log("inExample", inExample);
+    if (!data.key || !data.format || !data.description) {
+      message.error("字段名、格式、描述不能为空");
+      return;
+    }
+    if (inExample && (data.example === undefined || data.example === null)) {
+      message.error("请填写示例值");
+      return;
+    }
+
+    dispatch({
+      type: "FIELD_UPDATE",
+      payload: {
+        definitionKey,
+        inRequired,
+        inExample,
+        data,
+      },
+    });
+    setVisible(false);
   }
 
   return (
@@ -205,6 +311,7 @@ function DefinitionDrawer({
               placeholder="请输入"
               value={data.key}
               onChange={handleChange}
+              disabled={formMode === "edit"}
             />
           </Form.Item>
           <Form.Item label="Format">
@@ -214,6 +321,7 @@ function DefinitionDrawer({
               value={data.format}
               onChange={handleFormatChange}
               showSearch
+              disabled={!!data.enum}
               filterOption={(input, option) =>
                 option.key.toLowerCase().indexOf(input.toLowerCase()) >= 0
               }
@@ -233,7 +341,12 @@ function DefinitionDrawer({
             </Select>
           </Form.Item>
           <Form.Item label="Enum">
-            <Checkbox name="enum" checked={!!data.enum} onChange={handleEnum}>
+            <Checkbox
+              name="enum"
+              checked={!!data.enum}
+              disabled={!["int4", "string", "char"].includes(data.format)}
+              onChange={handleEnum}
+            >
               isEnum
             </Checkbox>
           </Form.Item>
@@ -334,6 +447,212 @@ function DefinitionDrawer({
             </Form.Item>
           )}
 
+          {data.format === "object" && (
+            <Form.Item label="Properties Source">
+              <Radio.Group
+                onChange={e => {
+                  setPropsSource(e.target.value);
+                }}
+                value={propsSource}
+              >
+                <Radio value={"custom"}>Custom</Radio>
+                <Radio value={"models"}>Models</Radio>
+              </Radio.Group>
+            </Form.Item>
+          )}
+
+          {data.format === "object" && propsSource === "models" && (
+            <Form.Item label="Source Model">
+              <Select
+                placeholder="请选择"
+                // value={data.format}
+                onChange={handleChangePropModel}
+              >
+                {definitions.map((definition, index) => (
+                  <Option
+                    value={index}
+                    key={index}
+                    disabled={definitionKey === definition.key}
+                  >
+                    <span>{`#/definitions/${definition.key}`}</span>
+                    <span
+                      style={{
+                        color: "#999",
+                      }}
+                    >{` (${definition.description})`}</span>
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          )}
+
+          {data.format === "array" && (
+            <Form.Item label="Source Model">
+              <Select
+                placeholder="请选择"
+                value={definitions
+                  .map(definition => `#/definitions/${definition.key}`)
+                  .indexOf(data.items && data.items["$ref"])}
+                onChange={handleChangeArrayModel}
+              >
+                {definitions.map((definition, index) => (
+                  <Option
+                    value={index}
+                    key={index}
+                    disabled={definitionKey === definition.key}
+                  >
+                    <span>{`#/definitions/${definition.key}`}</span>
+                    <span
+                      style={{
+                        color: "#999",
+                      }}
+                    >{` (${definition.description})`}</span>
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          )}
+
+          {data.format === "object" && (
+            <Form.Item label="Properties">
+              {propArr.map((item, index) => (
+                <div
+                  key={index}
+                  style={{
+                    position: "relative",
+                  }}
+                >
+                  <InputGroup compact>
+                    <Select
+                      placeholder="Type"
+                      value={item.type}
+                      style={{ width: "20%" }}
+                      disabled={propsSource === "models"}
+                      onChange={value => {
+                        handleChangeProp(index, "type", value);
+                      }}
+                    >
+                      {propTypes.map(key => (
+                        <Option value={key} key={key}>
+                          {key}
+                        </Option>
+                      ))}
+                    </Select>
+                    <Input
+                      style={{ width: "20%" }}
+                      placeholder="Key"
+                      value={item.key}
+                      disabled={propsSource === "models"}
+                      onChange={e => {
+                        handleChangeProp(index, "key", e.target.value);
+                      }}
+                    />
+                    <Input
+                      style={{ width: "20%" }}
+                      placeholder="Description"
+                      value={item.description}
+                      disabled={propsSource === "models"}
+                      onChange={e => {
+                        handleChangeProp(index, "description", e.target.value);
+                      }}
+                    />
+                    {item.type === "integer" || item.type === "number" ? (
+                      <InputNumber
+                        style={{ width: "40%" }}
+                        placeholder="Example"
+                        value={item.example}
+                        onChange={value => {
+                          handleChangeProp(index, "example", value);
+                        }}
+                      />
+                    ) : (
+                      <Input
+                        style={{ width: "40%" }}
+                        placeholder="Example"
+                        value={item.example}
+                        onChange={e => {
+                          handleChangeProp(index, "example", e.target.value);
+                        }}
+                      />
+                    )}
+                  </InputGroup>
+                  {propsSource === "custom" && (
+                    <Icon
+                      style={{
+                        position: "absolute",
+                        right: -20,
+                        top: 12,
+                      }}
+                      type="minus-circle-o"
+                      onClick={() => {
+                        handleRemoveProp(index);
+                      }}
+                    />
+                  )}
+                </div>
+              ))}
+              {propsSource === "custom" && (
+                <Button
+                  style={{
+                    width: "100%",
+                    marginTop: 12,
+                  }}
+                  type="dashed"
+                  onClick={handleAddProp}
+                  icon="plus"
+                >
+                  Add field
+                </Button>
+              )}
+            </Form.Item>
+          )}
+
+          {data.format === "array" && (
+            <Form.Item label="Array Items">
+              {arrayItems.map((item, index) => (
+                <div
+                  key={index}
+                  style={{
+                    position: "relative",
+                  }}
+                >
+                  <InputGroup compact>
+                    <Select
+                      placeholder="Type"
+                      value={item.type}
+                      style={{ width: "20%" }}
+                      disabled
+                    >
+                      {propTypes.map(key => (
+                        <Option value={key} key={key}>
+                          {key}
+                        </Option>
+                      ))}
+                    </Select>
+                    <Input
+                      style={{ width: "20%" }}
+                      placeholder="Key"
+                      value={item.key}
+                      disabled
+                    />
+                    <Input
+                      style={{ width: "20%" }}
+                      placeholder="Description"
+                      value={item.description}
+                      disabled
+                    />
+                    <Input
+                      style={{ width: "40%" }}
+                      placeholder="Example"
+                      value={item.example}
+                      disabled
+                    />
+                  </InputGroup>
+                </div>
+              ))}
+            </Form.Item>
+          )}
+
           {(data.format === "string" || data.format === "char") && (
             <Form.Item label="Limit">
               <InputNumber
@@ -428,156 +747,238 @@ function DefinitionDrawer({
           {(() => {
             if (data.enum) {
               return (
-                <Form.Item label="Default">
-                  <Select
-                    name="default"
-                    placeholder="请选择"
-                    value={data.default}
-                    onChange={value => {
-                      if (value === null) {
-                        handleKvDelete("default");
-                      } else {
-                        handleKvChange("default", value);
-                      }
-                    }}
-                  >
-                    <Option value={null}>
-                      <span>null</span>
-                    </Option>
-                    {data.enum.map(key => (
-                      <Option value={key} key={key}>
-                        <span>{key}</span>
-                        <span
-                          style={{
-                            color: "#999",
-                          }}
-                        >{` (${data["x-enumMap"][key]})`}</span>
+                <Fragment>
+                  <Form.Item label="Default">
+                    <Select
+                      name="default"
+                      placeholder="请选择"
+                      value={data.default}
+                      onChange={value => {
+                        if (value === null) {
+                          handleKvDelete("default");
+                        } else {
+                          handleKvChange("default", value);
+                        }
+                      }}
+                    >
+                      <Option value={null}>
+                        <span>null</span>
                       </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
+                      {data.enum.map(key => (
+                        <Option value={key} key={key}>
+                          <span>{key}</span>
+                          <span
+                            style={{
+                              color: "#999",
+                            }}
+                          >{` (${data["x-enumMap"][key]})`}</span>
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                  <Form.Item label="Example">
+                    <Select
+                      name="example"
+                      placeholder="请选择"
+                      value={data.example}
+                      onChange={value => {
+                        if (value === null) {
+                          handleKvDelete("example");
+                        } else {
+                          handleKvChange("example", value);
+                        }
+                      }}
+                    >
+                      <Option value={null}>
+                        <span>null</span>
+                      </Option>
+                      {data.enum.map(key => (
+                        <Option value={key} key={key}>
+                          <span>{key}</span>
+                          <span
+                            style={{
+                              color: "#999",
+                            }}
+                          >{` (${data["x-enumMap"][key]})`}</span>
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Fragment>
               );
             } else if (numTypes.includes(data.format)) {
               return (
-                <Form.Item label="Default">
-                  <InputNumber
-                    name="default"
-                    placeholder="请输入"
-                    value={data.default}
-                    onChange={value => {
-                      handleKvChange("default", value);
-                    }}
-                  />
-                </Form.Item>
+                <Fragment>
+                  <Form.Item label="Default">
+                    <InputNumber
+                      name="default"
+                      placeholder="请输入"
+                      value={data.default}
+                      onChange={value => {
+                        handleKvChange("default", value);
+                      }}
+                    />
+                  </Form.Item>
+                  <Form.Item label="Example">
+                    <InputNumber
+                      name="example"
+                      placeholder="请输入"
+                      value={data.example}
+                      onChange={value => {
+                        handleKvChange("example", value);
+                      }}
+                    />
+                  </Form.Item>
+                </Fragment>
               );
             } else if (data.format === "date") {
               return (
-                <Form.Item label="Default">
-                  <DatePicker
-                    name="default"
-                    value={data.default && moment(data.default)}
-                    onChange={(_, dateString) => {
-                      console.log(dateString);
-                      handleKvChange("default", dateString);
-                    }}
-                  />
-                </Form.Item>
+                <Fragment>
+                  <Form.Item label="Default">
+                    <DatePicker
+                      name="default"
+                      value={data.default ? moment(data.default) : null}
+                      onChange={(_, dateString) => {
+                        handleKvChange("default", dateString);
+                      }}
+                    />
+                  </Form.Item>
+                  <Form.Item label="Example">
+                    <DatePicker
+                      name="example"
+                      value={data.example ? moment(data.example) : null}
+                      onChange={(_, dateString) => {
+                        handleKvChange("example", dateString);
+                      }}
+                    />
+                  </Form.Item>
+                </Fragment>
               );
             } else if (data.format === "date-time") {
               return (
-                <Form.Item label="Default">
-                  <DatePicker
-                    showTime
-                    name="default"
-                    value={data.default && moment(data.default)}
-                    onChange={(_, dateString) => {
-                      console.log(dateString);
-                      handleKvChange("default", dateString);
-                    }}
-                  />
-                </Form.Item>
+                <Fragment>
+                  <Form.Item label="Default">
+                    <DatePicker
+                      showTime
+                      name="default"
+                      value={data.default ? moment(data.default) : null}
+                      onChange={(_, dateString) => {
+                        handleKvChange("default", dateString);
+                      }}
+                    />
+                  </Form.Item>
+                  <Form.Item label="Example">
+                    <DatePicker
+                      showTime
+                      name="example"
+                      value={data.example ? moment(data.example) : null}
+                      onChange={(_, dateString) => {
+                        handleKvChange("example", dateString);
+                      }}
+                    />
+                  </Form.Item>
+                </Fragment>
               );
-            } else if (data.format === "text") {
+            } else if (data.format === "text" || data.format === "json") {
               return (
-                <Form.Item label="Default">
-                  <TextArea
-                    autosize
-                    name="default"
-                    placeholder="请输入"
-                    value={data.default}
-                    onChange={handleChange}
-                  />
-                </Form.Item>
+                <Fragment>
+                  <Form.Item label="Default">
+                    <TextArea
+                      autosize
+                      name="default"
+                      placeholder="请输入"
+                      value={data.default}
+                      onChange={handleChange}
+                    />
+                  </Form.Item>
+                  <Form.Item label="Example">
+                    <TextArea
+                      autosize
+                      name="example"
+                      placeholder="请输入"
+                      value={data.example}
+                      onChange={handleChange}
+                    />
+                  </Form.Item>
+                </Fragment>
+              );
+            } else if (data.format === "boolean") {
+              return (
+                <Fragment>
+                  <Form.Item label="Default">
+                    <Checkbox
+                      checked={data.default === true}
+                      onChange={e => {
+                        if (e.target.checked) {
+                          handleKvChange("default", true);
+                        } else {
+                          handleKvDelete("default");
+                        }
+                      }}
+                    >
+                      True
+                    </Checkbox>
+                    <Checkbox
+                      checked={data.default === false}
+                      onChange={e => {
+                        if (e.target.checked) {
+                          handleKvChange("default", false);
+                        } else {
+                          handleKvDelete("default");
+                        }
+                      }}
+                    >
+                      False
+                    </Checkbox>
+                  </Form.Item>
+                  <Form.Item label="Example">
+                    <Checkbox
+                      checked={data.example === true}
+                      onChange={e => {
+                        if (e.target.checked) {
+                          handleKvChange("example", true);
+                        } else {
+                          handleKvDelete("example");
+                        }
+                      }}
+                    >
+                      True
+                    </Checkbox>
+                    <Checkbox
+                      checked={data.example === false}
+                      onChange={e => {
+                        if (e.target.checked) {
+                          handleKvChange("example", false);
+                        } else {
+                          handleKvDelete("example");
+                        }
+                      }}
+                    >
+                      False
+                    </Checkbox>
+                  </Form.Item>
+                </Fragment>
               );
             } else if (data.format !== "object" && data.format !== "array") {
               return (
-                <Form.Item label="Default">
-                  <Input
-                    name="default"
-                    placeholder="请输入"
-                    value={data.default}
-                    onChange={handleChange}
-                  />
-                </Form.Item>
-              );
-            }
-          })()}
-
-          {(() => {
-            if (data.enum) {
-              return (
-                <Form.Item label="Example">
-                  <Select
-                    name="example"
-                    placeholder="请选择"
-                    value={data.example}
-                    onChange={value => {
-                      if (value === null) {
-                        handleKvDelete("example");
-                      } else {
-                        handleKvChange("example", value);
-                      }
-                    }}
-                  >
-                    <Option value={null}>
-                      <span>null</span>
-                    </Option>
-                    {data.enum.map(key => (
-                      <Option value={key} key={key}>
-                        <span>{key}</span>
-                        <span
-                          style={{
-                            color: "#999",
-                          }}
-                        >{` (${data["x-enumMap"][key]})`}</span>
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              );
-            } else if (numTypes.includes(data.format)) {
-              return (
-                <Form.Item label="Example">
-                  <InputNumber
-                    name="example"
-                    placeholder="请输入"
-                    value={data.example}
-                    onChange={value => {
-                      handleKvChange("example", value);
-                    }}
-                  />
-                </Form.Item>
-              );
-            } else {
-              return (
-                <Form.Item label="Example">
-                  <Input
-                    name="example"
-                    placeholder="请输入"
-                    value={data.example}
-                    onChange={handleChange}
-                  />
-                </Form.Item>
+                <Fragment>
+                  <Form.Item label="Default">
+                    <Input
+                      name="default"
+                      placeholder="请输入"
+                      value={data.default}
+                      onChange={handleChange}
+                    />
+                  </Form.Item>
+                  <Form.Item label="Example">
+                    <Input
+                      name="example"
+                      placeholder="请输入"
+                      value={data.example}
+                      onChange={handleChange}
+                    />
+                  </Form.Item>
+                </Fragment>
               );
             }
           })()}
@@ -665,7 +1066,7 @@ function DefinitionDrawer({
   );
 }
 
-export default function Definition({ definition, dispatch }) {
+export default function Definition({ definitions, definition, dispatch }) {
   const data = Object.keys(definition.properties).map((key, index) => ({
     ...definition.properties[key],
     key,
@@ -691,10 +1092,10 @@ export default function Definition({ definition, dispatch }) {
       ),
     },
     {
-      title: "Format ( Type )",
+      title: "Type ( Format )",
       dataIndex: "format",
       render: (text, record) =>
-        `${text} ( ${record.type} )` + `${record.enum ? " ( enum )" : ""}`,
+        `${record.type} ( ${text} )` + `${record.enum ? " ( enum )" : ""}`,
     },
     {
       title: "Description ( Placeholder )",
@@ -748,12 +1149,15 @@ export default function Definition({ definition, dispatch }) {
       title: "Example",
       dataIndex: "example",
       render: (text, record) => (
-        <div>
-          <Badge
-            status={exampleArr.includes(record.key) ? "success" : "default"}
-          />
-          {text}
-        </div>
+        <Badge
+          status={exampleArr.includes(record.key) ? "success" : "default"}
+          text={
+            text ||
+            (definition.example &&
+              definition.example[record.key] &&
+              definition.example[record.key].toString())
+          }
+        />
       ),
     },
     {
@@ -762,10 +1166,15 @@ export default function Definition({ definition, dispatch }) {
       render: (text, record) => (
         <span>
           <DefinitionDrawer
+            destroyOnClose
             title="编辑"
+            formMode="edit"
+            dispatch={dispatch}
+            definitions={definitions}
             defaultData={record}
             requiredArr={requiredArr}
             exampleArr={exampleArr}
+            definitionKey={definition.key}
           >
             <Icon type="edit" />
           </DefinitionDrawer>
@@ -793,24 +1202,30 @@ export default function Definition({ definition, dispatch }) {
         pagination={false}
         size="middle"
       />
-      <Button
-        style={{
-          width: "100%",
-          marginTop: 16,
-          marginBottom: 8,
-        }}
-        type="dashed"
-        onClick={() => {}}
-        icon="plus"
+      <DefinitionDrawer
+        destroyOnClose
+        title="新增"
+        formMode="creat"
+        dispatch={dispatch}
+        definitions={definitions}
+        defaultData={{}}
+        requiredArr={[]}
+        exampleArr={[]}
+        definitionKey={definition.key}
       >
-        Add field
-      </Button>
-      {/* <DefinitionDrawer
-        title={drawerTitle}
-        visible={drawerVisible}
-        handlerVisible={setDrawerVisible}
-        defaultData={drawerData}
-      /> */}
+        <Button
+          style={{
+            width: "100%",
+            marginTop: 16,
+            marginBottom: 8,
+          }}
+          type="dashed"
+          onClick={() => {}}
+          icon="plus"
+        >
+          Add field
+        </Button>
+      </DefinitionDrawer>
     </Fragment>
   );
 }
