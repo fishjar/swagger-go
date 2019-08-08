@@ -39,24 +39,23 @@ function DefinitionDrawer({
   title = "编辑",
   formMode = "edit",
   definitionKey,
+  definitionKeys = [],
   defaultData = {},
   requiredArr = [],
   exampleArr = [],
   definitions = [],
 }) {
-  const getDefinitionProps = definition => {
-    if (!definition || !isObj(definition.properties)) {
+  const getDefinitionProps = o => {
+    if (!o || !isObj(o.properties)) {
       return [];
     }
-    return Object.keys(definition.properties).map(key => ({
+    return Object.keys(o.properties).map(key => ({
       key,
-      type: definition.properties[key].type,
-      description: definition.properties[key].description,
+      type: o.properties[key].type,
+      description: o.properties[key].description,
       example:
-        definition.properties[key].example ||
-        (definition.example &&
-          definition.example[key] &&
-          definition.example[key].toString()),
+        o.properties[key].example ||
+        (o.example && o.example[key] && o.example[key].toString()),
     }));
   };
   const defaultEnumArr = () => {
@@ -270,6 +269,7 @@ function DefinitionDrawer({
     console.log(data);
     console.log("inRequired", inRequired);
     console.log("inExample", inExample);
+
     if (!data.key || !data.format || !data.description) {
       message.error("字段名、格式、描述不能为空");
       return;
@@ -279,16 +279,25 @@ function DefinitionDrawer({
       return;
     }
 
-    dispatch({
-      type: "FIELD_UPDATE",
-      payload: {
-        definitionKey,
-        inRequired,
-        inExample,
-        data,
-      },
-    });
-    setVisible(false);
+    if (formMode === "edit") {
+      dispatch({
+        type: "FIELD_UPDATE",
+        payload: {
+          definitionKey,
+          inRequired,
+          inExample,
+          data,
+        },
+      });
+      setVisible(false);
+    } else if (formMode === "create") {
+      console.log(definitionKeys);
+      if (definitionKeys.includes(data.key)) {
+        message.error(`${data.key}字段名重复`);
+        return;
+      }
+    } else if (formMode === "copy") {
+    }
   }
 
   return (
@@ -303,7 +312,13 @@ function DefinitionDrawer({
       >
         {children}
       </span>
-      <Drawer title={title} width="60%" onClose={handleHide} visible={visible}>
+      <Drawer
+        destroyOnClose
+        title={title}
+        width="60%"
+        onClose={handleHide}
+        visible={visible}
+      >
         <Form {...formItemLayout}>
           <Form.Item label="Field">
             <Input
@@ -1166,7 +1181,6 @@ export default function Definition({ definitions, definition, dispatch }) {
       render: (text, record) => (
         <span>
           <DefinitionDrawer
-            destroyOnClose
             title="编辑"
             formMode="edit"
             dispatch={dispatch}
@@ -1175,6 +1189,7 @@ export default function Definition({ definitions, definition, dispatch }) {
             requiredArr={requiredArr}
             exampleArr={exampleArr}
             definitionKey={definition.key}
+            definitionKeys={data.map(item => item.key)}
           >
             <Icon type="edit" />
           </DefinitionDrawer>
@@ -1203,15 +1218,15 @@ export default function Definition({ definitions, definition, dispatch }) {
         size="middle"
       />
       <DefinitionDrawer
-        destroyOnClose
         title="新增"
-        formMode="creat"
+        formMode="create"
         dispatch={dispatch}
         definitions={definitions}
         defaultData={{}}
         requiredArr={[]}
         exampleArr={[]}
         definitionKey={definition.key}
+        definitionKeys={data.map(item => item.key)}
       >
         <Button
           style={{

@@ -56,7 +56,7 @@ const dataReducer = (state, action) => {
       if (inRequired) {
         newRequired = [...new Set([...newRequired, key])];
       } else {
-        newRequired = newRequired.filter(item => item === key);
+        newRequired = newRequired.filter(item => item !== key);
       }
 
       const newProperties = { ...properties, [key]: data };
@@ -73,6 +73,45 @@ const dataReducer = (state, action) => {
           },
         },
       };
+
+    // case "FIELD_CREATE":
+    //   const {
+    //     definitionKey,
+    //     inRequired,
+    //     inExample,
+    //     data: { key, ...data },
+    //   } = action.payload;
+    //   const definition = state.definitions[definitionKey];
+    //   const { example = {}, properties = {}, required = [] } = definition;
+
+    //   const newExample = { ...example };
+    //   if (inExample) {
+    //     newExample[key] = data.example;
+    //   } else {
+    //     delete newExample[key];
+    //   }
+
+    //   let newRequired = [...required];
+    //   if (inRequired) {
+    //     newRequired = [...new Set([...newRequired, key])];
+    //   } else {
+    //     newRequired = newRequired.filter(item => item !== key);
+    //   }
+
+    //   const newProperties = { ...properties, [key]: data };
+
+    //   return {
+    //     ...state,
+    //     definitions: {
+    //       ...state.definitions,
+    //       [definitionKey]: {
+    //         ...state.definitions[definitionKey],
+    //         example: newExample,
+    //         required: newRequired,
+    //         properties: newProperties,
+    //       },
+    //     },
+    //   };
 
     default:
       return state;
