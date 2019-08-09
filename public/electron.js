@@ -18,8 +18,8 @@ function createWindow() {
     width: 800,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, "preload.js")
-    }
+      preload: path.join(__dirname, "preload.js"),
+    },
   });
 
   // and load the index.html of the app.
@@ -49,7 +49,7 @@ function createWindow() {
 
     // 参考：https://electronjs.org/devtron
     // devtron
-    // require("devtron").install();
+    require("devtron").install();
 
     // 参考：https://github.com/MarshallOfSound/electron-devtools-installer
     // 可能网络问题，此方法未能安装成功
