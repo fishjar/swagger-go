@@ -23,7 +23,11 @@ const { Panel } = Collapse;
 const CheckboxGroup = Checkbox.Group;
 
 export default function Definitions({ state, dispatch }) {
-  const definitions = Object.keys(state.definitions).map(key => ({
+  /**
+   * 计算值
+   * 将模型对象转为模型列表
+   */
+  const models = Object.keys(state.definitions).map(key => ({
     ...state.definitions[key],
     key,
   }));
@@ -31,19 +35,19 @@ export default function Definitions({ state, dispatch }) {
   return (
     <Fragment>
       <Collapse defaultActiveKey={[]}>
-        {definitions.map(definition => (
+        {models.map(({ key, ...data }) => (
           <Panel
             header={
-              definition["x-isModel"]
-                ? `${definition.key} [${definition["x-plural"]}][${
-                    definition["x-tableName"]
-                  }] (${definition.description})`
-                : `${definition.key} (${definition.description || ""})`
+              data["x-isModel"]
+                ? `${key} [${data["x-plural"]}][${data["x-tableName"]}] (${
+                    data.description
+                  })`
+                : `${key} (${data.description || ""})`
             }
-            key={definition.key}
+            key={key}
             extra={
               <span>
-                {definition["x-isModel"] && (
+                {data["x-isModel"] && (
                   <span style={{ marginRight: 12 }}>
                     {apiOptions.map((api, index) => (
                       <Badge
@@ -52,16 +56,14 @@ export default function Definitions({ state, dispatch }) {
                         showZero
                         style={{
                           backgroundColor: "#fff",
-                          color: (definition["x-apis"] || []).includes(index)
+                          color: (data["x-apis"] || []).includes(index)
                             ? "#52c41a"
                             : "#999",
                           boxShadow: "0 0 0 1px #d9d9d9 inset",
                         }}
-                        title={`${
-                          api.method
-                        }("/${definition.key.toLowerCase()}${api.path}") ${
-                          api.notice
-                        }(${api.key})`}
+                        title={`${api.method}("/${key.toLowerCase()}${
+                          api.path
+                        }") ${api.notice}(${api.key})`}
                       />
                     ))}
                   </span>
@@ -93,7 +95,11 @@ export default function Definitions({ state, dispatch }) {
               </span>
             }
           >
-            <Definition definitions={definitions} definition={definition} dispatch={dispatch} />
+            <Definition
+              models={models}
+              model={{ key, ...data }}
+              dispatch={dispatch}
+            />
           </Panel>
         ))}
       </Collapse>
@@ -107,7 +113,7 @@ export default function Definitions({ state, dispatch }) {
         onClick={() => {}}
         icon="plus"
       >
-        新增成员
+        Add Model
       </Button>
     </Fragment>
   );

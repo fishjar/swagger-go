@@ -229,3 +229,18 @@ export const readLocalStorage = key => {
   }
   return data;
 };
+
+export const getType = o => {
+  const s = Object.prototype.toString.call(o);
+  return s.match(/\[object (.*?)\]/)[1].toLowerCase();
+};
+
+export const isObj = o => {
+  if (getType(o) !== "object") {
+    return false;
+  }
+  if (Object.keys(o).length === 0) {
+    return false;
+  }
+  return true;
+};
