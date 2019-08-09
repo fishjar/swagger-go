@@ -111,13 +111,6 @@ export default function DefinitionDrawer({
   const [subFields, setSubFields] = useState([...defaultSubFields]); //子字段列表
   const [arrayItems, setArrayItems] = useState([...defaultArrayItems]); // 数组对象列表
 
-  // useEffect(() => {
-  //   setData({
-  //     ...data,
-  //     "x-length": defaultData["x-length"] || 255,
-  //   });
-  // }, [data.format]);
-
   /**
    * 副作用
    * 根据最新的枚举列表更新数据
@@ -246,18 +239,6 @@ export default function DefinitionDrawer({
     });
   }
 
-  // /**
-  //  * 枚举开关
-  //  * @param {Event} e
-  //  */
-  // function handleEnumToggle(e) {
-  //   const { checked } = e.target;
-  //   setData({
-  //     ...data,
-  //     ["x-isEnum"]: checked,
-  //   });
-  // }
-
   /**
    * 添加枚举
    */
@@ -353,37 +334,51 @@ export default function DefinitionDrawer({
    * 提交表单
    */
   function handleSubmit() {
-    console.log(model);
     console.log(data);
 
-    if (!data.key || !data.format || !data.description) {
-      message.error("字段名、格式、描述不能为空");
+    const { key: fieldKey, ...fieldData } = data;
+    const { key: modelKey, ...modelData } = model;
+
+    if (!fieldKey || !fieldData.format || !fieldData.description) {
+      message.error("字段名、字段类型、描述不能为空");
       return;
     }
-    if (data["x-isExample"] && !data.example) {
+    if (fieldData["x-isExample"] && !fieldData.example) {
       message.error("请填写示例值");
       return;
     }
+    if (
+      formMode === "create" &&
+      fields.map(item => item.key).includes(fieldKey)
+    ) {
+      message.error("字段名重复");
+      return;
+    }
 
-    // if (formMode === "edit") {
-    //   dispatch({
-    //     type: "FIELD_UPDATE",
-    //     payload: {
-    //       definitionKey,
-    //       inRequired,
-    //       inExample,
-    //       data,
-    //     },
-    //   });
-    //   setVisible(false);
-    // } else if (formMode === "create") {
-    //   console.log(definitionKeys);
-    //   if (definitionKeys.includes(data.key)) {
-    //     message.error(`${data.key}字段名重复`);
-    //     return;
-    //   }
-    // } else if (formMode === "copy") {
-    // }
+    const { required = [], example = {} } = modelData;
+    const newRequired = fieldData["x-isRequired"]
+      ? [...new Set([...required, fieldKey])]
+      : required.filter(item => item !== fieldKey);
+    const newExample = { ...example, [fieldKey]: fieldData.example };
+    if (!fieldData["x-isExample"]) {
+      delete newExample[fieldKey];
+    }
+
+    dispatch({
+      type: "MODEL_UPDATE",
+      payload: {
+        [modelKey]: {
+          ...modelData,
+          required: newRequired,
+          example: newExample,
+          properties: {
+            ...modelData.properties,
+            [fieldKey]: { ...fieldData },
+          },
+        },
+      },
+    });
+    setVisible(false);
   }
 
   return (
@@ -459,7 +454,7 @@ export default function DefinitionDrawer({
               />
             ) : (
               <Input
-                name="描述"
+                name="description"
                 placeholder="请输入"
                 value={data.description}
                 onChange={handleChange}
@@ -874,7 +869,7 @@ export default function DefinitionDrawer({
                       <Option value={null}>
                         <span>Null</span>
                       </Option>
-                      {data.enum.map(key => (
+                      {Object.keys(data["x-enumMap"]).map(key => (
                         <Option value={key} key={key}>
                           <span>{key}</span>
                           <span
@@ -902,7 +897,7 @@ export default function DefinitionDrawer({
                       <Option value={null}>
                         <span>Null</span>
                       </Option>
-                      {data.enum.map(key => (
+                      {Object.keys(data["x-enumMap"]).map(key => (
                         <Option value={key} key={key}>
                           <span>{key}</span>
                           <span
@@ -1103,7 +1098,7 @@ export default function DefinitionDrawer({
             </Checkbox>
             <Checkbox
               name="x-isRequired"
-              checked={data["handleCheck"]}
+              checked={data["x-isRequired"]}
               onChange={handleCheck}
             >
               Required

@@ -91,7 +91,7 @@ function App() {
                   Export
                 </Button>
                 <Button
-                  icon="project"
+                  icon="rollback"
                   loading={isResetting}
                   disabled={isResetting}
                   onClick={() => {
@@ -99,13 +99,6 @@ function App() {
                   }}
                 >
                   Reset
-                </Button>
-                <Button
-                  onClick={() => {
-                    //
-                  }}
-                >
-                  Test
                 </Button>
               </ButtonGroup>
             </div>

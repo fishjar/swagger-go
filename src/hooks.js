@@ -35,84 +35,14 @@ const dataReducer = (state, action) => {
         ...(state || {}),
         ...action.payload,
       };
-    case "FIELD_UPDATE":
-      const {
-        definitionKey,
-        inRequired,
-        inExample,
-        data: { key, ...data },
-      } = action.payload;
-      const definition = state.definitions[definitionKey];
-      const { example = {}, properties = {}, required = [] } = definition;
-
-      const newExample = { ...example };
-      if (inExample) {
-        newExample[key] = data.example;
-      } else {
-        delete newExample[key];
-      }
-
-      let newRequired = [...required];
-      if (inRequired) {
-        newRequired = [...new Set([...newRequired, key])];
-      } else {
-        newRequired = newRequired.filter(item => item !== key);
-      }
-
-      const newProperties = { ...properties, [key]: data };
-
+    case "MODEL_UPDATE":
       return {
         ...state,
         definitions: {
           ...state.definitions,
-          [definitionKey]: {
-            ...state.definitions[definitionKey],
-            example: newExample,
-            required: newRequired,
-            properties: newProperties,
-          },
+          ...action.payload,
         },
       };
-
-    // case "FIELD_CREATE":
-    //   const {
-    //     definitionKey,
-    //     inRequired,
-    //     inExample,
-    //     data: { key, ...data },
-    //   } = action.payload;
-    //   const definition = state.definitions[definitionKey];
-    //   const { example = {}, properties = {}, required = [] } = definition;
-
-    //   const newExample = { ...example };
-    //   if (inExample) {
-    //     newExample[key] = data.example;
-    //   } else {
-    //     delete newExample[key];
-    //   }
-
-    //   let newRequired = [...required];
-    //   if (inRequired) {
-    //     newRequired = [...new Set([...newRequired, key])];
-    //   } else {
-    //     newRequired = newRequired.filter(item => item !== key);
-    //   }
-
-    //   const newProperties = { ...properties, [key]: data };
-
-    //   return {
-    //     ...state,
-    //     definitions: {
-    //       ...state.definitions,
-    //       [definitionKey]: {
-    //         ...state.definitions[definitionKey],
-    //         example: newExample,
-    //         required: newRequired,
-    //         properties: newProperties,
-    //       },
-    //     },
-    //   };
-
     default:
       return state;
   }
@@ -156,7 +86,7 @@ export const useData = () => {
       }
     };
     isSaving && saveFile();
-  }, [state, isSaving]);
+  }, [isSaving]);
 
   useEffect(() => {
     const resetData = async () => {

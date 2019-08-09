@@ -230,12 +230,20 @@ export const readLocalStorage = key => {
   return data;
 };
 
+/**
+ * 获取数据类型
+ * @param {*} o
+ */
 export const getType = o => {
   const s = Object.prototype.toString.call(o);
   return s.match(/\[object (.*?)\]/)[1].toLowerCase();
 };
 
-export const isObj = o => {
+/**
+ * 判断是否对象，且非空
+ * @param {*} o
+ */
+export const isNonNullObj = o => {
   if (getType(o) !== "object") {
     return false;
   }

@@ -41,8 +41,7 @@ export default function Definition({ models, model, dispatch }) {
    */
   const fields = Object.keys(model.properties).map(key => ({
     ...model.properties[key],
-    "x-isEnum":
-      model.properties[key].enum && Array.isArray(model.properties[key].enum),
+    "x-isEnum": Array.isArray(model.properties[key].enum),
     "x-isRequired": (model.required || []).includes(key),
     "x-isExample": Object.keys(model.example || {}).includes(key),
     key,
