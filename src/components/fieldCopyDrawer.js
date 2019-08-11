@@ -148,6 +148,7 @@ export default function FieldCopyDrawer({
         },
       },
     });
+    handleReset();
     setVisible(false);
   }
 

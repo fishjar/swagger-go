@@ -107,7 +107,6 @@ export default function Definitions({ state, dispatch }) {
         style={{
           width: "100%",
           marginTop: 16,
-          marginBottom: 8,
         }}
         type="dashed"
         onClick={() => {}}

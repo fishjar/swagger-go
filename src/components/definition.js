@@ -106,7 +106,7 @@ export default function Definition({ models, model, dispatch }) {
               <div>{`${record["x-message"] || ""} - ${
                 record["x-description"]
               }`}</div>
-              <ul>
+              <ul style={{ margin: 0 }}>
                 {record["x-enumMap"]
                   ? Object.keys(record["x-enumMap"]).map(key => (
                       <li key={key}>
@@ -121,7 +121,7 @@ export default function Definition({ models, model, dispatch }) {
           return (
             <div>
               <div>{`${record["x-message"] || ""} - ${text}`}</div>
-              <ul>
+              <ul style={{ margin: 0 }}>
                 {Object.keys(record.properties).map(key => (
                   <li key={key}>
                     {record.properties[key].type} - {key} (
@@ -135,7 +135,7 @@ export default function Definition({ models, model, dispatch }) {
           return (
             <div>
               <div>{`${record["x-message"] || ""} - ${text}`}</div>
-              <ul>
+              <ul style={{ margin: 0 }}>
                 {getModelProps(
                   models.find(
                     item =>
@@ -274,10 +274,8 @@ export default function Definition({ models, model, dispatch }) {
           style={{
             width: "100%",
             marginTop: 16,
-            marginBottom: 8,
           }}
           type="dashed"
-          onClick={() => {}}
           icon="plus"
         >
           Add field

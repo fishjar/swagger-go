@@ -331,6 +331,12 @@ export default function FieldEditDrawer({
       message.error("字段名、字段类型、描述不能为空");
       return;
     }
+
+    if (fieldKey === "key") {
+      message.error("字段名不能为key");
+      return;
+    }
+
     if (fieldData["x-isExample"] && !fieldData.example) {
       message.error("请填写示例值");
       return;
