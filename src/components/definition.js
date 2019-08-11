@@ -1,6 +1,8 @@
 import React, { Fragment, useState, useEffect } from "react";
 import moment from "moment";
-import DefinitionDrawer from "./definitionDrawer";
+import FieldEditDrawer from "./fieldEditDrawer";
+import FieldCopyDrawer from "./fieldCopyDrawer";
+import { getModelProps } from "../utils";
 import {
   formItemLayout,
   dataFormats,
@@ -46,14 +48,36 @@ export default function Definition({ models, model, dispatch }) {
     "x-isExample": Object.keys(model.example || {}).includes(key),
     key,
   }));
-  // const requiredArr = definition.required || [];
-  // const exampleArr = Object.keys(definition.example || {});
+
+  /**
+   * 删除字段
+   * @param {String} fieldKey
+   */
+  function handleFieldRemove(fieldKey) {
+    const { key: modelKey, ...modelData } = model;
+    const { properties = {}, required = [], example = {} } = modelData;
+
+    delete properties[fieldKey];
+    delete example[fieldKey];
+
+    dispatch({
+      type: "MODEL_UPDATE",
+      payload: {
+        [modelKey]: {
+          ...modelData,
+          required: required.filter(item => item === fieldKey),
+          example,
+          properties,
+        },
+      },
+    });
+  }
 
   const columns = [
     {
       title: "Index",
       dataIndex: "index",
-      render: (_, __, index) => index,
+      render: (_, __, index) => index + 1,
     },
     {
       title: "Field",
@@ -73,10 +97,65 @@ export default function Definition({ models, model, dispatch }) {
         `${record.type} ( ${text} )` + `${record.enum ? " ( enum )" : ""}`,
     },
     {
-      title: "Description ( Placeholder )",
+      title: "Placeholder - Description",
       dataIndex: "description",
-      render: (text, record) =>
-        `${text}` + (record["x-message"] ? ` (${record["x-message"]})` : ""),
+      render: (text, record) => {
+        if (record["x-isEnum"]) {
+          return (
+            <div>
+              <div>{`${record["x-message"] || ""} - ${
+                record["x-description"]
+              }`}</div>
+              <ul>
+                {record["x-enumMap"]
+                  ? Object.keys(record["x-enumMap"]).map(key => (
+                      <li key={key}>
+                        {key} - {record["x-enumMap"][key]}
+                      </li>
+                    ))
+                  : record.enum.map(key => <li key={key}>{key}</li>)}
+              </ul>
+            </div>
+          );
+        } else if (record.format === "object") {
+          return (
+            <div>
+              <div>{`${record["x-message"] || ""} - ${text}`}</div>
+              <ul>
+                {Object.keys(record.properties).map(key => (
+                  <li key={key}>
+                    {record.properties[key].type} - {key} (
+                    {record.properties[key].description})
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        } else if (record.format === "array") {
+          return (
+            <div>
+              <div>{`${record["x-message"] || ""} - ${text}`}</div>
+              <ul>
+                {getModelProps(
+                  models.find(
+                    item =>
+                      item.key ===
+                      ((record.items && record.items["$ref"]) || "").replace(
+                        "#/definitions/",
+                        ""
+                      )
+                  )
+                ).map(item => (
+                  <li key={item.key}>
+                    {item.type} - {item.key} ({item.description})
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        }
+        return `${record["x-message"] || ""} - ${text}`;
+      },
     },
     {
       title: "Form",
@@ -139,7 +218,7 @@ export default function Definition({ models, model, dispatch }) {
       title: "操作",
       render: (text, record) => (
         <span>
-          <DefinitionDrawer
+          <FieldEditDrawer
             title="编辑"
             formMode="edit"
             dispatch={dispatch}
@@ -149,15 +228,23 @@ export default function Definition({ models, model, dispatch }) {
             field={record}
           >
             <Icon type="edit" />
-          </DefinitionDrawer>
+          </FieldEditDrawer>
           <Divider type="vertical" />
-          <Icon type="copy" onClick={() => {}} />
+          <FieldCopyDrawer
+            title="复制"
+            dispatch={dispatch}
+            models={models}
+            model={model}
+            fields={fields}
+            field={record}
+          >
+            <Icon type="copy" />
+          </FieldCopyDrawer>
           <Divider type="vertical" />
           <Icon
             type="close"
-            onClick={event => {
-              // If you don't want click extra trigger collapse, you can prevent this:
-              event.stopPropagation();
+            onClick={() => {
+              handleFieldRemove(record.key);
             }}
           />
         </span>
@@ -174,7 +261,7 @@ export default function Definition({ models, model, dispatch }) {
         pagination={false}
         size="middle"
       />
-      <DefinitionDrawer
+      <FieldEditDrawer
         title="新增"
         formMode="create"
         dispatch={dispatch}
@@ -195,7 +282,7 @@ export default function Definition({ models, model, dispatch }) {
         >
           Add field
         </Button>
-      </DefinitionDrawer>
+      </FieldEditDrawer>
     </Fragment>
   );
 }

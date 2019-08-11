@@ -3,7 +3,7 @@ import { formItemLayout } from "../config";
 import { Form, Input, Checkbox, Card, Icon, Button, Radio, Modal } from "antd";
 const CheckboxGroup = Checkbox.Group;
 
-export default function SecurityModal({
+export default function SecurityAddModal({
   state: { securityDefinitions },
   dispatch,
   visible,
@@ -71,4 +71,3 @@ export default function SecurityModal({
     </Modal>
   );
 }
-

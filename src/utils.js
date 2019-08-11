@@ -231,6 +231,14 @@ export const readLocalStorage = key => {
 };
 
 /**
+ * 深度拷贝一个对象
+ * @param {*} o
+ */
+export function deepClone(o) {
+  return JSON.parse(JSON.stringify(o));
+}
+
+/**
  * 获取数据类型
  * @param {*} o
  */
@@ -251,4 +259,23 @@ export const isNonNullObj = o => {
     return false;
   }
   return true;
+};
+
+/**
+ * 工具函数
+ * 获取一个对象的简单属性列表
+ * @param {Object} o
+ */
+export const getModelProps = o => {
+  if (!o || !o.properties) {
+    return [];
+  }
+  return Object.keys(o.properties).map(key => ({
+    key,
+    type: o.properties[key].type,
+    description: o.properties[key].description,
+    example:
+      o.properties[key].example ||
+      (o.example && o.example[key] && o.example[key].toString()),
+  }));
 };

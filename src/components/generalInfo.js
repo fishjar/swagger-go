@@ -1,5 +1,5 @@
 import React, { Fragment, useState, useEffect } from "react";
-import SecurityModal from "./securityModal";
+import SecurityAddModal from "./securityAddModal";
 import { formItemLayout } from "../config";
 import { Form, Input, Checkbox, Card, Icon, Button, Radio, Modal } from "antd";
 const CheckboxGroup = Checkbox.Group;
@@ -257,7 +257,7 @@ export default function GeneralInfo({ state, dispatch }) {
           >
             <Icon type="plus" /> Add field
           </Button>
-          <SecurityModal
+          <SecurityAddModal
             state={state}
             dispatch={dispatch}
             visible={modalVisible}

@@ -1,6 +1,7 @@
 import React, { Fragment, useState, useEffect } from "react";
 import moment from "moment";
 import { formItemLayout, dataFormats, numTypes, propTypes } from "../config";
+import { getModelProps } from "../utils";
 import {
   Form,
   Input,
@@ -27,26 +28,7 @@ const CheckboxGroup = Checkbox.Group;
 const InputGroup = Input.Group;
 const { TextArea } = Input;
 
-/**
- * 工具函数
- * 获取一个对象的简单属性列表
- * @param {Object} o
- */
-const getModelProps = o => {
-  if (!o || !o.properties) {
-    return [];
-  }
-  return Object.keys(o.properties).map(key => ({
-    key,
-    type: o.properties[key].type,
-    description: o.properties[key].description,
-    example:
-      o.properties[key].example ||
-      (o.example && o.example[key] && o.example[key].toString()),
-  }));
-};
-
-export default function DefinitionDrawer({
+export default function FieldEditDrawer({
   children,
   title = "编辑",
   formMode,
@@ -106,7 +88,9 @@ export default function DefinitionDrawer({
    */
   const [visible, setVisible] = useState(false); // 抽屉是否可见
   const [data, setData] = useState({ ...defaultData }); // 表单数据
-  const [enumSource, setEnumSource] = useState("custom"); // 枚举数据来源： custom 或 models
+  const [objectSource, setObjectSource] = useState(
+    defaultData["x-ref"] ? "models" : "custom"
+  ); // 对象类型数据来源： custom 或 models
   const [enumItems, setEnumItems] = useState([...defaultEnumItems]); // 枚举列表
   const [subFields, setSubFields] = useState([...defaultSubFields]); //子字段列表
   const [arrayItems, setArrayItems] = useState([...defaultArrayItems]); // 数组对象列表
@@ -299,22 +283,26 @@ export default function DefinitionDrawer({
 
   /**
    * 选择对象类型的数据模型
-   * @param {Number} index
+   * @param {String} modelKey
    */
-  function handleObjectModelChange(index) {
-    setSubFields(getModelProps(models[index]));
+  function handleObjectModelChange(modelKey) {
+    setSubFields(getModelProps(models.find(item => item.key === modelKey)));
+    setData({
+      ...data,
+      "x-ref": `#/definitions/${modelKey}`,
+    });
   }
 
   /**
    * 选择数组类型的数据模型
-   * @param {Number} index
+   * @param {String} modelKey
    */
-  function handleArrayModelChange(index) {
-    setArrayItems(getModelProps(models[index]));
+  function handleArrayModelChange(modelKey) {
+    setArrayItems(getModelProps(models.find(item => item.key === modelKey)));
     setData({
       ...data,
       items: {
-        $ref: `#/definitions/${models[index].key}`,
+        $ref: `#/definitions/${modelKey}`,
       },
     });
   }
@@ -324,7 +312,7 @@ export default function DefinitionDrawer({
    */
   function handleReset() {
     setData({ ...defaultData });
-    setEnumSource("custom");
+    setObjectSource(defaultData["x-ref"] ? "models" : "custom");
     setEnumItems([...defaultEnumItems]);
     setSubFields([...defaultSubFields]);
     setArrayItems([...defaultArrayItems]);
@@ -546,9 +534,12 @@ export default function DefinitionDrawer({
             <Form.Item label="数据来源">
               <Radio.Group
                 onChange={e => {
-                  setEnumSource(e.target.value);
+                  setObjectSource(e.target.value);
+                  if (e.target.value === "custom") {
+                    handleKvDelete("x-ref");
+                  }
                 }}
-                value={enumSource}
+                value={objectSource}
               >
                 <Radio value={"custom"}>Custom</Radio>
                 <Radio value={"models"}>Models</Radio>
@@ -556,15 +547,17 @@ export default function DefinitionDrawer({
             </Form.Item>
           )}
 
-          {data.format === "object" && enumSource === "models" && (
+          {data.format === "object" && objectSource === "models" && (
             <Form.Item label="数据模型">
-              <Select placeholder="请选择" onChange={handleObjectModelChange}>
-                {models.map(({ key, description }, index) => (
-                  <Option
-                    value={index}
-                    key={index}
-                    disabled={model.key === key}
-                  >
+              <Select
+                placeholder="请选择"
+                value={
+                  data["x-ref"] && data["x-ref"].replace("#/definitions/", "")
+                }
+                onChange={handleObjectModelChange}
+              >
+                {models.map(({ key, description }) => (
+                  <Option value={key} key={key} disabled={model.key === key}>
                     <span>{`#/definitions/${key}`}</span>
                     <span
                       style={{
@@ -581,17 +574,15 @@ export default function DefinitionDrawer({
             <Form.Item label="数据模型">
               <Select
                 placeholder="请选择"
-                value={models
-                  .map(({ key }) => `#/definitions/${key}`)
-                  .indexOf(data.items && data.items["$ref"])}
+                value={
+                  data.items &&
+                  data.items["$ref"] &&
+                  data.items["$ref"].replace("#/definitions/", "")
+                }
                 onChange={handleArrayModelChange}
               >
-                {models.map(({ key, description }, index) => (
-                  <Option
-                    value={index}
-                    key={index}
-                    disabled={model.key === key}
-                  >
+                {models.map(({ key, description }) => (
+                  <Option value={key} key={key} disabled={model.key === key}>
                     <span>{`#/definitions/${key}`}</span>
                     <span
                       style={{
@@ -618,7 +609,7 @@ export default function DefinitionDrawer({
                       placeholder="Type"
                       value={item.type}
                       style={{ width: "20%" }}
-                      disabled={enumSource === "models"}
+                      disabled={objectSource === "models"}
                       onChange={value => {
                         handleSubFieldChange(index, "type", value);
                       }}
@@ -633,7 +624,7 @@ export default function DefinitionDrawer({
                       style={{ width: "20%" }}
                       placeholder="Key"
                       value={item.key}
-                      disabled={enumSource === "models"}
+                      disabled={objectSource === "models"}
                       onChange={e => {
                         handleSubFieldChange(index, "key", e.target.value);
                       }}
@@ -642,7 +633,7 @@ export default function DefinitionDrawer({
                       style={{ width: "20%" }}
                       placeholder="Description"
                       value={item.description}
-                      disabled={enumSource === "models"}
+                      disabled={objectSource === "models"}
                       onChange={e => {
                         handleSubFieldChange(
                           index,
@@ -675,7 +666,7 @@ export default function DefinitionDrawer({
                       />
                     )}
                   </InputGroup>
-                  {enumSource === "custom" && (
+                  {objectSource === "custom" && (
                     <Icon
                       style={{
                         position: "absolute",
@@ -690,7 +681,7 @@ export default function DefinitionDrawer({
                   )}
                 </div>
               ))}
-              {enumSource === "custom" && (
+              {objectSource === "custom" && (
                 <Button
                   style={{
                     width: "100%",
@@ -870,7 +861,7 @@ export default function DefinitionDrawer({
                         <span>Null</span>
                       </Option>
                       {Object.keys(data["x-enumMap"]).map(key => (
-                        <Option value={key} key={key}>
+                        <Option value={~~key} key={key}>
                           <span>{key}</span>
                           <span
                             style={{
@@ -898,7 +889,7 @@ export default function DefinitionDrawer({
                         <span>Null</span>
                       </Option>
                       {Object.keys(data["x-enumMap"]).map(key => (
-                        <Option value={key} key={key}>
+                        <Option value={~~key} key={key}>
                           <span>{key}</span>
                           <span
                             style={{
