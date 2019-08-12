@@ -47,7 +47,7 @@ function ModelCopy({
   form,
 }) {
   const { getFieldDecorator, getFieldValue, resetFields } = form;
-  const { key: modelKey, data = {} } = model;
+  const { key: modelKey, data: modelData = {} } = model;
 
   /**
    * 设置state hooks
@@ -93,13 +93,13 @@ function ModelCopy({
     });
   }
 
-  function updateData({ key, ...values }) {
+  function updateData({ key, ...data }) {
     dispatch({
       type: "MODEL_UPDATE",
       payload: {
         [key]: {
+          ...modelData,
           ...data,
-          ...values,
         },
       },
     });
@@ -172,7 +172,7 @@ function ModelCopy({
             })(<Input disabled={formMode === "edit"} />)}
           </Form.Item>
 
-          <Form.Item label="旧描述">{data.description}</Form.Item>
+          <Form.Item label="旧描述">{modelData.description}</Form.Item>
           <Form.Item label="新描述" hasFeedback>
             {getFieldDecorator("description", {
               rules: [
@@ -188,14 +188,14 @@ function ModelCopy({
             <Switch
               checkedChildren="是"
               unCheckedChildren="否"
-              checked={!!data["x-isModel"]}
+              checked={!!modelData["x-isModel"]}
               disabled
             />
           </Form.Item>
 
-          {data["x-isModel"] && (
+          {modelData["x-isModel"] && (
             <Fragment>
-              <Form.Item label="旧复数形式">{data["x-plural"]}</Form.Item>
+              <Form.Item label="旧复数形式">{modelData["x-plural"]}</Form.Item>
               <Form.Item label="新复数形式" hasFeedback>
                 {getFieldDecorator("x-plural", {
                   rules: [
@@ -210,7 +210,7 @@ function ModelCopy({
                 })(<Input />)}
               </Form.Item>
 
-              <Form.Item label="旧表名">{data["x-tableName"]}</Form.Item>
+              <Form.Item label="旧表名">{modelData["x-tableName"]}</Form.Item>
               <Form.Item label="新表名" hasFeedback>
                 {getFieldDecorator("x-tableName", {
                   rules: [

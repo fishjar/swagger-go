@@ -32,7 +32,7 @@ const dataReducer = (state, action) => {
       };
     case "DATA_UPDATE":
       return {
-        ...(state || {}),
+        ...state,
         ...action.payload,
       };
     case "MODEL_UPDATE":

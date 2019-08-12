@@ -37,19 +37,19 @@ const InputGroup = Input.Group;
 const { TextArea } = Input;
 
 export default function Definition({ models, model, dispatch }) {
-  const { key: modelKey, data = {} } = model;
+  const { key: modelKey, data: modelData = {} } = model;
 
   /**
    * 计算值
    * 将字段对象转为字段列表
    */
-  const fields = Object.keys(data.properties).map(key => ({
+  const fields = Object.entries(modelData.properties).map(([key, data]) => ({
     key,
     data: {
-      ...data.properties[key],
-      "x-isEnum": Array.isArray(data.properties[key].enum),
-      "x-isRequired": (data.required || []).includes(key),
-      "x-isExample": Object.keys(data.example || {}).includes(key),
+      ...data,
+      "x-isEnum": Array.isArray(data.enum),
+      "x-isRequired": (modelData.required || []).includes(key),
+      "x-isExample": Object.keys(modelData.example || {}).includes(key),
     },
   }));
 
@@ -58,7 +58,7 @@ export default function Definition({ models, model, dispatch }) {
    * @param {String} fieldKey
    */
   function handleFieldRemove(fieldKey) {
-    const { key: modelKey, ...modelData } = model;
+    // const { key: modelKey, ...modelData } = model;
     const { properties = {}, required = [], example = {} } = modelData;
 
     delete properties[fieldKey];
@@ -85,24 +85,23 @@ export default function Definition({ models, model, dispatch }) {
     },
     {
       title: "Field",
-      dataIndex: "data.key",
+      dataIndex: "key",
       render: (text, record) => {
-        console.log(text)
-        console.log(record)
         return (
           <Badge
-            status={record["x-isRequired"] ? "success" : "default"}
+            status={record.data["x-isRequired"] ? "success" : "default"}
             text={text}
-            style={record.uniqueItems ? { color: "#52c41a" } : {}}
+            style={record.data.uniqueItems ? { color: "#52c41a" } : {}}
           />
-        )
+        );
       },
     },
     {
       title: "Type ( Format )",
       dataIndex: "data.format",
       render: (text, record) =>
-        `${record.type} ( ${text} )` + `${record.enum ? " ( enum )" : ""}`,
+        `${record.data.type} ( ${text} )` +
+        `${record.data.enum ? " ( enum )" : ""}`,
     },
     {
       title: "Placeholder - Description",

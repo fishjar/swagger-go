@@ -29,18 +29,16 @@ export default function Definitions({ state, dispatch }) {
    * 计算值
    * 将模型对象转为模型列表
    */
-  const models = Object.keys(state.definitions).map(key => ({
+  const models = Object.entries(state.definitions).map(([key, data]) => ({
     key,
-    data: {
-      ...state.definitions[key],
-    },
+    data,
   }));
 
   function handleModelRemove(key) {
-    const { [key]: _, ...restDefinitions } = state.definitions;
+    const { [key]: _, ...payload } = state.definitions;
     dispatch({
       type: "MODEL_RESET",
-      payload: { ...restDefinitions },
+      payload,
     });
   }
 
