@@ -1,7 +1,7 @@
 import React, { Fragment, useState, useEffect } from "react";
 import moment from "moment";
-import { formItemLayout, dataFormats, numTypes, propTypes } from "../config";
-import { getModelProps, deepClone } from "../utils";
+import { formItemLayout, dataFormats, numTypes, propTypes } from "../../config";
+import { getModelProps, deepClone } from "../../utils";
 import {
   Form,
   Input,
@@ -28,7 +28,7 @@ const CheckboxGroup = Checkbox.Group;
 const InputGroup = Input.Group;
 const { TextArea } = Input;
 
-export default function FieldCopyDrawer({
+export default function FieldCopy({
   children,
   title = "编辑",
   formMode,
@@ -148,8 +148,7 @@ export default function FieldCopyDrawer({
         },
       },
     });
-    handleReset();
-    setVisible(false);
+    handleHide();
   }
 
   return (

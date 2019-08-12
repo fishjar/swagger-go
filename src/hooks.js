@@ -43,6 +43,11 @@ const dataReducer = (state, action) => {
           ...action.payload,
         },
       };
+    case "MODEL_RESET":
+      return {
+        ...state,
+        definitions: { ...action.payload },
+      };
     default:
       return state;
   }

@@ -1,7 +1,7 @@
 import React, { Fragment, useState, useEffect } from "react";
 import moment from "moment";
-import FieldEditDrawer from "./fieldEditDrawer";
-import FieldCopyDrawer from "./fieldCopyDrawer";
+import FieldEdit from "./drawers/fieldEdit";
+import FieldCopy from "./drawers/fieldCopy";
 import { getModelProps } from "../utils";
 import {
   formItemLayout,
@@ -37,16 +37,20 @@ const InputGroup = Input.Group;
 const { TextArea } = Input;
 
 export default function Definition({ models, model, dispatch }) {
+  const { key: modelKey, data = {} } = model;
+
   /**
    * 计算值
    * 将字段对象转为字段列表
    */
-  const fields = Object.keys(model.properties).map(key => ({
-    ...model.properties[key],
-    "x-isEnum": Array.isArray(model.properties[key].enum),
-    "x-isRequired": (model.required || []).includes(key),
-    "x-isExample": Object.keys(model.example || {}).includes(key),
+  const fields = Object.keys(data.properties).map(key => ({
     key,
+    data: {
+      ...data.properties[key],
+      "x-isEnum": Array.isArray(data.properties[key].enum),
+      "x-isRequired": (data.required || []).includes(key),
+      "x-isExample": Object.keys(data.example || {}).includes(key),
+    },
   }));
 
   /**
@@ -81,24 +85,28 @@ export default function Definition({ models, model, dispatch }) {
     },
     {
       title: "Field",
-      dataIndex: "key",
-      render: (text, record) => (
-        <Badge
-          status={record["x-isRequired"] ? "success" : "default"}
-          text={text}
-          style={record.uniqueItems ? { color: "#52c41a" } : {}}
-        />
-      ),
+      dataIndex: "data.key",
+      render: (text, record) => {
+        console.log(text)
+        console.log(record)
+        return (
+          <Badge
+            status={record["x-isRequired"] ? "success" : "default"}
+            text={text}
+            style={record.uniqueItems ? { color: "#52c41a" } : {}}
+          />
+        )
+      },
     },
     {
       title: "Type ( Format )",
-      dataIndex: "format",
+      dataIndex: "data.format",
       render: (text, record) =>
         `${record.type} ( ${text} )` + `${record.enum ? " ( enum )" : ""}`,
     },
     {
       title: "Placeholder - Description",
-      dataIndex: "description",
+      dataIndex: "data.description",
       render: (text, record) => {
         if (record["x-isEnum"]) {
           return (
@@ -159,7 +167,7 @@ export default function Definition({ models, model, dispatch }) {
     },
     {
       title: "Form",
-      dataIndex: "x-showTable",
+      dataIndex: "data['x-showTable']",
       render: (_, record) => (
         <div>
           {record["x-showTable"] && (
@@ -182,7 +190,7 @@ export default function Definition({ models, model, dispatch }) {
     },
     {
       title: "Default",
-      dataIndex: "default",
+      dataIndex: "data.default",
       render: (_, record) => (
         <div>
           {record.default !== undefined && (
@@ -201,7 +209,7 @@ export default function Definition({ models, model, dispatch }) {
     },
     {
       title: "Example",
-      dataIndex: "example",
+      dataIndex: "data.example",
       render: (text, record) => (
         <Badge
           status={record["x-isExample"] ? "success" : "default"}
@@ -218,7 +226,7 @@ export default function Definition({ models, model, dispatch }) {
       title: "操作",
       render: (text, record) => (
         <span>
-          <FieldEditDrawer
+          <FieldEdit
             title="编辑"
             formMode="edit"
             dispatch={dispatch}
@@ -228,9 +236,9 @@ export default function Definition({ models, model, dispatch }) {
             field={record}
           >
             <Icon type="edit" />
-          </FieldEditDrawer>
+          </FieldEdit>
           <Divider type="vertical" />
-          <FieldCopyDrawer
+          <FieldCopy
             title="复制"
             dispatch={dispatch}
             models={models}
@@ -239,7 +247,7 @@ export default function Definition({ models, model, dispatch }) {
             field={record}
           >
             <Icon type="copy" />
-          </FieldCopyDrawer>
+          </FieldCopy>
           <Divider type="vertical" />
           <Icon
             type="close"
@@ -261,7 +269,7 @@ export default function Definition({ models, model, dispatch }) {
         pagination={false}
         size="middle"
       />
-      <FieldEditDrawer
+      <FieldEdit
         title="新增"
         formMode="create"
         dispatch={dispatch}
@@ -280,7 +288,7 @@ export default function Definition({ models, model, dispatch }) {
         >
           Add field
         </Button>
-      </FieldEditDrawer>
+      </FieldEdit>
     </Fragment>
   );
 }

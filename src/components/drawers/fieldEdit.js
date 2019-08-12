@@ -1,7 +1,7 @@
 import React, { Fragment, useState, useEffect } from "react";
 import moment from "moment";
-import { formItemLayout, dataFormats, numTypes, propTypes } from "../config";
-import { getModelProps } from "../utils";
+import { formItemLayout, dataFormats, numTypes, propTypes } from "../../config";
+import { getModelProps } from "../../utils";
 import {
   Form,
   Input,
@@ -28,7 +28,7 @@ const CheckboxGroup = Checkbox.Group;
 const InputGroup = Input.Group;
 const { TextArea } = Input;
 
-export default function FieldEditDrawer({
+export default function FieldEdit({
   children,
   title = "编辑",
   formMode,
@@ -337,15 +337,16 @@ export default function FieldEditDrawer({
       return;
     }
 
-    if (fieldData["x-isExample"] && !fieldData.example) {
-      message.error("请填写示例值");
-      return;
-    }
     if (
       formMode === "create" &&
       fields.map(item => item.key).includes(fieldKey)
     ) {
       message.error("字段名重复");
+      return;
+    }
+
+    if (fieldData["x-isExample"] && !fieldData.example) {
+      message.error("请填写示例值");
       return;
     }
 

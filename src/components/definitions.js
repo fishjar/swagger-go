@@ -2,6 +2,8 @@ import React, { Fragment, useState, useEffect } from "react";
 
 import { apiOptions } from "../config";
 import Definition from "./definition";
+import ModelEdit from "./drawers/modelEdit";
+import ModelCopy from "./drawers/modelCopy";
 
 import {
   Form,
@@ -28,14 +30,24 @@ export default function Definitions({ state, dispatch }) {
    * 将模型对象转为模型列表
    */
   const models = Object.keys(state.definitions).map(key => ({
-    ...state.definitions[key],
     key,
+    data: {
+      ...state.definitions[key],
+    },
   }));
+
+  function handleModelRemove(key) {
+    const { [key]: _, ...restDefinitions } = state.definitions;
+    dispatch({
+      type: "MODEL_RESET",
+      payload: { ...restDefinitions },
+    });
+  }
 
   return (
     <Fragment>
       <Collapse defaultActiveKey={[]}>
-        {models.map(({ key, ...data }) => (
+        {models.map(({ key, data }) => (
           <Panel
             header={
               data["x-isModel"]
@@ -56,7 +68,7 @@ export default function Definitions({ state, dispatch }) {
                         showZero
                         style={{
                           backgroundColor: "#fff",
-                          color: (data["x-apis"] || []).includes(index)
+                          color: (data["x-apis"] || []).includes(api.key)
                             ? "#52c41a"
                             : "#999",
                           boxShadow: "0 0 0 1px #d9d9d9 inset",
@@ -69,27 +81,31 @@ export default function Definitions({ state, dispatch }) {
                   </span>
                 )}
 
-                <Icon
-                  type="edit"
-                  onClick={event => {
-                    // If you don't want click extra trigger collapse, you can prevent this:
-                    event.stopPropagation();
-                  }}
-                  style={{ marginRight: 12 }}
-                />
-                <Icon
-                  type="copy"
-                  onClick={event => {
-                    // If you don't want click extra trigger collapse, you can prevent this:
-                    event.stopPropagation();
-                  }}
-                  style={{ marginRight: 12 }}
-                />
+                <ModelEdit
+                  title="编辑模型"
+                  formMode="edit"
+                  models={models}
+                  model={{ key, data }}
+                  dispatch={dispatch}
+                >
+                  <Icon type="edit" style={{ marginRight: 12 }} />
+                </ModelEdit>
+
+                <ModelCopy
+                  title="编辑模型"
+                  formMode="copy"
+                  models={models}
+                  model={{ key, data }}
+                  dispatch={dispatch}
+                >
+                  <Icon type="copy" style={{ marginRight: 12 }} />
+                </ModelCopy>
+
                 <Icon
                   type="close"
                   onClick={event => {
-                    // If you don't want click extra trigger collapse, you can prevent this:
                     event.stopPropagation();
+                    handleModelRemove(key);
                   }}
                 />
               </span>
@@ -97,23 +113,30 @@ export default function Definitions({ state, dispatch }) {
           >
             <Definition
               models={models}
-              model={{ key, ...data }}
+              model={{ key, data }}
               dispatch={dispatch}
             />
           </Panel>
         ))}
       </Collapse>
-      <Button
-        style={{
-          width: "100%",
-          marginTop: 16,
-        }}
-        type="dashed"
-        onClick={() => {}}
-        icon="plus"
+      <ModelEdit
+        title="新增模型"
+        formMode="create"
+        models={models}
+        model={{}}
+        dispatch={dispatch}
       >
-        Add Model
-      </Button>
+        <Button
+          style={{
+            width: "100%",
+            marginTop: 16,
+          }}
+          type="dashed"
+          icon="plus"
+        >
+          Add Model
+        </Button>
+      </ModelEdit>
     </Fragment>
   );
 }

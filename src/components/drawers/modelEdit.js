@@ -1,0 +1,222 @@
+import React, { Fragment, useState, useEffect } from "react";
+import moment from "moment";
+import {
+  formItemLayout,
+  apiOptions,
+  dataFormats,
+  numTypes,
+  propTypes,
+} from "../../config";
+import { getModelProps } from "../../utils";
+import {
+  Form,
+  Input,
+  Checkbox,
+  Card,
+  Icon,
+  Button,
+  Radio,
+  Modal,
+  Collapse,
+  Table,
+  Divider,
+  Popconfirm,
+  Badge,
+  Drawer,
+  Select,
+  InputNumber,
+  DatePicker,
+  message,
+  Switch,
+  Row,
+  Col,
+} from "antd";
+const { Panel } = Collapse;
+const { Option } = Select;
+const CheckboxGroup = Checkbox.Group;
+const InputGroup = Input.Group;
+const { TextArea } = Input;
+
+function ModelEdit({
+  children,
+  title = "编辑",
+  formMode,
+  dispatch,
+  models,
+  model,
+  form,
+}) {
+  const { getFieldDecorator, getFieldValue, resetFields } = form;
+  const { key: modelKey, data = {} } = model;
+
+  /**
+   * 设置state hooks
+   */
+  const [visible, setVisible] = useState(false); // 抽屉是否可见
+
+  /**
+   * 关闭抽屉
+   */
+  function handleHide() {
+    handleReset();
+    setVisible(false);
+  }
+
+  /**
+   * 打开抽屉
+   */
+  function handleShow(e) {
+    e.stopPropagation();
+    setVisible(true);
+  }
+
+  /**
+   * 重置表单
+   */
+  function handleReset() {
+    resetFields();
+  }
+
+  /**
+   * 提交表单
+   */
+  function handleSubmit(e) {
+    e.preventDefault();
+    form.validateFieldsAndScroll((err, values) => {
+      if (err) {
+        message.error("表单填写有问题？");
+        return;
+      }
+      console.log(values);
+      updateData(values);
+      handleHide();
+    });
+  }
+
+  function updateData({ key, ...values }) {
+    dispatch({
+      type: "MODEL_UPDATE",
+      payload: {
+        [key]: {
+          ...data,
+          ...values,
+        },
+      },
+    });
+  }
+
+  return (
+    <span>
+      <span
+        onClick={handleShow}
+        style={{
+          cursor: "pointer",
+        }}
+      >
+        {children}
+      </span>
+      <Drawer
+        destroyOnClose
+        title={title}
+        width="60%"
+        onClose={handleHide}
+        visible={visible}
+        onClick={e => {
+          e.stopPropagation();
+        }}
+      >
+        <Form {...formItemLayout} onSubmit={handleSubmit}>
+          <Form.Item label="模型名" hasFeedback>
+            {getFieldDecorator("key", {
+              initialValue: modelKey,
+              rules: [
+                {
+                  required: true,
+                  message: "请填写!",
+                },
+              ],
+            })(<Input disabled={formMode === "edit"} />)}
+          </Form.Item>
+          <Form.Item label="描述" hasFeedback>
+            {getFieldDecorator("description", {
+              initialValue: data.description,
+              rules: [
+                {
+                  required: true,
+                  message: "请填写!",
+                },
+              ],
+            })(<Input />)}
+          </Form.Item>
+          <Form.Item label="是否实体" required>
+            {getFieldDecorator("x-isModel", {
+              initialValue: !!data["x-isModel"],
+              valuePropName: "checked",
+            })(<Switch checkedChildren="是" unCheckedChildren="否" />)}
+          </Form.Item>
+          {getFieldValue("x-isModel") && (
+            <Fragment>
+              <Form.Item label="复数形式" hasFeedback>
+                {getFieldDecorator("x-plural", {
+                  initialValue: data["x-plural"],
+                  rules: [
+                    {
+                      required: true,
+                      message: "请填写!",
+                    },
+                  ],
+                })(<Input />)}
+              </Form.Item>
+              <Form.Item label="表名" hasFeedback>
+                {getFieldDecorator("x-tableName", {
+                  initialValue: data["x-tableName"],
+                  rules: [
+                    {
+                      required: true,
+                      message: "请填写!",
+                    },
+                  ],
+                })(<Input />)}
+              </Form.Item>
+              <Form.Item label="接口选项">
+                {getFieldDecorator("x-apis", {
+                  initialValue: data["x-apis"],
+                })(
+                  <Checkbox.Group>
+                    {apiOptions.map(({ key, method, notice, path }) => (
+                      <Row key={key}>
+                        <Checkbox
+                          value={key}
+                        >{`${method}("/${modelKey.toLowerCase()}${path}") ${notice}(${key})`}</Checkbox>
+                      </Row>
+                    ))}
+                  </Checkbox.Group>
+                )}
+              </Form.Item>
+            </Fragment>
+          )}
+        </Form>
+        <div
+          style={{
+            borderTop: "1px solid #e9e9e9",
+            padding: "10px 16px",
+            background: "#fff",
+            textAlign: "right",
+          }}
+        >
+          <Button onClick={handleHide} style={{ marginRight: 8 }}>
+            Cancel
+          </Button>
+          <Button onClick={handleReset} style={{ marginRight: 8 }}>
+            Reset
+          </Button>
+          <Button onClick={handleSubmit} type="primary">
+            Submit
+          </Button>
+        </div>
+      </Drawer>
+    </span>
+  );
+}
+
+export default Form.create({ name: "modelEdit" })(ModelEdit);
