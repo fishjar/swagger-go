@@ -29,11 +29,7 @@ const CheckboxGroup = Checkbox.Group;
 const InputGroup = Input.Group;
 const { TextArea } = Input;
 
-export default function SubField({
-  value: subFields = [],
-  objectSource,
-  onChange,
-}) {
+function SubField({ value: subFields = [], objectSource, onChange }, ref) {
   /**
    * 添加子字段
    */
@@ -64,7 +60,7 @@ export default function SubField({
   }
 
   return (
-    <Fragment>
+    <div ref={ref}>
       {subFields.map((item, index) => (
         <div
           key={index}
@@ -154,6 +150,10 @@ export default function SubField({
           Add field
         </Button>
       )}
-    </Fragment>
+    </div>
   );
 }
+
+// https://ant.design/components/form-cn/#components-form-demo-customized-form-controls
+// https://reactjs.org/docs/forwarding-refs.html
+export default forwardRef(SubField);
