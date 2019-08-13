@@ -47,7 +47,6 @@ function ModelEdit({
   form,
 }) {
   const { getFieldDecorator, getFieldValue, resetFields } = form;
-  const { key: modelKey, data = {} } = model;
 
   /**
    * 设置state hooks
@@ -93,16 +92,24 @@ function ModelEdit({
     });
   }
 
-  function updateData({ key, ...values }) {
+  function updateData({ key, ...newData }) {
+    const { key: _, ...oldData } = model;
     dispatch({
       type: "MODEL_UPDATE",
       payload: {
         [key]: {
-          ...data,
-          ...values,
+          ...oldData,
+          ...newData,
         },
       },
     });
+  }
+
+  function handleModelKeyValidator(rule, value, callback) {
+    if (models.map(item => item.key).includes(value) && formMode === "create") {
+      callback("模型名称重复");
+    }
+    callback();
   }
 
   return (
@@ -128,18 +135,21 @@ function ModelEdit({
         <Form {...formItemLayout} onSubmit={handleSubmit}>
           <Form.Item label="模型名" hasFeedback>
             {getFieldDecorator("key", {
-              initialValue: modelKey,
+              initialValue: model.key,
               rules: [
                 {
                   required: true,
                   message: "请填写!",
+                },
+                {
+                  validator: handleModelKeyValidator,
                 },
               ],
             })(<Input disabled={formMode === "edit"} />)}
           </Form.Item>
           <Form.Item label="描述" hasFeedback>
             {getFieldDecorator("description", {
-              initialValue: data.description,
+              initialValue: model.description,
               rules: [
                 {
                   required: true,
@@ -150,7 +160,7 @@ function ModelEdit({
           </Form.Item>
           <Form.Item label="是否实体" required>
             {getFieldDecorator("x-isModel", {
-              initialValue: !!data["x-isModel"],
+              initialValue: !!model["x-isModel"],
               valuePropName: "checked",
             })(<Switch checkedChildren="是" unCheckedChildren="否" />)}
           </Form.Item>
@@ -158,7 +168,7 @@ function ModelEdit({
             <Fragment>
               <Form.Item label="复数形式" hasFeedback>
                 {getFieldDecorator("x-plural", {
-                  initialValue: data["x-plural"],
+                  initialValue: model["x-plural"],
                   rules: [
                     {
                       required: true,
@@ -169,7 +179,7 @@ function ModelEdit({
               </Form.Item>
               <Form.Item label="表名" hasFeedback>
                 {getFieldDecorator("x-tableName", {
-                  initialValue: data["x-tableName"],
+                  initialValue: model["x-tableName"],
                   rules: [
                     {
                       required: true,
@@ -180,14 +190,14 @@ function ModelEdit({
               </Form.Item>
               <Form.Item label="接口选项">
                 {getFieldDecorator("x-apis", {
-                  initialValue: data["x-apis"],
+                  initialValue: model["x-apis"],
                 })(
                   <Checkbox.Group>
                     {apiOptions.map(({ key, method, notice, path }) => (
                       <Row key={key}>
-                        <Checkbox
-                          value={key}
-                        >{`${method}("/${modelKey.toLowerCase()}${path}") ${notice}(${key})`}</Checkbox>
+                        <Checkbox value={key}>{`${method}("/${(
+                          getFieldValue("key") || ""
+                        ).toLowerCase()}${path}") ${notice}(${key})`}</Checkbox>
                       </Row>
                     ))}
                   </Checkbox.Group>

@@ -47,7 +47,6 @@ function ModelCopy({
   form,
 }) {
   const { getFieldDecorator, getFieldValue, resetFields } = form;
-  const { key: modelKey, data: modelData = {} } = model;
 
   /**
    * 设置state hooks
@@ -93,13 +92,14 @@ function ModelCopy({
     });
   }
 
-  function updateData({ key, ...data }) {
+  function updateData({ key, ...newData }) {
+    const { key: _, ...oldData } = model;
     dispatch({
       type: "MODEL_UPDATE",
       payload: {
         [key]: {
-          ...modelData,
-          ...data,
+          ...oldData,
+          ...newData,
         },
       },
     });
@@ -115,7 +115,7 @@ function ModelCopy({
   function handlePluralValidator(rule, value, callback) {
     if (
       models
-        .map(item => item.data["x-plural"])
+        .map(item => item["x-plural"])
         .filter(item => item)
         .includes(value)
     ) {
@@ -127,7 +127,7 @@ function ModelCopy({
   function handleTableNameValidator(rule, value, callback) {
     if (
       models
-        .map(item => item.data["x-tableName"])
+        .map(item => item["x-tableName"])
         .filter(item => item)
         .includes(value)
     ) {
@@ -157,7 +157,7 @@ function ModelCopy({
         }}
       >
         <Form {...formItemLayout} onSubmit={handleSubmit}>
-          <Form.Item label="旧模型名">{modelKey}</Form.Item>
+          <Form.Item label="旧模型名">{model.key}</Form.Item>
           <Form.Item label="新模型名" hasFeedback>
             {getFieldDecorator("key", {
               rules: [
@@ -172,7 +172,7 @@ function ModelCopy({
             })(<Input disabled={formMode === "edit"} />)}
           </Form.Item>
 
-          <Form.Item label="旧描述">{modelData.description}</Form.Item>
+          <Form.Item label="旧描述">{model.description}</Form.Item>
           <Form.Item label="新描述" hasFeedback>
             {getFieldDecorator("description", {
               rules: [
@@ -188,14 +188,14 @@ function ModelCopy({
             <Switch
               checkedChildren="是"
               unCheckedChildren="否"
-              checked={!!modelData["x-isModel"]}
+              checked={!!model["x-isModel"]}
               disabled
             />
           </Form.Item>
 
-          {modelData["x-isModel"] && (
+          {model["x-isModel"] && (
             <Fragment>
-              <Form.Item label="旧复数形式">{modelData["x-plural"]}</Form.Item>
+              <Form.Item label="旧复数形式">{model["x-plural"]}</Form.Item>
               <Form.Item label="新复数形式" hasFeedback>
                 {getFieldDecorator("x-plural", {
                   rules: [
@@ -210,7 +210,7 @@ function ModelCopy({
                 })(<Input />)}
               </Form.Item>
 
-              <Form.Item label="旧表名">{modelData["x-tableName"]}</Form.Item>
+              <Form.Item label="旧表名">{model["x-tableName"]}</Form.Item>
               <Form.Item label="新表名" hasFeedback>
                 {getFieldDecorator("x-tableName", {
                   rules: [

@@ -28,7 +28,7 @@ const CheckboxGroup = Checkbox.Group;
 const InputGroup = Input.Group;
 const { TextArea } = Input;
 
-export default function FieldEdit({
+function FieldEdit({
   children,
   title = "编辑",
   formMode,
@@ -36,7 +36,8 @@ export default function FieldEdit({
   models,
   model,
   fields,
-  field: defaultData,
+  field,
+  form
 }) {
   /**
    * 计算值
@@ -1164,3 +1165,5 @@ export default function FieldEdit({
     </span>
   );
 }
+
+export default Form.create({ name: "fieldEdit" })(FieldEdit);

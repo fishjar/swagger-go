@@ -1,7 +1,7 @@
 import React, { Fragment, useState, useEffect } from "react";
 import moment from "moment";
-import FieldEdit from "./drawers/fieldEdit";
-import FieldCopy from "./drawers/fieldCopy";
+import FieldEdit from "./forms/fieldEdit";
+import FieldCopy from "./forms/fieldCopy";
 import { getModelProps } from "../utils";
 import {
   formItemLayout,
@@ -37,20 +37,16 @@ const InputGroup = Input.Group;
 const { TextArea } = Input;
 
 export default function Definition({ models, model, dispatch }) {
-  const { key: modelKey, data: modelData = {} } = model;
-
   /**
    * 计算值
    * 将字段对象转为字段列表
    */
-  const fields = Object.entries(modelData.properties).map(([key, data]) => ({
+  const fields = Object.entries(model.properties).map(([key, values]) => ({
+    ...values,
+    "x-isEnum": Array.isArray(values.enum),
+    "x-isRequired": (model.required || []).includes(key),
+    "x-isExample": Object.keys(model.example || {}).includes(key),
     key,
-    data: {
-      ...data,
-      "x-isEnum": Array.isArray(data.enum),
-      "x-isRequired": (modelData.required || []).includes(key),
-      "x-isExample": Object.keys(modelData.example || {}).includes(key),
-    },
   }));
 
   /**
@@ -58,8 +54,8 @@ export default function Definition({ models, model, dispatch }) {
    * @param {String} fieldKey
    */
   function handleFieldRemove(fieldKey) {
-    // const { key: modelKey, ...modelData } = model;
-    const { properties = {}, required = [], example = {} } = modelData;
+    const { key, ...oldData } = model;
+    const { properties = {}, required = [], example = {} } = oldData;
 
     delete properties[fieldKey];
     delete example[fieldKey];
@@ -67,9 +63,9 @@ export default function Definition({ models, model, dispatch }) {
     dispatch({
       type: "MODEL_UPDATE",
       payload: {
-        [modelKey]: {
-          ...modelData,
-          required: required.filter(item => item === fieldKey),
+        [key]: {
+          ...oldData,
+          required: required.filter(item => item !== fieldKey),
           example,
           properties,
         },
@@ -89,23 +85,23 @@ export default function Definition({ models, model, dispatch }) {
       render: (text, record) => {
         return (
           <Badge
-            status={record.data["x-isRequired"] ? "success" : "default"}
+            status={record["x-isRequired"] ? "success" : "default"}
             text={text}
-            style={record.data.uniqueItems ? { color: "#52c41a" } : {}}
+            style={record.uniqueItems ? { color: "#52c41a" } : {}}
           />
         );
       },
     },
     {
       title: "Type ( Format )",
-      dataIndex: "data.format",
+      dataIndex: "format",
       render: (text, record) =>
-        `${record.data.type} ( ${text} )` +
-        `${record.data.enum ? " ( enum )" : ""}`,
+        `${record.type} ( ${text} )` +
+        `${record["x-isEnum"] ? " ( enum )" : ""}`,
     },
     {
       title: "Placeholder - Description",
-      dataIndex: "data.description",
+      dataIndex: "description",
       render: (text, record) => {
         if (record["x-isEnum"]) {
           return (
@@ -115,12 +111,12 @@ export default function Definition({ models, model, dispatch }) {
               }`}</div>
               <ul style={{ margin: 0 }}>
                 {record["x-enumMap"]
-                  ? Object.keys(record["x-enumMap"]).map(key => (
-                      <li key={key}>
-                        {key} - {record["x-enumMap"][key]}
+                  ? Object.entries(record["x-enumMap"]).map(([k, v]) => (
+                      <li key={k}>
+                        {k} - {v}
                       </li>
                     ))
-                  : record.enum.map(key => <li key={key}>{key}</li>)}
+                  : record.enum.map(k => <li key={k}>{k}</li>)}
               </ul>
             </div>
           );
@@ -129,10 +125,9 @@ export default function Definition({ models, model, dispatch }) {
             <div>
               <div>{`${record["x-message"] || ""} - ${text}`}</div>
               <ul style={{ margin: 0 }}>
-                {Object.keys(record.properties).map(key => (
-                  <li key={key}>
-                    {record.properties[key].type} - {key} (
-                    {record.properties[key].description})
+                {Object.entries(record.properties).map(([k, v]) => (
+                  <li key={k}>
+                    {v.type} - {k} ({v.description})
                   </li>
                 ))}
               </ul>
@@ -166,7 +161,7 @@ export default function Definition({ models, model, dispatch }) {
     },
     {
       title: "Form",
-      dataIndex: "data['x-showTable']",
+      dataIndex: "x-showTable",
       render: (_, record) => (
         <div>
           {record["x-showTable"] && (
@@ -189,7 +184,7 @@ export default function Definition({ models, model, dispatch }) {
     },
     {
       title: "Default",
-      dataIndex: "data.default",
+      dataIndex: "default",
       render: (_, record) => (
         <div>
           {record.default !== undefined && (
@@ -208,7 +203,7 @@ export default function Definition({ models, model, dispatch }) {
     },
     {
       title: "Example",
-      dataIndex: "data.example",
+      dataIndex: "example",
       render: (text, record) => (
         <Badge
           status={record["x-isExample"] ? "success" : "default"}
@@ -239,6 +234,7 @@ export default function Definition({ models, model, dispatch }) {
           <Divider type="vertical" />
           <FieldCopy
             title="复制"
+            formMode="copy"
             dispatch={dispatch}
             models={models}
             model={model}

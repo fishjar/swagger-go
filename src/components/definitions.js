@@ -2,8 +2,8 @@ import React, { Fragment, useState, useEffect } from "react";
 
 import { apiOptions } from "../config";
 import Definition from "./definition";
-import ModelEdit from "./drawers/modelEdit";
-import ModelCopy from "./drawers/modelCopy";
+import ModelEdit from "./forms/modelEdit";
+import ModelCopy from "./forms/modelCopy";
 
 import {
   Form,
@@ -29,13 +29,13 @@ export default function Definitions({ state, dispatch }) {
    * 计算值
    * 将模型对象转为模型列表
    */
-  const models = Object.entries(state.definitions).map(([key, data]) => ({
+  const models = Object.entries(state.definitions).map(([key, values]) => ({
+    ...values,
     key,
-    data,
   }));
 
-  function handleModelRemove(key) {
-    const { [key]: _, ...payload } = state.definitions;
+  function handleModelRemove(modelKey) {
+    const { [modelKey]: _, ...payload } = state.definitions;
     dispatch({
       type: "MODEL_RESET",
       payload,
@@ -45,35 +45,33 @@ export default function Definitions({ state, dispatch }) {
   return (
     <Fragment>
       <Collapse defaultActiveKey={[]}>
-        {models.map(({ key, data }) => (
+        {models.map(model => (
           <Panel
             header={
-              data["x-isModel"]
-                ? `${key} [${data["x-plural"]}][${data["x-tableName"]}] (${
-                    data.description
-                  })`
-                : `${key} (${data.description || ""})`
+              model["x-isModel"]
+                ? `${model.key} [${model["x-plural"]}][${
+                    model["x-tableName"]
+                  }] (${model.description})`
+                : `${model.key} (${model.description || ""})`
             }
-            key={key}
+            key={model.key}
             extra={
               <span>
-                {data["x-isModel"] && (
+                {model["x-isModel"] && (
                   <span style={{ marginRight: 12 }}>
-                    {apiOptions.map((api, index) => (
+                    {apiOptions.map(({ key, method, notice, path }, index) => (
                       <Badge
-                        key={index}
+                        key={key}
                         count={index}
                         showZero
                         style={{
                           backgroundColor: "#fff",
-                          color: (data["x-apis"] || []).includes(api.key)
+                          color: (model["x-apis"] || []).includes(key)
                             ? "#52c41a"
                             : "#999",
                           boxShadow: "0 0 0 1px #d9d9d9 inset",
                         }}
-                        title={`${api.method}("/${key.toLowerCase()}${
-                          api.path
-                        }") ${api.notice}(${api.key})`}
+                        title={`${method}("/${model.key.toLowerCase()}${path}") ${notice}(${key})`}
                       />
                     ))}
                   </span>
@@ -83,7 +81,7 @@ export default function Definitions({ state, dispatch }) {
                   title="编辑模型"
                   formMode="edit"
                   models={models}
-                  model={{ key, data }}
+                  model={model}
                   dispatch={dispatch}
                 >
                   <Icon type="edit" style={{ marginRight: 12 }} />
@@ -93,7 +91,7 @@ export default function Definitions({ state, dispatch }) {
                   title="编辑模型"
                   formMode="copy"
                   models={models}
-                  model={{ key, data }}
+                  model={model}
                   dispatch={dispatch}
                 >
                   <Icon type="copy" style={{ marginRight: 12 }} />
@@ -103,17 +101,13 @@ export default function Definitions({ state, dispatch }) {
                   type="close"
                   onClick={event => {
                     event.stopPropagation();
-                    handleModelRemove(key);
+                    handleModelRemove(model.key);
                   }}
                 />
               </span>
             }
           >
-            <Definition
-              models={models}
-              model={{ key, data }}
-              dispatch={dispatch}
-            />
+            <Definition models={models} model={model} dispatch={dispatch} />
           </Panel>
         ))}
       </Collapse>
