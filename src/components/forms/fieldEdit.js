@@ -1,8 +1,15 @@
 import React, { Fragment, useState, useEffect, forwardRef } from "react";
 import moment from "moment";
-import { formItemLayout, dataFormats, numTypes, propTypes } from "../../config";
+import {
+  formItemLayout,
+  dataFormats,
+  dataTypes,
+  numTypes,
+  standDataTypes,
+} from "../../config";
 import { getModelProps } from "../../utils";
 import SubFields from "./subFields";
+import EnumItems from "./enumItems";
 import {
   Form,
   Input,
@@ -65,7 +72,7 @@ function FieldEdit({
     }
     if (field["x-enumMap"]) {
       return Object.entries(field["x-enumMap"]).map(([k, v]) => ({
-        key: numTypes.includes(field.format) ? ~~k : k,
+        key: field.type === "integer" ? ~~k : k,
         description: v,
       }));
     }
@@ -81,7 +88,7 @@ function FieldEdit({
    * 获取array item链接到的模型，并将其字段转为一个对象列表
    */
   const defaultArrayItems = (() => {
-    const ref = field.items && field.items["$ref"];
+    const ref = field.items && field.items.$ref;
     if (!ref) {
       return [];
     }
@@ -99,6 +106,7 @@ function FieldEdit({
   const [visible, setVisible] = useState(false); // 抽屉是否可见
   const [objectSource, setObjectSource] = useState("custom");
   const [arrayItems, setArrayItems] = useState([...defaultArrayItems]);
+  const [outObject, setOutObject] = useState(!!field.$ref);
 
   /**
    * 关闭抽屉
@@ -119,9 +127,9 @@ function FieldEdit({
    * 重置表单
    */
   function handleReset() {
-    setObjectSource("custom");
-    setArrayItems([...defaultArrayItems]);
     resetFields();
+    setArrayItems([...defaultArrayItems]);
+    setObjectSource("custom");
   }
 
   /**
@@ -148,10 +156,24 @@ function FieldEdit({
   }
 
   function handleSubFieldsValidator(rule, value, callback) {
-    if (value.length === 0) {
-      callback("子字段不能少于一项");
-    }
     const validValue = value.filter(item => item.key);
+    if (validValue.length < 1) {
+      callback("有效子字段不能少于两项");
+    }
+    if (
+      validValue.length !==
+      [...new Set(validValue.map(item => item.key))].length
+    ) {
+      callback("子字段名称重复");
+    }
+    callback();
+  }
+
+  function handleEnumItemsValidator(rule, value, callback) {
+    const validValue = value.filter(item => item.key);
+    if (validValue.length < 2) {
+      callback("有效子字段不能少于两项");
+    }
     if (
       validValue.length !==
       [...new Set(validValue.map(item => item.key))].length
@@ -207,348 +229,419 @@ function FieldEdit({
                   validator: handleFieldKeyValidator,
                 },
               ],
-            })(<Input disabled={formMode === "edit"} />)}
-          </Form.Item>
-
-          <Form.Item label="字段类型">
-            {getFieldDecorator("format", {
-              initialValue: field.format,
-              rules: [
-                {
-                  required: true,
-                  message: "请选择!",
-                },
-              ],
             })(
-              <Select
-                showSearch
-                disabled={field["x-isEnum"]}
-                filterOption={(input, option) =>
-                  option.key.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                }
-              >
-                {Object.entries(dataFormats).map(([k, v]) => (
-                  <Option value={k} key={k}>
-                    <span>{k}</span>
-                    <span
-                      style={{
-                        color: "#999",
-                      }}
-                    >{` (${v[0]}, ${v[1]}, ${v[2]})`}</span>
-                  </Option>
-                ))}
-              </Select>
+              <Input placeholder="field_key" disabled={formMode === "edit"} />
             )}
           </Form.Item>
 
-          <Form.Item label="是否枚举" required>
-            {getFieldDecorator("x-isEnum", {
-              initialValue: field["x-isEnum"],
-              valuePropName: "checked",
-            })(
-              <Switch
-                checkedChildren="是"
-                unCheckedChildren="否"
-                disabled={!["int4", "string", "char"].includes(field.format)}
-              />
-            )}
+          <Form.Item label="外链模型" required>
+            <Switch
+              checked={outObject}
+              checkedChildren="是"
+              unCheckedChildren="否"
+              onChange={checked => {
+                setOutObject(checked);
+                setFieldsValue({
+                  $ref: undefined,
+                });
+              }}
+            />
           </Form.Item>
 
-          <Form.Item label="描述">
-            {field["x-isEnum"]
-              ? getFieldDecorator("x-description", {
-                  initialValue: field["x-description"],
-                  rules: [
-                    {
-                      required: true,
-                      message: "请填写!",
-                    },
-                  ],
-                })(<Input />)
-              : getFieldDecorator("description", {
-                  initialValue: field.description,
-                  rules: [
-                    {
-                      required: true,
-                      message: "请填写!",
-                    },
-                  ],
-                })(<Input />)}
-          </Form.Item>
-
-          {field["x-isEnum"] && (
-            <Form.Item label="枚举选项">
-              {enumItems.map((item, index) => (
-                <div
-                  key={index}
-                  style={{
-                    position: "relative",
-                  }}
-                >
-                  <InputGroup compact>
-                    {getFieldDecorator(`enumItems[${index}].key`, {
-                      initialValue: item.key,
-                      rules: [
-                        {
-                          required: true,
-                          message: "请填写!",
-                        },
-                      ],
-                    })(
-                      numTypes.includes(field.format) ? (
-                        <InputNumber
-                          // parser={input => ~~input}
-                          style={{ width: "40%" }}
-                          placeholder="Key"
-                        />
-                      ) : (
-                        <Input style={{ width: "40%" }} placeholder="Key" />
-                      )
-                    )}
-                    {getFieldDecorator(`enumItems[${index}].description`, {
-                      initialValue: item.description,
-                      rules: [
-                        {
-                          required: true,
-                          message: "请填写!",
-                        },
-                      ],
-                    })(<Input style={{ width: "60%" }} placeholder="Value" />)}
-                  </InputGroup>
-                  <Icon
-                    style={{
-                      position: "absolute",
-                      right: -20,
-                      top: 12,
-                    }}
-                    type="minus-circle-o"
-                    onClick={e => {
-                      // handleEnumRemove(index);
-                      console.log(index);
-                    }}
-                  />
-                </div>
-              ))}
-              <Button
-                style={{
-                  width: "100%",
-                  marginTop: 12,
-                }}
-                type="dashed"
-                onClick={() => {}}
-                icon="plus"
-              >
-                Add field
-              </Button>
-              <TextArea
-                autosize
-                disabled
-                value={field.description}
-                style={{
-                  marginTop: 12,
-                }}
-              />
-            </Form.Item>
-          )}
-
-          {field.format === "object" && (
-            <Form.Item label="数据来源">
-              <Radio.Group
-                onChange={e => {
-                  setObjectSource(e.target.value);
-                  if (e.target.value === "custom") {
-                    // handleKvDelete("x-ref");
-                  }
-                }}
-                value={objectSource}
-              >
-                <Radio value={"custom"}>Custom</Radio>
-                <Radio value={"models"}>Models</Radio>
-              </Radio.Group>
-            </Form.Item>
-          )}
-
-          {field.format === "object" && objectSource === "models" && (
-            <Form.Item label="数据模型">
-              <Select placeholder="请选择" onChange={handleObjectModelChange}>
-                {models.map(({ key, description }) => (
-                  <Option
-                    value={`#/definitions/${key}`}
-                    key={key}
-                    disabled={model.key === key}
-                  >
-                    <span>{`#/definitions/${key}`}</span>
-                    <span
-                      style={{
-                        color: "#999",
-                      }}
-                    >{` (${description})`}</span>
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          )}
-
-          {field.format === "array" && (
-            <Form.Item label="数据模型">
-              <Select
-                placeholder="请选择"
-                value={field.items && field.items.$ref}
-                onChange={handleArrayModelChange}
-              >
-                {models.map(({ key, description }) => (
-                  <Option
-                    value={`#/definitions/${key}`}
-                    key={key}
-                    disabled={model.key === key}
-                  >
-                    <span>{`#/definitions/${key}`}</span>
-                    <span
-                      style={{
-                        color: "#999",
-                      }}
-                    >{` (${description})`}</span>
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          )}
-
-          {field.format === "object" && (
-            <Form.Item label="子字段选项">
-              {getFieldDecorator("subFields", {
-                initialValue: subFields,
+          {outObject ? (
+            <Form.Item label="选择模型">
+              {getFieldDecorator("$ref", {
+                initialValue: field.$ref,
                 rules: [
                   {
-                    validator: handleSubFieldsValidator,
+                    required: true,
+                    message: "请选择!",
                   },
                 ],
-              })(<SubFields objectSource={objectSource} />)}
-            </Form.Item>
-          )}
-
-          {field.format === "array" && (
-            <Form.Item label="数组字段">
-              <Table
-                columns={[
-                  {
-                    title: "Type",
-                    dataIndex: "type",
-                  },
-                  {
-                    title: "Key",
-                    dataIndex: "key",
-                  },
-                  {
-                    title: "Description",
-                    dataIndex: "description",
-                  },
-                  {
-                    title: "Example",
-                    dataIndex: "example",
-                    render: text => (
-                      <div
-                        style={{
-                          wordWrap: "break-word",
-                          wordBreak: "break-all",
-                        }}
-                      >
-                        {text}
-                      </div>
-                    ),
-                  },
-                ]}
-                dataSource={arrayItems}
-                size="small"
-                pagination={false}
-                bordered
-              />
-            </Form.Item>
-          )}
-
-          {(field.format === "string" || field.format === "char") && (
-            <Form.Item label="数据长度">
-              {getFieldDecorator("x-length", {
-                initialValue: field["x-length"],
               })(
-                <InputNumber
-                  min={0}
-                  max={255}
-                  // parser={input => ~~input}
-                />
+                <Select placeholder="请选择">
+                  {models.map(({ key, description }) => (
+                    <Option
+                      value={`#/definitions/${key}`}
+                      key={key}
+                      disabled={model.key === key}
+                    >
+                      <span>{`#/definitions/${key}`}</span>
+                      <span
+                        style={{
+                          color: "#999",
+                        }}
+                      >{` (${description})`}</span>
+                    </Option>
+                  ))}
+                </Select>
               )}
             </Form.Item>
-          )}
-
-          {/* {field.format === "string" && (
-            <Form.Item label="长度范围" style={{ marginBottom: 0 }}>
-              <Form.Item style={{ display: "inline-block" }}>
-                {getFieldDecorator(`minLength`, {
-                  initialValue: field.minLength,
-                })(<InputNumber placeholder="MinLength" min={0} max={255} />)}
-              </Form.Item>
-              <span
-                style={{
-                  display: "inline-block",
-                  width: "24px",
-                  textAlign: "center",
-                }}
-              >
-                ~
-              </span>
-              <Form.Item style={{ display: "inline-block" }}>
-                {getFieldDecorator(`maxLength`, {
-                  initialValue: field.maxLength,
-                })(<InputNumber placeholder="MaxLength" min={0} max={255} />)}
-              </Form.Item>
-            </Form.Item>
-          )} */}
-
-          {/* {numTypes.includes(field.format) && (
-            <Form.Item label="大小范围">
-              <InputGroup compact>
-                {getFieldDecorator(`minimum`, {
-                  initialValue: field.minimum,
-                })(
-                  <InputNumber
-                    style={{ width: 100, textAlign: "center" }}
-                    placeholder="Minimum"
-                    min={0}
-                    max={255}
-                  />
-                )}
-
-                <Input
+          ) : (
+            <Fragment>
+              <Form.Item label="键属性">
+                <Form.Item
                   style={{
-                    width: 30,
-                    borderLeft: 0,
-                    pointerEvents: "none",
-                    backgroundColor: "#fff",
+                    display: "inline-block",
+                    marginRight: 12,
+                    marginBottom: 0,
                   }}
-                  placeholder="~"
-                  disabled
-                />
-                {getFieldDecorator(`maximum`, {
-                  initialValue: field.maximum,
+                >
+                  {getFieldDecorator("x-primaryKey", {
+                    initialValue: field["x-primaryKey"],
+                    valuePropName: "checked",
+                  })(<Checkbox>主键</Checkbox>)}
+                </Form.Item>
+                <Form.Item style={{ display: "inline-block", marginBottom: 0 }}>
+                  {getFieldDecorator("x-foreignKey", {
+                    initialValue: field["x-foreignKey"],
+                    valuePropName: "checked",
+                  })(<Checkbox disabled>外键(暂不支持)</Checkbox>)}
+                </Form.Item>
+              </Form.Item>
+
+              <Form.Item label="字段类型">
+                {getFieldDecorator("type", {
+                  initialValue: field.type,
+                  rules: [
+                    {
+                      required: true,
+                      message: "请选择!",
+                    },
+                  ],
                 })(
-                  <InputNumber
-                    style={{ width: 100, textAlign: "center", borderLeft: 0 }}
-                    placeholder="Maximum"
-                    min={0}
-                    max={255}
+                  <Select
+                    placeholder="请选择"
+                    showSearch
+                    disabled={getFieldValue("x-isEnum")}
+                    filterOption={(input, option) =>
+                      option.key.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                    }
+                    onChange={() => {
+                      setFieldsValue({
+                        format: undefined,
+                      });
+                    }}
+                  >
+                    {standDataTypes.map(item => (
+                      <Option value={item} key={item}>
+                        {item}
+                      </Option>
+                    ))}
+                  </Select>
+                )}
+              </Form.Item>
+
+              <Form.Item label="字段格式">
+                {getFieldDecorator("format", {
+                  initialValue: field.format,
+                  rules: [
+                    {
+                      required: true,
+                      message: "请选择!",
+                    },
+                  ],
+                })(
+                  <Select
+                    placeholder="请选择"
+                    showSearch
+                    disabled={getFieldValue("x-isEnum")}
+                    filterOption={(input, option) =>
+                      option.key.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                    }
+                  >
+                    {Object.entries(dataTypes[getFieldValue("type")] || {}).map(
+                      ([k, v]) => (
+                        <Option value={k} key={k}>
+                          <span>{k}</span>
+                          <span
+                            style={{
+                              color: "#999",
+                            }}
+                          >{` (${v[0]}, ${v[1]})`}</span>
+                        </Option>
+                      )
+                    )}
+                  </Select>
+                )}
+              </Form.Item>
+
+              <Form.Item
+                label="是否枚举"
+                required
+                extra="仅当字段类型为[int4, string, char]时支持枚举"
+              >
+                {getFieldDecorator("x-isEnum", {
+                  initialValue: field["x-isEnum"],
+                  valuePropName: "checked",
+                })(
+                  <Switch
+                    checkedChildren="是"
+                    unCheckedChildren="否"
+                    disabled={
+                      !["int4", "string", "char"].includes(
+                        getFieldValue("format")
+                      )
+                    }
                   />
                 )}
-              </InputGroup>
-            </Form.Item>
-          )} */}
+              </Form.Item>
 
-          <Form.Item label="提示信息" hasFeedback>
-            {getFieldDecorator("x-message", {
-              initialValue: field["x-message"],
-            })(<Input />)}
-          </Form.Item>
+              <Form.Item label="描述" hasFeedback>
+                {getFieldValue("x-isEnum")
+                  ? getFieldDecorator("x-description", {
+                      initialValue: field["x-description"],
+                      rules: [
+                        {
+                          required: true,
+                          message: "请填写!",
+                        },
+                      ],
+                    })(<Input placeholder="x-description" />)
+                  : getFieldDecorator("description", {
+                      initialValue: field.description,
+                      rules: [
+                        {
+                          required: true,
+                          message: "请填写!",
+                        },
+                      ],
+                    })(<Input placeholder="description" />)}
+              </Form.Item>
 
-          {/* {(() => {
+              <Form.Item label="标题" hasFeedback>
+                {getFieldDecorator("title", {
+                  initialValue: field.title,
+                })(<Input placeholder="title" />)}
+              </Form.Item>
+
+              {getFieldValue("x-isEnum") && (
+                <Form.Item label="枚举选项" required>
+                  {getFieldDecorator("enumItems", {
+                    initialValue: enumItems,
+                    rules: [
+                      {
+                        validator: handleEnumItemsValidator,
+                      },
+                    ],
+                  })(<EnumItems fieldType={getFieldValue("type")} />)}
+                </Form.Item>
+              )}
+
+              {getFieldValue("format") === "object" && (
+                <Form.Item label="数据来源">
+                  <Radio.Group
+                    onChange={e => {
+                      setObjectSource(e.target.value);
+                      if (e.target.value === "custom") {
+                        // handleKvDelete("x-ref");
+                      }
+                    }}
+                    value={objectSource}
+                  >
+                    <Radio value={"custom"}>Custom</Radio>
+                    <Radio value={"models"}>Models</Radio>
+                  </Radio.Group>
+                </Form.Item>
+              )}
+
+              {getFieldValue("format") === "object" &&
+                objectSource === "models" && (
+                  <Form.Item label="数据模型">
+                    <Select
+                      placeholder="请选择"
+                      onChange={handleObjectModelChange}
+                    >
+                      {models.map(({ key, description }) => (
+                        <Option
+                          value={`#/definitions/${key}`}
+                          key={key}
+                          disabled={model.key === key}
+                        >
+                          <span>{`#/definitions/${key}`}</span>
+                          <span
+                            style={{
+                              color: "#999",
+                            }}
+                          >{` (${description})`}</span>
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                )}
+
+              {getFieldValue("format") === "array" && (
+                <Form.Item label="数据模型">
+                  <Select
+                    placeholder="请选择"
+                    value={field.items && field.items.$ref}
+                    onChange={handleArrayModelChange}
+                  >
+                    {models.map(({ key, description }) => (
+                      <Option
+                        value={`#/definitions/${key}`}
+                        key={key}
+                        disabled={model.key === key}
+                      >
+                        <span>{`#/definitions/${key}`}</span>
+                        <span
+                          style={{
+                            color: "#999",
+                          }}
+                        >{` (${description})`}</span>
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              )}
+
+              {getFieldValue("format") === "object" && (
+                <Form.Item label="子字段选项">
+                  {getFieldDecorator("subFields", {
+                    initialValue: subFields,
+                    rules: [
+                      {
+                        validator: handleSubFieldsValidator,
+                      },
+                    ],
+                  })(<SubFields objectSource={objectSource} />)}
+                </Form.Item>
+              )}
+
+              {getFieldValue("format") === "array" && (
+                <Form.Item label="数组字段">
+                  <Table
+                    columns={[
+                      {
+                        title: "Type",
+                        dataIndex: "type",
+                      },
+                      {
+                        title: "Key",
+                        dataIndex: "key",
+                      },
+                      {
+                        title: "Description",
+                        dataIndex: "description",
+                      },
+                      {
+                        title: "Example",
+                        dataIndex: "example",
+                        render: text => (
+                          <div
+                            style={{
+                              wordWrap: "break-word",
+                              wordBreak: "break-all",
+                            }}
+                          >
+                            {text}
+                          </div>
+                        ),
+                      },
+                    ]}
+                    dataSource={arrayItems}
+                    size="small"
+                    pagination={false}
+                    bordered
+                  />
+                </Form.Item>
+              )}
+
+              {(getFieldValue("format") === "string" ||
+                getFieldValue("format") === "char") && (
+                <Form.Item label="数据长度">
+                  {getFieldDecorator("x-length", {
+                    initialValue: field["x-length"] || 255,
+                    rules: [
+                      {
+                        required: true,
+                        message: "请填写!",
+                      },
+                    ],
+                  })(
+                    <InputNumber
+                      min={1}
+                      max={255}
+                      parser={input => input && ~~input}
+                    />
+                  )}
+                </Form.Item>
+              )}
+
+              {getFieldValue("format") === "string" && (
+                <Form.Item label="长度范围">
+                  <Form.Item
+                    style={{ display: "inline-block", marginBottom: 0 }}
+                  >
+                    {getFieldDecorator(`minLength`, {
+                      initialValue: field.minLength,
+                    })(
+                      <InputNumber
+                        placeholder="MinLength"
+                        min={1}
+                        max={255}
+                        parser={input => input && ~~input}
+                      />
+                    )}
+                  </Form.Item>
+                  <span
+                    style={{
+                      display: "inline-block",
+                      width: "24px",
+                      textAlign: "center",
+                    }}
+                  >
+                    ~
+                  </span>
+                  <Form.Item
+                    style={{ display: "inline-block", marginBottom: 0 }}
+                  >
+                    {getFieldDecorator(`maxLength`, {
+                      initialValue: field.maxLength,
+                    })(
+                      <InputNumber
+                        placeholder="MaxLength"
+                        min={1}
+                        max={255}
+                        parser={input => input && ~~input}
+                      />
+                    )}
+                  </Form.Item>
+                </Form.Item>
+              )}
+
+              {(getFieldValue("type") === "integer" ||
+                getFieldValue("type") === "number") && (
+                <Form.Item label="大小范围" style={{ marginBottom: 0 }}>
+                  <Form.Item style={{ display: "inline-block" }}>
+                    {getFieldDecorator(`minimum`, {
+                      initialValue: field.minimum,
+                    })(<InputNumber placeholder="Minimum" />)}
+                  </Form.Item>
+                  <span
+                    style={{
+                      display: "inline-block",
+                      width: "24px",
+                      textAlign: "center",
+                    }}
+                  >
+                    ~
+                  </span>
+                  <Form.Item style={{ display: "inline-block" }}>
+                    {getFieldDecorator(`maximum`, {
+                      initialValue: field.maximum,
+                    })(<InputNumber placeholder="Maximum" />)}
+                  </Form.Item>
+                </Form.Item>
+              )}
+
+              <Form.Item label="表单提示信息" hasFeedback>
+                {getFieldDecorator("x-message", {
+                  initialValue: field["x-message"],
+                })(<Input placeholder="placeholder" />)}
+              </Form.Item>
+
+              {/* {(() => {
             if (data["x-isEnum"]) {
               return (
                 <Fragment>
@@ -610,7 +703,7 @@ function FieldEdit({
                   </Form.Item>
                 </Fragment>
               );
-            } else if (numTypes.includes(data.format)) {
+            } else if (numTypes.includes(getFieldValue("format"))) {
               return (
                 <Fragment>
                   <Form.Item label="默认值">
@@ -635,7 +728,7 @@ function FieldEdit({
                   </Form.Item>
                 </Fragment>
               );
-            } else if (data.format === "date") {
+            } else if (getFieldValue("format") === "date") {
               return (
                 <Fragment>
                   <Form.Item label="默认值">
@@ -658,7 +751,7 @@ function FieldEdit({
                   </Form.Item>
                 </Fragment>
               );
-            } else if (data.format === "date-time") {
+            } else if (getFieldValue("format") === "date-time") {
               return (
                 <Fragment>
                   <Form.Item label="默认值">
@@ -683,7 +776,7 @@ function FieldEdit({
                   </Form.Item>
                 </Fragment>
               );
-            } else if (data.format === "text" || data.format === "json") {
+            } else if (getFieldValue("format") === "text" || getFieldValue("format") === "json") {
               return (
                 <Fragment>
                   <Form.Item label="默认值">
@@ -706,7 +799,7 @@ function FieldEdit({
                   </Form.Item>
                 </Fragment>
               );
-            } else if (data.format === "boolean") {
+            } else if (getFieldValue("format") === "boolean") {
               return (
                 <Fragment>
                   <Form.Item label="默认值">
@@ -763,7 +856,7 @@ function FieldEdit({
                   </Form.Item>
                 </Fragment>
               );
-            } else if (data.format !== "object" && data.format !== "array") {
+            } else if (getFieldValue("format") !== "object" && getFieldValue("format") !== "array") {
               return (
                 <Fragment>
                   <Form.Item label="默认值">
@@ -787,49 +880,50 @@ function FieldEdit({
             }
           })()} */}
 
-          {/* <Form.Item label="其他选项" style={{ marginBottom: 0 }}>
-            <Form.Item style={{ display: "inline-block", marginRight: 12 }}>
-              {getFieldDecorator("uniqueItems", {
-                initialValue: field.uniqueItems,
-                valuePropName: "checked",
-              })(<Checkbox>Unique</Checkbox>)}
-            </Form.Item>
-            <Form.Item style={{ display: "inline-block" }}>
-              {getFieldDecorator("x-isExample", {
-                initialValue: field["x-isExample"],
-                valuePropName: "checked",
-              })(<Checkbox>InExample</Checkbox>)}
-            </Form.Item>
-          </Form.Item>
+              <Form.Item label="其他选项" style={{ marginBottom: 0 }}>
+                <Form.Item style={{ display: "inline-block", marginRight: 12 }}>
+                  {getFieldDecorator("uniqueItems", {
+                    initialValue: field.uniqueItems,
+                    valuePropName: "checked",
+                  })(<Checkbox>值唯一</Checkbox>)}
+                </Form.Item>
+                <Form.Item style={{ display: "inline-block" }}>
+                  {getFieldDecorator("x-isExample", {
+                    initialValue: field["x-isExample"],
+                    valuePropName: "checked",
+                  })(<Checkbox>作为示例</Checkbox>)}
+                </Form.Item>
+              </Form.Item>
 
-          <Form.Item label="表单选项" style={{ marginBottom: 0 }}>
-            <Form.Item style={{ display: "inline-block", marginRight: 12 }}>
-              {getFieldDecorator("x-showTable", {
-                initialValue: field["x-showTable"],
-                valuePropName: "checked",
-              })(<Checkbox>showInTable</Checkbox>)}
-            </Form.Item>
-            <Form.Item style={{ display: "inline-block", marginRight: 12 }}>
-              {getFieldDecorator("x-showFilter", {
-                initialValue: field["x-showFilter"],
-                valuePropName: "checked",
-              })(<Checkbox>showFilter</Checkbox>)}
-            </Form.Item>
-            <Form.Item style={{ display: "inline-block", marginRight: 12 }}>
-              {getFieldDecorator("x-showSorter", {
-                initialValue: field["x-showSorter"],
-                valuePropName: "checked",
-              })(<Checkbox>showSorter</Checkbox>)}
-            </Form.Item>
-            <Form.Item style={{ display: "inline-block" }}>
-              {field.format === "text" &&
-                getFieldDecorator("x-isRichText", {
-                  initialValue: field["x-isRichText"],
-                  valuePropName: "checked",
-                })(<Checkbox>useRichText</Checkbox>)}
-            </Form.Item>
-          </Form.Item> */}
-
+              <Form.Item label="表单选项" style={{ marginBottom: 0 }}>
+                <Form.Item style={{ display: "inline-block", marginRight: 12 }}>
+                  {getFieldDecorator("x-showTable", {
+                    initialValue: field["x-showTable"],
+                    valuePropName: "checked",
+                  })(<Checkbox>列表显示</Checkbox>)}
+                </Form.Item>
+                <Form.Item style={{ display: "inline-block", marginRight: 12 }}>
+                  {getFieldDecorator("x-showFilter", {
+                    initialValue: field["x-showFilter"],
+                    valuePropName: "checked",
+                  })(<Checkbox>可过滤</Checkbox>)}
+                </Form.Item>
+                <Form.Item style={{ display: "inline-block", marginRight: 12 }}>
+                  {getFieldDecorator("x-showSorter", {
+                    initialValue: field["x-showSorter"],
+                    valuePropName: "checked",
+                  })(<Checkbox>可排序</Checkbox>)}
+                </Form.Item>
+                <Form.Item style={{ display: "inline-block" }}>
+                  {getFieldValue("format") === "text" &&
+                    getFieldDecorator("x-isRichText", {
+                      initialValue: field["x-isRichText"],
+                      valuePropName: "checked",
+                    })(<Checkbox>使用富文本编辑器</Checkbox>)}
+                </Form.Item>
+              </Form.Item>
+            </Fragment>
+          )}
         </Form>
         <div
           style={{

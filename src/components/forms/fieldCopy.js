@@ -1,6 +1,6 @@
 import React, { Fragment, useState, useEffect } from "react";
 import moment from "moment";
-import { formItemLayout, dataFormats, numTypes, propTypes } from "../../config";
+import { formItemLayout, dataFormats, numTypes, standDataTypes } from "../../config";
 import { getModelProps, deepClone } from "../../utils";
 import {
   Form,

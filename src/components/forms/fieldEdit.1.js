@@ -1,6 +1,6 @@
 import React, { Fragment, useState, useEffect } from "react";
 import moment from "moment";
-import { formItemLayout, dataFormats, numTypes, propTypes } from "../../config";
+import { formItemLayout, dataFormats, numTypes, standDataTypes } from "../../config";
 import { getModelProps } from "../../utils";
 import {
   Form,
@@ -622,7 +622,7 @@ function FieldEdit({
                         handleSubFieldChange(index, "type", value);
                       }}
                     >
-                      {propTypes.map(key => (
+                      {standDataTypes.map(key => (
                         <Option value={key} key={key}>
                           {key}
                         </Option>
@@ -721,7 +721,7 @@ function FieldEdit({
                       style={{ width: "20%" }}
                       disabled
                     >
-                      {propTypes.map(key => (
+                      {standDataTypes.map(key => (
                         <Option value={key} key={key}>
                           {key}
                         </Option>

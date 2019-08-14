@@ -1,6 +1,6 @@
 import React, { Fragment, useState, useEffect, forwardRef } from "react";
 import moment from "moment";
-import { formItemLayout, dataFormats, numTypes, propTypes } from "../../config";
+import { formItemLayout, dataFormats, numTypes, standDataTypes } from "../../config";
 import { getModelProps } from "../../utils";
 import {
   Form,
@@ -33,7 +33,7 @@ function SubField({ value: subFields = [], objectSource, onChange }, ref) {
   /**
    * 添加子字段
    */
-  function handleSubFieldAdd() {
+  function handleItemAdd() {
     onChange([...subFields, {}]);
   }
 
@@ -41,7 +41,7 @@ function SubField({ value: subFields = [], objectSource, onChange }, ref) {
    * 删除子字段
    * @param {Number} index
    */
-  function handleSubFieldRemove(index) {
+  function handleItemRemove(index) {
     const newSubFields = [...subFields];
     newSubFields.splice(index, 1);
     onChange(newSubFields);
@@ -53,7 +53,7 @@ function SubField({ value: subFields = [], objectSource, onChange }, ref) {
    * @param {*} key
    * @param {*} value
    */
-  function handleSubFieldChange(index, key, value) {
+  function handleItemChange(index, key, value) {
     const newSubFields = [...subFields];
     newSubFields[index] = { ...newSubFields[index], [key]: value };
     onChange(newSubFields);
@@ -75,10 +75,10 @@ function SubField({ value: subFields = [], objectSource, onChange }, ref) {
               style={{ width: "20%" }}
               disabled={objectSource === "models"}
               onChange={value => {
-                handleSubFieldChange(index, "type", value);
+                handleItemChange(index, "type", value);
               }}
             >
-              {propTypes.map(key => (
+              {standDataTypes.map(key => (
                 <Option value={key} key={key}>
                   {key}
                 </Option>
@@ -90,7 +90,7 @@ function SubField({ value: subFields = [], objectSource, onChange }, ref) {
               value={item.key}
               disabled={objectSource === "models"}
               onChange={e => {
-                handleSubFieldChange(index, "key", e.target.value);
+                handleItemChange(index, "key", e.target.value);
               }}
             />
             <Input
@@ -99,7 +99,7 @@ function SubField({ value: subFields = [], objectSource, onChange }, ref) {
               value={item.description}
               disabled={objectSource === "models"}
               onChange={e => {
-                handleSubFieldChange(index, "description", e.target.value);
+                handleItemChange(index, "description", e.target.value);
               }}
             />
             {item.type === "integer" || item.type === "number" ? (
@@ -108,7 +108,7 @@ function SubField({ value: subFields = [], objectSource, onChange }, ref) {
                 placeholder="Example"
                 value={item.example}
                 onChange={value => {
-                  handleSubFieldChange(index, "example", value);
+                  handleItemChange(index, "example", value);
                 }}
               />
             ) : (
@@ -117,7 +117,7 @@ function SubField({ value: subFields = [], objectSource, onChange }, ref) {
                 placeholder="Example"
                 value={item.example}
                 onChange={e => {
-                  handleSubFieldChange(index, "example", e.target.value);
+                  handleItemChange(index, "example", e.target.value);
                 }}
               />
             )}
@@ -131,7 +131,7 @@ function SubField({ value: subFields = [], objectSource, onChange }, ref) {
               }}
               type="minus-circle-o"
               onClick={() => {
-                handleSubFieldRemove(index);
+                handleItemRemove(index);
               }}
             />
           )}
@@ -144,7 +144,7 @@ function SubField({ value: subFields = [], objectSource, onChange }, ref) {
             marginTop: 12,
           }}
           type="dashed"
-          onClick={handleSubFieldAdd}
+          onClick={handleItemAdd}
           icon="plus"
         >
           Add field

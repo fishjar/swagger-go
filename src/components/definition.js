@@ -8,7 +8,7 @@ import {
   dataFormats,
   numTypes,
   isObj,
-  propTypes,
+  standDataTypes,
 } from "../config";
 import {
   Form,
@@ -36,6 +36,7 @@ const CheckboxGroup = Checkbox.Group;
 const InputGroup = Input.Group;
 const { TextArea } = Input;
 
+// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#schemaObject
 export default function Definition({ models, model, dispatch }) {
   /**
    * 计算值
@@ -80,30 +81,68 @@ export default function Definition({ models, model, dispatch }) {
       render: (_, __, index) => index + 1,
     },
     {
-      title: "Field",
+      title: "[Unique] Field",
       dataIndex: "key",
       render: (text, record) => {
         return (
           <Badge
-            status={record["x-isRequired"] ? "success" : "default"}
+            status={record.uniqueItems ? "success" : "default"}
             text={text}
-            style={record.uniqueItems ? { color: "#52c41a" } : {}}
+            style={record["x-primaryKey"] ? { color: "#52c41a" } : {}}
           />
         );
       },
     },
     {
-      title: "Type ( Format )",
+      title: "[Required] Type ( Format )",
       dataIndex: "format",
-      render: (text, record) =>
-        `${record.type} ( ${text} )` +
-        `${record["x-isEnum"] ? " ( enum )" : ""}`,
+      render: (text, record) => {
+        if (record.$ref) {
+          const refModel =
+            models.find(
+              item => item.key === record.$ref.replace("#/definitions/", "")
+            ) || {};
+          return (
+            <Badge
+              status={record["x-isRequired"] ? "success" : "default"}
+              text={`$ref ( ${refModel.key} )`}
+            />
+          );
+        }
+        return (
+          <Badge
+            status={record["x-isRequired"] ? "success" : "default"}
+            text={
+              `${record.type} ( ${text} )` +
+              `${record["x-isEnum"] ? " ( enum )" : ""}`
+            }
+          />
+        );
+      },
     },
     {
       title: "Placeholder - Description",
       dataIndex: "description",
       render: (text, record) => {
-        if (record["x-isEnum"]) {
+        if (record.$ref) {
+          const refModel =
+            models.find(
+              item => item.key === record.$ref.replace("#/definitions/", "")
+            ) || {};
+          const refProps = getModelProps(refModel);
+          return (
+            <div>
+              <div>{`- ${refModel.description} ( ${refModel.key} )`}</div>
+              <ul style={{ margin: 0 }}>
+                {refProps.map(item => (
+                  <li key={item.key}>
+                    {item.type} - {item.key} ({item.description})
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        } else if (record["x-isEnum"]) {
           return (
             <div>
               <div>{`${record["x-message"] || ""} - ${
@@ -134,20 +173,23 @@ export default function Definition({ models, model, dispatch }) {
             </div>
           );
         } else if (record.format === "array") {
+          const refModel =
+            models.find(
+              item =>
+                item.key ===
+                ((record.items && record.items["$ref"]) || "").replace(
+                  "#/definitions/",
+                  ""
+                )
+            ) || {};
+          const refProps = getModelProps(refModel);
           return (
             <div>
-              <div>{`${record["x-message"] || ""} - ${text}`}</div>
+              <div>{`${record["x-message"] || ""} - ${text} [ ${
+                refModel.description
+              } ( ${refModel.key} ) ]`}</div>
               <ul style={{ margin: 0 }}>
-                {getModelProps(
-                  models.find(
-                    item =>
-                      item.key ===
-                      ((record.items && record.items["$ref"]) || "").replace(
-                        "#/definitions/",
-                        ""
-                      )
-                  )
-                ).map(item => (
+                {refProps.map(item => (
                   <li key={item.key}>
                     {item.type} - {item.key} ({item.description})
                   </li>
@@ -177,6 +219,11 @@ export default function Definition({ models, model, dispatch }) {
           {record["x-showSorter"] && (
             <div>
               <Badge status="success" text="showSorter" />
+            </div>
+          )}
+          {record["x-isRichText"] && (
+            <div>
+              <Badge status="success" text="useRichText" />
             </div>
           )}
         </div>

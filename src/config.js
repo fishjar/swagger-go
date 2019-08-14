@@ -72,59 +72,53 @@ export const apiOptions = [
   },
 ];
 
+// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md
 // https://swagger.io/docs/specification/data-models/data-types/
-export const dataTypes = [
-  "string",
-  "number",
-  "integer",
-  "boolean",
-  "array",
-  "object",
-];
-
-export const propTypes = ["integer", "number", "string", "boolean"];
-
-export const dataFormats = {
-  int4: ["integer", "TINYINT", "TINYINT", ""],
-  int8: ["integer", "SMALLINT", "SMALLINT"],
-  int16: ["integer", "MEDIUMINT", "INTEGER"],
-  int32: ["integer", "INTEGER", "INTEGER"],
-  int64: ["integer", "BIGINT", "BIGINT"],
-  float: ["number", "FLOAT", "FLOAT"],
-  double: ["number", "DOUBLE", "FLOAT"],
-  decimal: ["number", "DECIMAL", "DECIMAL"],
-  char: ["string", "CHAR", "CHAR"],
-  string: ["string", "STRING", "VARCHAR"],
-  text: ["string", "TEXT", "TEXT"],
-  date: ["string", "DATEONLY", "DATE"],
-  "date-time": ["string", "DATE", "DATETIME"],
-  // "date-time(6)": ["string", "DATE", "DATETIME"],
-  "time-stamp": ["integer", "INTEGER", "TIMESTAMP"],
-  email: ["string", "STRING", "VARCHAR"],
-  uri: ["string", "STRING", "VARCHAR"],
-  hostname: ["string", "STRING", "VARCHAR"],
-  ipv4: ["string", "STRING", "VARCHAR"],
-  ipv6: ["string", "STRING", "VARCHAR"],
-  byte: ["string", "BLOB", "BLOB"],
-  binary: ["string", "STRING.BINARY", "binary"],
-  password: ["string", "STRING", "VARCHAR"],
-  uuid: ["string", "UUID", "UUID"],
-  json: ["string", "JSON", "JSON"],
-  object: ["object", "JSON", "JSON"],
-  array: ["array", "JSON", "JSON"],
-  boolean: ["boolean", "BOOLEAN", "BOOLEAN"],
-  // enum: ["*", "ENUM", "ENUM"],
+export const dataTypes = {
+  integer: {
+    int4: ["TINYINT", "TINYINT"],
+    int8: ["SMALLINT", "SMALLINT"],
+    int16: ["MEDIUMINT", "INTEGER"],
+    int32: ["INTEGER", "INTEGER"],
+    int64: ["BIGINT", "BIGINT"],
+    "time-stamp": ["INTEGER", "TIMESTAMP"],
+  },
+  number: {
+    float: ["FLOAT", "FLOAT"],
+    double: ["DOUBLE", "FLOAT"],
+    decimal: ["DECIMAL", "DECIMAL"],
+  },
+  string: {
+    char: ["CHAR", "CHAR"],
+    string: ["STRING", "VARCHAR"],
+    text: ["TEXT", "TEXT"],
+    date: ["DATEONLY", "DATE"],
+    "date-time": ["DATE", "DATETIME"],
+    // "date-time(6)": ["DATE", "DATETIME"],
+    email: ["STRING", "VARCHAR"],
+    uri: ["STRING", "VARCHAR"],
+    hostname: ["STRING", "VARCHAR"],
+    ipv4: ["STRING", "VARCHAR"],
+    ipv6: ["STRING", "VARCHAR"],
+    byte: ["STRING", "VARCHAR"],
+    binary: ["STRING.BINARY", "binary"],
+    password: ["STRING", "VARCHAR"],
+    uuid: ["UUID", "UUID"],
+    json: ["JSON", "JSON"],
+  },
+  object: {
+    object: ["JSON", "JSON"],
+  },
+  array: {
+    array: ["JSON", "JSON"],
+  },
+  boolean: {
+    boolean: ["BOOLEAN", "BOOLEAN"],
+  },
 };
 
-export const numTypes = [
-  "int4",
-  "int8",
-  "int16",
-  "int32",
-  "int64",
-  "float",
-  "double",
-  "decimal",
-  "time-stamp",
-];
+export const dataFormats = Object.entries(dataTypes)
+  .map(([key, value]) => Object.entries(value).map(([k, v]) => [key, k, ...v]))
+  .reduce((accumulator, currentValue) => [...accumulator, ...currentValue]);
 
+export const standDataTypes = Object.keys(dataTypes);

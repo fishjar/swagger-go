@@ -5,7 +5,7 @@ import {
   apiOptions,
   dataFormats,
   numTypes,
-  propTypes,
+  standDataTypes,
 } from "../../config";
 import { getModelProps } from "../../utils";
 import {

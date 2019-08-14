@@ -246,6 +246,9 @@ definitions:
         format: "uuid"
         description: "ID"
         uniqueItems: true
+        x-primaryKey: true
+      user:
+        $ref: "#/definitions/UserDemo"
       name:
         type: "string"
         format: "string"
