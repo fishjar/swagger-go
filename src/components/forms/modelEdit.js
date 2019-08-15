@@ -88,7 +88,7 @@ function ModelEdit({
       }
       console.log(values);
       updateData(values);
-      handleHide();
+      setVisible(false);
     });
   }
 

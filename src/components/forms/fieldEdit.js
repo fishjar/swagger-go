@@ -31,6 +31,7 @@ import {
   message,
   Switch,
 } from "antd";
+import { setTimeout } from "timers";
 const { Panel } = Collapse;
 const { Option } = Select;
 const CheckboxGroup = Checkbox.Group;
@@ -71,7 +72,7 @@ function FieldEdit({
   // const [arrayModel, setArrayModel] = useState(field.arrayModel);
   const [arrayFields, setArrayFields] = useState(field.arrayFields);
   // const [subFields, setSubFields] = useState(field.subFields);
-  // const [enumItems, setEnumItems] = useState(field.enumItems);
+  const [enumItems, setEnumItems] = useState(field.enumItems);
 
   /**
    * 关闭抽屉
@@ -105,7 +106,7 @@ function FieldEdit({
     // setArrayModel(field.arrayModel);
     setArrayFields(field.arrayFields);
     // setSubFields(field.subFields);
-    // setEnumItems(field.enumItems);
+    setEnumItems(field.enumItems);
   }
 
   /**
@@ -120,10 +121,29 @@ function FieldEdit({
       }
       console.log(values);
       // updateData(values);
-      // handleHide();
+      // setVisible(false);
     });
   }
 
+  /**
+   * 切换外链模型
+   * @param {Boolean} value
+   */
+  function handleRefSwitch(value) {
+    if (value === field.isRef) {
+      // handleReset();
+      setTimeout(() => {
+        handleReset();
+      }, 100);
+    }
+  }
+
+  /**
+   * 字段名称校验
+   * @param {*} rule
+   * @param {*} value
+   * @param {*} callback
+   */
   function handleFieldKeyValidator(rule, value, callback) {
     if (fields.map(item => item.key).includes(value) && formMode === "create") {
       callback("字段名称重复");
@@ -131,10 +151,18 @@ function FieldEdit({
     callback();
   }
 
+  /**
+   * 子字段校验
+   * @param {*} rule
+   * @param {*} value
+   * @param {*} callback
+   */
   function handleSubFieldsValidator(rule, value, callback) {
-    const validValue = value.filter(item => item.key);
+    const validValue = value.filter(
+      item => item.key && item.type && item.description
+    );
     if (validValue.length < 1) {
-      callback("有效子字段不能少于两项");
+      callback("有效子字段不能少于一项");
     }
     if (hasDuplication(validValue)) {
       callback("子字段名称重复");
@@ -142,8 +170,14 @@ function FieldEdit({
     callback();
   }
 
+  /**
+   * 枚举项目校验
+   * @param {*} rule
+   * @param {*} value
+   * @param {Function} callback
+   */
   function handleEnumItemsValidator(rule, value, callback) {
-    const validValue = value.filter(item => item.key);
+    const validValue = value.filter(item => item.key && item.description);
     if (validValue.length < 2) {
       callback("有效子字段不能少于两项");
     }
@@ -153,18 +187,29 @@ function FieldEdit({
     callback();
   }
 
+  /**
+   * 选择时快速插入数据时
+   * 获取模型字段
+   * @param {String} ref
+   */
   function handleObjectModelChange(ref) {
     const [_, subFields] = parseRef(models, ref);
     setFieldsValue({ subFields });
   }
 
+  /**
+   * 选择外链模型时
+   * 获取模型字段
+   * @param {String} ref
+   */
   function handleRefModelChange(ref) {
     const [_, newRefFields] = parseRef(models, ref);
     setRefFields(newRefFields);
   }
 
   /**
-   * 选择数组类型的数据模型
+   * 数组类型时选择数据模型时
+   * 获取模型字段
    * @param {String} value
    */
   function handleArrayModelChange(ref) {
@@ -217,7 +262,13 @@ function FieldEdit({
                   message: "请选择!",
                 },
               ],
-            })(<Switch checkedChildren="是" unCheckedChildren="否" />)}
+            })(
+              <Switch
+                checkedChildren="是"
+                unCheckedChildren="否"
+                onChange={handleRefSwitch}
+              />
+            )}
           </Form.Item>
 
           {getFieldValue("isRef") ? (
@@ -552,14 +603,9 @@ function FieldEdit({
                   <Form.Item label="字符长度">
                     {getFieldDecorator("x-length", {
                       initialValue: field["x-length"],
-                      rules: [
-                        {
-                          required: true,
-                          message: "请填写!",
-                        },
-                      ],
                     })(
                       <InputNumber
+                        placeholder="Length"
                         min={1}
                         max={255}
                         parser={input => input && ~~input}
@@ -639,244 +685,180 @@ function FieldEdit({
                 })(<Input placeholder="placeholder" />)}
               </Form.Item>
 
-              {/* {(() => {
-            if (data["x-isEnum"]) {
-              return (
-                <Fragment>
-                  <Form.Item label="默认值">
-                    <Select
-                      name="default"
-                      placeholder="请选择"
-                      value={data.default}
-                      onChange={value => {
-                        if (value === null) {
-                          handleKvDelete("default");
-                        } else {
-                          handleKvChange("default", value);
-                        }
-                      }}
-                    >
-                      <Option value={null}>
-                        <span>Null</span>
-                      </Option>
-                      {Object.keys(data["x-enumMap"]).map(key => (
-                        <Option value={~~key} key={key}>
-                          <span>{key}</span>
-                          <span
-                            style={{
-                              color: "#999",
-                            }}
-                          >{` (${data["x-enumMap"][key]})`}</span>
-                        </Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                  <Form.Item label="示例值">
-                    <Select
-                      name="example"
-                      placeholder="请选择"
-                      value={data.example}
-                      onChange={value => {
-                        if (value === null) {
-                          handleKvDelete("example");
-                        } else {
-                          handleKvChange("example", value);
-                        }
-                      }}
-                    >
-                      <Option value={null}>
-                        <span>Null</span>
-                      </Option>
-                      {Object.keys(data["x-enumMap"]).map(key => (
-                        <Option value={~~key} key={key}>
-                          <span>{key}</span>
-                          <span
-                            style={{
-                              color: "#999",
-                            }}
-                          >{` (${data["x-enumMap"][key]})`}</span>
-                        </Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                </Fragment>
-              );
-            } else if (numTypes.includes(getFieldValue("format"))) {
-              return (
-                <Fragment>
-                  <Form.Item label="默认值">
-                    <InputNumber
-                      name="default"
-                      placeholder="请输入"
-                      value={data.default}
-                      onChange={value => {
-                        handleKvChange("default", value);
-                      }}
-                    />
-                  </Form.Item>
-                  <Form.Item label="示例值">
-                    <InputNumber
-                      name="example"
-                      placeholder="请输入"
-                      value={data.example}
-                      onChange={value => {
-                        handleKvChange("example", value);
-                      }}
-                    />
-                  </Form.Item>
-                </Fragment>
-              );
-            } else if (getFieldValue("format") === "date") {
-              return (
-                <Fragment>
-                  <Form.Item label="默认值">
-                    <DatePicker
-                      name="default"
-                      value={data.default ? moment(data.default) : null}
-                      onChange={(_, dateString) => {
-                        handleKvChange("default", dateString);
-                      }}
-                    />
-                  </Form.Item>
-                  <Form.Item label="示例值">
-                    <DatePicker
-                      name="example"
-                      value={data.example ? moment(data.example) : null}
-                      onChange={(_, dateString) => {
-                        handleKvChange("example", dateString);
-                      }}
-                    />
-                  </Form.Item>
-                </Fragment>
-              );
-            } else if (getFieldValue("format") === "date-time") {
-              return (
-                <Fragment>
-                  <Form.Item label="默认值">
-                    <DatePicker
-                      showTime
-                      name="default"
-                      value={data.default ? moment(data.default) : null}
-                      onChange={(_, dateString) => {
-                        handleKvChange("default", dateString);
-                      }}
-                    />
-                  </Form.Item>
-                  <Form.Item label="示例值">
-                    <DatePicker
-                      showTime
-                      name="example"
-                      value={data.example ? moment(data.example) : null}
-                      onChange={(_, dateString) => {
-                        handleKvChange("example", dateString);
-                      }}
-                    />
-                  </Form.Item>
-                </Fragment>
-              );
-            } else if (getFieldValue("format") === "text" || getFieldValue("format") === "json") {
-              return (
-                <Fragment>
-                  <Form.Item label="默认值">
-                    <TextArea
-                      autosize
-                      name="default"
-                      placeholder="请输入"
-                      value={data.default}
-                      onChange={handleChange}
-                    />
-                  </Form.Item>
-                  <Form.Item label="示例值">
-                    <TextArea
-                      autosize
-                      name="example"
-                      placeholder="请输入"
-                      value={data.example}
-                      onChange={handleChange}
-                    />
-                  </Form.Item>
-                </Fragment>
-              );
-            } else if (getFieldValue("format") === "boolean") {
-              return (
-                <Fragment>
-                  <Form.Item label="默认值">
-                    <Checkbox
-                      checked={data.default === true}
-                      onChange={e => {
-                        if (e.target.checked) {
-                          handleKvChange("default", true);
-                        } else {
-                          handleKvDelete("default");
-                        }
-                      }}
-                    >
-                      True
-                    </Checkbox>
-                    <Checkbox
-                      checked={data.default === false}
-                      onChange={e => {
-                        if (e.target.checked) {
-                          handleKvChange("default", false);
-                        } else {
-                          handleKvDelete("default");
-                        }
-                      }}
-                    >
-                      False
-                    </Checkbox>
-                  </Form.Item>
-                  <Form.Item label="示例值">
-                    <Checkbox
-                      checked={data.example === true}
-                      onChange={e => {
-                        if (e.target.checked) {
-                          handleKvChange("example", true);
-                        } else {
-                          handleKvDelete("example");
-                        }
-                      }}
-                    >
-                      True
-                    </Checkbox>
-                    <Checkbox
-                      checked={data.example === false}
-                      onChange={e => {
-                        if (e.target.checked) {
-                          handleKvChange("example", false);
-                        } else {
-                          handleKvDelete("example");
-                        }
-                      }}
-                    >
-                      False
-                    </Checkbox>
-                  </Form.Item>
-                </Fragment>
-              );
-            } else if (getFieldValue("format") !== "object" && getFieldValue("format") !== "array") {
-              return (
-                <Fragment>
-                  <Form.Item label="默认值">
-                    <Input
-                      name="default"
-                      placeholder="请输入"
-                      value={data.default}
-                      onChange={handleChange}
-                    />
-                  </Form.Item>
-                  <Form.Item label="示例值">
-                    <Input
-                      name="example"
-                      placeholder="请输入"
-                      value={data.example}
-                      onChange={handleChange}
-                    />
-                  </Form.Item>
-                </Fragment>
-              );
-            }
-          })()} */}
+              {(() => {
+                if (getFieldValue("isEnum")) {
+                  return (
+                    <Fragment>
+                      <Form.Item label="默认值">
+                        {getFieldDecorator("default", {
+                          initialValue: field.default,
+                        })(
+                          <Select placeholder="请选择" allowClear>
+                            {enumItems.map(({ key, description }) => (
+                              <Option value={key} key={key}>
+                                <span>{key}</span>
+                                <span
+                                  style={{
+                                    color: "#999",
+                                  }}
+                                >{` (${description})`}</span>
+                              </Option>
+                            ))}
+                          </Select>
+                        )}
+                      </Form.Item>
+                      <Form.Item label="示例值">
+                        {getFieldDecorator("example", {
+                          initialValue: field.example,
+                        })(
+                          <Select placeholder="请选择" allowClear>
+                            {enumItems.map(({ key, description }) => (
+                              <Option value={key} key={key}>
+                                <span>{key}</span>
+                                <span
+                                  style={{
+                                    color: "#999",
+                                  }}
+                                >{` (${description})`}</span>
+                              </Option>
+                            ))}
+                          </Select>
+                        )}
+                      </Form.Item>
+                    </Fragment>
+                  );
+                } else if (getFieldValue("type") === "integer") {
+                  return (
+                    <Fragment>
+                      <Form.Item label="默认值">
+                        {getFieldDecorator(`default`, {
+                          initialValue: field.default,
+                        })(
+                          <InputNumber
+                            placeholder="Default"
+                            parser={input => input && ~~input}
+                          />
+                        )}
+                      </Form.Item>
+                      <Form.Item label="示例值">
+                        {getFieldDecorator(`example`, {
+                          initialValue: field.example,
+                        })(
+                          <InputNumber
+                            placeholder="Example"
+                            parser={input => input && ~~input}
+                          />
+                        )}
+                      </Form.Item>
+                    </Fragment>
+                  );
+                } else if (getFieldValue("type") === "number") {
+                  return (
+                    <Fragment>
+                      <Form.Item label="默认值">
+                        {getFieldDecorator(`default`, {
+                          initialValue: field.default,
+                        })(<InputNumber placeholder="Default" />)}
+                      </Form.Item>
+                      <Form.Item label="示例值">
+                        {getFieldDecorator(`example`, {
+                          initialValue: field.example,
+                        })(<InputNumber placeholder="Example" />)}
+                      </Form.Item>
+                    </Fragment>
+                  );
+                } else if (getFieldValue("type") === "boolean") {
+                  return (
+                    <Fragment>
+                      <Form.Item label="默认值">
+                        {getFieldDecorator(`default`, {
+                          initialValue: field.default,
+                        })(
+                          <Radio.Group>
+                            <Radio value={undefined}>Null</Radio>
+                            <Radio value={true}>True</Radio>
+                            <Radio value={false}>False</Radio>
+                          </Radio.Group>
+                        )}
+                      </Form.Item>
+                      <Form.Item label="示例值">
+                        {getFieldDecorator(`example`, {
+                          initialValue: field.example,
+                        })(
+                          <Radio.Group>
+                            <Radio value={undefined}>Null</Radio>
+                            <Radio value={true}>True</Radio>
+                            <Radio value={false}>False</Radio>
+                          </Radio.Group>
+                        )}
+                      </Form.Item>
+                    </Fragment>
+                  );
+                } else if (
+                  getFieldValue("format") === "date" ||
+                  getFieldValue("format") === "date-time"
+                ) {
+                  return (
+                    <Fragment>
+                      <Form.Item label="默认值">
+                        {getFieldDecorator(`default`, {
+                          initialValue: field.default && moment(field.default),
+                        })(
+                          <DatePicker
+                            placeholder="请选择"
+                            showTime={getFieldValue("format") === "date-time"}
+                          />
+                        )}
+                      </Form.Item>
+                      <Form.Item label="示例值">
+                        {getFieldDecorator(`example`, {
+                          initialValue: field.example && moment(field.example),
+                        })(
+                          <DatePicker
+                            placeholder="请选择"
+                            showTime={getFieldValue("format") === "date-time"}
+                          />
+                        )}
+                      </Form.Item>
+                    </Fragment>
+                  );
+                } else if (
+                  getFieldValue("format") === "text" ||
+                  getFieldValue("format") === "json" ||
+                  getFieldValue("type") === "object" ||
+                  getFieldValue("type") === "array"
+                ) {
+                  return (
+                    <Fragment>
+                      <Form.Item label="默认值">
+                        {getFieldDecorator(`default`, {
+                          initialValue: field.default,
+                        })(<TextArea placeholder="Default" autosize />)}
+                      </Form.Item>
+                      <Form.Item label="示例值">
+                        {getFieldDecorator(`example`, {
+                          initialValue: field.example,
+                        })(<TextArea placeholder="Example" autosize />)}
+                      </Form.Item>
+                    </Fragment>
+                  );
+                } else {
+                  return (
+                    <Fragment>
+                      <Form.Item label="默认值" hasFeedback>
+                        {getFieldDecorator(`default`, {
+                          initialValue: field.default,
+                        })(<Input placeholder="Default" />)}
+                      </Form.Item>
+                      <Form.Item label="示例值" hasFeedback>
+                        {getFieldDecorator(`example`, {
+                          initialValue: field.example,
+                        })(<Input placeholder="Example" />)}
+                      </Form.Item>
+                    </Fragment>
+                  );
+                }
+              })()}
 
               <Form.Item label="其他选项" style={{ marginBottom: 0 }}>
                 <Form.Item style={{ display: "inline-block", marginRight: 12 }}>
