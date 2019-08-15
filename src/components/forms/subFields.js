@@ -1,6 +1,11 @@
 import React, { Fragment, useState, useEffect, forwardRef } from "react";
 import moment from "moment";
-import { formItemLayout, dataFormats, numTypes, standDataTypes } from "../../config";
+import {
+  formItemLayout,
+  dataFormats,
+  numTypes,
+  standDataTypes,
+} from "../../config";
 import { getModelProps } from "../../utils";
 import {
   Form,
@@ -29,7 +34,7 @@ const CheckboxGroup = Checkbox.Group;
 const InputGroup = Input.Group;
 const { TextArea } = Input;
 
-function SubField({ value: subFields = [], objectSource, onChange }, ref) {
+function SubField({ value: subFields = [], onChange }, ref) {
   /**
    * 添加子字段
    */
@@ -73,7 +78,6 @@ function SubField({ value: subFields = [], objectSource, onChange }, ref) {
               placeholder="Type"
               value={item.type}
               style={{ width: "20%" }}
-              disabled={objectSource === "models"}
               onChange={value => {
                 handleItemChange(index, "type", value);
               }}
@@ -88,7 +92,6 @@ function SubField({ value: subFields = [], objectSource, onChange }, ref) {
               style={{ width: "20%" }}
               placeholder="Key"
               value={item.key}
-              disabled={objectSource === "models"}
               onChange={e => {
                 handleItemChange(index, "key", e.target.value);
               }}
@@ -97,7 +100,6 @@ function SubField({ value: subFields = [], objectSource, onChange }, ref) {
               style={{ width: "20%" }}
               placeholder="Description"
               value={item.description}
-              disabled={objectSource === "models"}
               onChange={e => {
                 handleItemChange(index, "description", e.target.value);
               }}
@@ -122,34 +124,30 @@ function SubField({ value: subFields = [], objectSource, onChange }, ref) {
               />
             )}
           </InputGroup>
-          {objectSource === "custom" && (
-            <Icon
-              style={{
-                position: "absolute",
-                right: -20,
-                top: 12,
-              }}
-              type="minus-circle-o"
-              onClick={() => {
-                handleItemRemove(index);
-              }}
-            />
-          )}
+          <Icon
+            style={{
+              position: "absolute",
+              right: -20,
+              top: 12,
+            }}
+            type="minus-circle-o"
+            onClick={() => {
+              handleItemRemove(index);
+            }}
+          />
         </div>
       ))}
-      {objectSource === "custom" && (
-        <Button
-          style={{
-            width: "100%",
-            marginTop: 12,
-          }}
-          type="dashed"
-          onClick={handleItemAdd}
-          icon="plus"
-        >
-          Add field
-        </Button>
-      )}
+      <Button
+        style={{
+          width: "100%",
+          marginTop: 12,
+        }}
+        type="dashed"
+        onClick={handleItemAdd}
+        icon="plus"
+      >
+        Add field
+      </Button>
     </div>
   );
 }

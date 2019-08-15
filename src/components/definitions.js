@@ -34,6 +34,10 @@ export default function Definitions({ state, dispatch }) {
     key,
   }));
 
+  /**
+   * 删除模型
+   * @param {String} modelKey 
+   */
   function handleModelRemove(modelKey) {
     const { [modelKey]: _, ...payload } = state.definitions;
     dispatch({

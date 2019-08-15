@@ -89,8 +89,8 @@ function FieldCopy({
     const { key: fieldKey, ...oldData } = field;
     const { properties = {}, required = [], example = {} } = modelData;
 
-    oldData["x-isRequired"] && required.push(key);
-    oldData["x-isExample"] &&
+    oldData.isRequired && required.push(key);
+    oldData.isExample &&
       (example[key] = oldData.example || example[fieldKey]);
 
     const copyData = deepClone({
@@ -155,11 +155,11 @@ function FieldCopy({
           </Form.Item>
 
           <Form.Item label="旧描述">
-            {field["x-isEnum"] ? field["x-description"] : field.description}
+            {field.isEnum ? field["x-description"] : field.description}
           </Form.Item>
           <Form.Item label="新描述" hasFeedback>
             {getFieldDecorator(
-              field["x-isEnum"] ? "x-description" : "description",
+              field.isEnum ? "x-description" : "description",
               {
                 rules: [
                   {

@@ -262,20 +262,40 @@ export const isNonNullObj = o => {
 };
 
 /**
- * 工具函数
- * 获取一个对象的简单属性列表
- * @param {Object} o
+ * 获取一个模型对象的简单属性列表
+ * @param {Object} model
  */
-export const getModelProps = o => {
-  if (!o || !o.properties) {
+export const getModelProps = model => {
+  if (!model || !model.properties) {
     return [];
   }
-  return Object.keys(o.properties).map(key => ({
+  return Object.keys(model.properties).map(key => ({
     key,
-    type: o.properties[key].type,
-    description: o.properties[key].description,
+    type: model.properties[key].type,
+    description: model.properties[key].description,
     example:
-      o.properties[key].example ||
-      (o.example && o.example[key] && o.example[key].toString()),
+      model.properties[key].example ||
+      (model.example && model.example[key] && model.example[key].toString()),
   }));
 };
+
+/**
+ * 根据ref链接获取模型及模型字段列表
+ * @param {Array} models
+ * @param {String} ref
+ */
+export const parseRef = (models, ref) => {
+  if (!ref || models.length < 1) {
+    return [{}, []];
+  }
+  const refModel =
+    models.find(item => item.key === ref.replace("#/definitions/", "")) || {};
+  const refFields = getModelProps(refModel);
+  return [refModel, refFields];
+};
+
+/**
+ * 判断数组是否有重复值
+ * @param {Array} a
+ */
+export const hasDuplication = a => a.length !== [...new Set(a)].length;

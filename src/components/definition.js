@@ -2,7 +2,7 @@ import React, { Fragment, useState, useEffect } from "react";
 import moment from "moment";
 import FieldEdit from "./forms/fieldEdit";
 import FieldCopy from "./forms/fieldCopy";
-import { getModelProps } from "../utils";
+import { getModelProps, parseRef } from "../utils";
 import {
   formItemLayout,
   dataFormats,
@@ -42,13 +42,46 @@ export default function Definition({ models, model, dispatch }) {
    * 计算值
    * 将字段对象转为字段列表
    */
-  const fields = Object.entries(model.properties).map(([key, values]) => ({
-    ...values,
-    "x-isEnum": Array.isArray(values.enum),
-    "x-isRequired": (model.required || []).includes(key),
-    "x-isExample": Object.keys(model.example || {}).includes(key),
-    key,
-  }));
+  const fields = Object.entries(model.properties).map(([key, field]) => {
+    // 外链模型
+    const [refModel, refFields] = parseRef(models, field.$ref);
+
+    // 对象类型
+    const subFields = getModelProps(field);
+
+    // 数组类型
+    const arrayRef = field.items && field.items.$ref;
+    const [arrayModel, arrayFields] = parseRef(models, arrayRef);
+
+    // 枚举类型
+    const enumItems = Array.isArray(field.enum)
+      ? field["x-enumMap"]
+        ? Object.entries(field["x-enumMap"]).map(([k, v]) => ({
+            key: field.type === "integer" ? ~~k : k,
+            description: v,
+          }))
+        : field.enum.map(k => ({
+            key: k,
+            description: "",
+          }))
+      : [];
+
+    return {
+      ...field,
+      refModel,
+      refFields,
+      arrayRef,
+      arrayModel,
+      arrayFields,
+      subFields,
+      enumItems,
+      isRef: !!field.$ref,
+      isEnum: Array.isArray(field.enum),
+      isRequired: (model.required || []).includes(key),
+      isExample: Object.keys(model.example || {}).includes(key),
+      key,
+    };
+  });
 
   /**
    * 删除字段
@@ -88,7 +121,7 @@ export default function Definition({ models, model, dispatch }) {
           <Badge
             status={record.uniqueItems ? "success" : "default"}
             text={text}
-            style={record["x-primaryKey"] ? { color: "#52c41a" } : {}}
+            style={record["x-primaryKey"] ? { color: "#52c41a", fontWeight: "bold" } : {}}
           />
         );
       },
@@ -97,24 +130,20 @@ export default function Definition({ models, model, dispatch }) {
       title: "[Required] Type ( Format )",
       dataIndex: "format",
       render: (text, record) => {
-        if (record.$ref) {
-          const refModel =
-            models.find(
-              item => item.key === record.$ref.replace("#/definitions/", "")
-            ) || {};
+        if (record.isRef) {
           return (
             <Badge
-              status={record["x-isRequired"] ? "success" : "default"}
-              text={`$ref ( ${refModel.key} )`}
+              status={record.isRequired ? "success" : "default"}
+              text={`$ref ( ${record.refModel.key} )`}
             />
           );
         }
         return (
           <Badge
-            status={record["x-isRequired"] ? "success" : "default"}
+            status={record.isRequired ? "success" : "default"}
             text={
               `${record.type} ( ${text} )` +
-              `${record["x-isEnum"] ? " ( enum )" : ""}`
+              `${record.isEnum ? " ( enum )" : ""}`
             }
           />
         );
@@ -125,37 +154,30 @@ export default function Definition({ models, model, dispatch }) {
       dataIndex: "description",
       render: (text, record) => {
         if (record.$ref) {
-          const refModel =
-            models.find(
-              item => item.key === record.$ref.replace("#/definitions/", "")
-            ) || {};
-          const refProps = getModelProps(refModel);
           return (
             <div>
-              <div>{`- ${refModel.description} ( ${refModel.key} )`}</div>
+              <div>{`- ${record.refModel.description} ( ${record.refModel.key} )`}</div>
               <ul style={{ margin: 0 }}>
-                {refProps.map(item => (
-                  <li key={item.key}>
-                    {item.type} - {item.key} ({item.description})
+                {record.refFields.map(({ key, type, description }) => (
+                  <li key={key}>
+                    {type} - {key} ({description})
                   </li>
                 ))}
               </ul>
             </div>
           );
-        } else if (record["x-isEnum"]) {
+        } else if (record.isEnum) {
           return (
             <div>
               <div>{`${record["x-message"] || ""} - ${
                 record["x-description"]
               }`}</div>
               <ul style={{ margin: 0 }}>
-                {record["x-enumMap"]
-                  ? Object.entries(record["x-enumMap"]).map(([k, v]) => (
-                      <li key={k}>
-                        {k} - {v}
-                      </li>
-                    ))
-                  : record.enum.map(k => <li key={k}>{k}</li>)}
+                {record.enumItems.map(({ key, description }) => (
+                  <li key={key}>
+                    {key} - {description}
+                  </li>
+                ))}
               </ul>
             </div>
           );
@@ -164,34 +186,24 @@ export default function Definition({ models, model, dispatch }) {
             <div>
               <div>{`${record["x-message"] || ""} - ${text}`}</div>
               <ul style={{ margin: 0 }}>
-                {Object.entries(record.properties).map(([k, v]) => (
-                  <li key={k}>
-                    {v.type} - {k} ({v.description})
+                {record.subFields.map(({ key, type, description }) => (
+                  <li key={key}>
+                    {type} - {key} ({description})
                   </li>
                 ))}
               </ul>
             </div>
           );
         } else if (record.format === "array") {
-          const refModel =
-            models.find(
-              item =>
-                item.key ===
-                ((record.items && record.items["$ref"]) || "").replace(
-                  "#/definitions/",
-                  ""
-                )
-            ) || {};
-          const refProps = getModelProps(refModel);
           return (
             <div>
               <div>{`${record["x-message"] || ""} - ${text} [ ${
-                refModel.description
-              } ( ${refModel.key} ) ]`}</div>
+                record.arrayModel.description
+              } ( ${record.arrayModel.key} ) ]`}</div>
               <ul style={{ margin: 0 }}>
-                {refProps.map(item => (
-                  <li key={item.key}>
-                    {item.type} - {item.key} ({item.description})
+                {record.arrayFields.map(({ key, type, description }) => (
+                  <li key={key}>
+                    {type} - {key} ({description})
                   </li>
                 ))}
               </ul>
@@ -253,7 +265,7 @@ export default function Definition({ models, model, dispatch }) {
       dataIndex: "example",
       render: (text, record) => (
         <Badge
-          status={record["x-isExample"] ? "success" : "default"}
+          status={record.isExample ? "success" : "default"}
           text={
             text ||
             (model.example &&
