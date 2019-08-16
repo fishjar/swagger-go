@@ -299,3 +299,55 @@ export const parseRef = (models, ref) => {
  * @param {Array} a
  */
 export const hasDuplication = a => a.length !== [...new Set(a)].length;
+
+/**
+ * 过滤对象
+ * 返回对象和参数是同一个
+ * @param {Object} o
+ * @param {*} value
+ */
+export const filterObjectItems = (o, value = undefined) => {
+  getType(o) === "object" &&
+    Object.entries(o).forEach(([k, v]) => {
+      if (v === value) {
+        delete o[k];
+      }
+    });
+};
+
+/**
+ * 过滤数组
+ * 返回新数组
+ * @param {Array} a
+ * @param {*} value
+ */
+export const filterArrayItems1 = (a, value) => a.filter(item => item !== value);
+
+/**
+ * 过滤数组
+ * @param {Array} a
+ * @param {*} value
+ */
+export const filterArrayItems2 = (a, value) => {
+  const i = a.indexOf(value);
+  if (i !== -1) {
+    a.splice(i, 1);
+  }
+};
+
+/**
+ * 将对象列表转为对象
+ * @param {Array} a
+ * @param {String} key
+ */
+export const parseArrayToObject = (a, key = "key") => {
+  if (!Array.isArray(a) || a.length < 1) {
+    return {};
+  }
+  const o = {};
+  a.forEach(({ [key]: k, ...data }, i) => {
+    filterObjectItems(data);
+    o[k || i] = data;
+  });
+  return o;
+};

@@ -7,9 +7,17 @@ import {
   numTypes,
   standDataTypes,
 } from "../../config";
-import { getModelProps, parseRef, hasDuplication } from "../../utils";
+import {
+  getModelProps,
+  parseRef,
+  hasDuplication,
+  parseArrayToObject,
+  filterObjectItems,
+  filterArrayItems2,
+} from "../../utils";
 import SubFields from "./subFields";
 import EnumItems from "./enumItems";
+import DateSelect from "./dateSelect";
 import {
   Form,
   Input,
@@ -120,8 +128,74 @@ function FieldEdit({
         return;
       }
       console.log(values);
-      // updateData(values);
-      // setVisible(false);
+      const {
+        key,
+        isRef,
+        isEnum,
+        isRequired,
+        isExample,
+        enumItems = [],
+        subFields,
+        arrayRef,
+        ...data
+      } = values;
+
+      filterObjectItems(data);
+
+      if (data.type === "object") {
+        data.properties = parseArrayToObject(subFields);
+      } else if (data.type === "array") {
+        data.items = { $ref: arrayRef };
+      }
+
+      if (isEnum) {
+        data.enum = [];
+        data["x-enumMap"] = {};
+        data.description = `"状态"`;
+        enumItems.forEach(item => {
+          data.enum.push(item.key);
+          data["x-enumMap"][item.key] = item.description;
+          data.description += `\t* ${item.key} - ${item.description}`;
+        });
+      }
+      console.log(key);
+      console.log(data);
+
+      const { key: modelKey, ...modelData } = model;
+      const { properties = {}, required = [], example = {} } = modelData;
+      if (isRequired) {
+        if (!required.includes(key)) {
+          required.push(key);
+        }
+      } else {
+        filterArrayItems2(required, key);
+      }
+      if (isExample) {
+        if (data.example !== undefined) {
+          example[key] = data.example;
+        }
+      } else {
+        delete example[key];
+      }
+
+      console.log(required);
+      console.log(example);
+
+      dispatch({
+        type: "MODEL_UPDATE",
+        payload: {
+          [modelKey]: {
+            ...modelData,
+            required,
+            example,
+            properties: {
+              ...properties,
+              [key]: data,
+            },
+          },
+        },
+      });
+      setVisible(false);
     });
   }
 
@@ -801,21 +875,35 @@ function FieldEdit({
                   return (
                     <Fragment>
                       <Form.Item label="默认值">
-                        {getFieldDecorator(`default`, {
+                        {/* {getFieldDecorator(`default`, {
                           initialValue: field.default && moment(field.default),
                         })(
                           <DatePicker
                             placeholder="请选择"
                             showTime={getFieldValue("format") === "date-time"}
                           />
+                        )} */}
+                        {getFieldDecorator(`default`, {
+                          initialValue: field.default,
+                        })(
+                          <DateSelect
+                            showTime={getFieldValue("format") === "date-time"}
+                          />
                         )}
                       </Form.Item>
                       <Form.Item label="示例值">
-                        {getFieldDecorator(`example`, {
+                        {/* {getFieldDecorator(`example`, {
                           initialValue: field.example && moment(field.example),
                         })(
                           <DatePicker
                             placeholder="请选择"
+                            showTime={getFieldValue("format") === "date-time"}
+                          />
+                        )} */}
+                        {getFieldDecorator(`example`, {
+                          initialValue: field.example,
+                        })(
+                          <DateSelect
                             showTime={getFieldValue("format") === "date-time"}
                           />
                         )}
@@ -862,14 +950,20 @@ function FieldEdit({
 
               <Form.Item label="其他选项" style={{ marginBottom: 0 }}>
                 <Form.Item style={{ display: "inline-block", marginRight: 12 }}>
+                  {getFieldDecorator("isRequired", {
+                    initialValue: field.isRequired,
+                    valuePropName: "checked",
+                  })(<Checkbox>不能为空</Checkbox>)}
+                </Form.Item>
+                <Form.Item style={{ display: "inline-block", marginRight: 12 }}>
                   {getFieldDecorator("uniqueItems", {
                     initialValue: field.uniqueItems,
                     valuePropName: "checked",
                   })(<Checkbox>值唯一</Checkbox>)}
                 </Form.Item>
                 <Form.Item style={{ display: "inline-block" }}>
-                  {getFieldDecorator("x-isExample", {
-                    initialValue: field["x-isExample"],
+                  {getFieldDecorator("isExample", {
+                    initialValue: field.isExample,
                     valuePropName: "checked",
                   })(<Checkbox>作为示例</Checkbox>)}
                 </Form.Item>

@@ -68,6 +68,10 @@ export default function Definition({ models, model, dispatch }) {
 
     return {
       ...field,
+      example:
+        field.example === undefined
+          ? model.example && model.example[key]
+          : field.example,
       refModel,
       refFields,
       arrayRef,
@@ -121,7 +125,11 @@ export default function Definition({ models, model, dispatch }) {
           <Badge
             status={record.uniqueItems ? "success" : "default"}
             text={text}
-            style={record["x-primaryKey"] ? { color: "#52c41a", fontWeight: "bold" } : {}}
+            style={
+              record["x-primaryKey"]
+                ? { color: "#52c41a", fontWeight: "bold" }
+                : {}
+            }
           />
         );
       },
@@ -156,7 +164,9 @@ export default function Definition({ models, model, dispatch }) {
         if (record.$ref) {
           return (
             <div>
-              <div>{`- ${record.refModel.description} ( ${record.refModel.key} )`}</div>
+              <div>{`- ${record.refModel.description} ( ${
+                record.refModel.key
+              } )`}</div>
               <ul style={{ margin: 0 }}>
                 {record.refFields.map(({ key, type, description }) => (
                   <li key={key}>
