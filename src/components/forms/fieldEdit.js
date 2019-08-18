@@ -54,7 +54,9 @@ function FieldEdit({
   models,
   model,
   fields,
-  field,
+  field = {
+    isRef: false,
+  },
   form,
 }) {
   const {
@@ -136,6 +138,7 @@ function FieldEdit({
         isExample,
         enumItems = [],
         subFields,
+        arrayType,
         arrayRef,
         ...data
       } = values;
@@ -145,7 +148,11 @@ function FieldEdit({
       if (data.type === "object") {
         data.properties = parseArrayToObject(subFields);
       } else if (data.type === "array") {
-        data.items = { $ref: arrayRef };
+        if (arrayType === "object") {
+          data.items = { $ref: arrayRef };
+        } else {
+          data.items = { type: arrayType };
+        }
       }
 
       if (isEnum) {
@@ -411,6 +418,12 @@ function FieldEdit({
                   bordered
                 />
               </Form.Item>
+              <Form.Item label="其他选项">
+                {getFieldDecorator("isRequired", {
+                  initialValue: field.isRequired,
+                  valuePropName: "checked",
+                })(<Checkbox>不能为空</Checkbox>)}
+              </Form.Item>
             </Fragment>
           ) : (
             <Fragment>
@@ -602,9 +615,9 @@ function FieldEdit({
 
               {getFieldValue("format") === "array" && (
                 <Fragment>
-                  <Form.Item label="数组模型">
-                    {getFieldDecorator("arrayRef", {
-                      initialValue: field.arrayRef,
+                  <Form.Item label="数组类型">
+                    {getFieldDecorator("arrayType", {
+                      initialValue: field.arrayType,
                       rules: [
                         {
                           required: true,
@@ -614,61 +627,92 @@ function FieldEdit({
                     })(
                       <Select
                         placeholder="请选择"
-                        onChange={handleArrayModelChange}
+                        showSearch
+                        filterOption={(input, option) =>
+                          option.key
+                            .toLowerCase()
+                            .indexOf(input.toLowerCase()) >= 0
+                        }
                       >
-                        {models.map(({ key, description }) => (
-                          <Option
-                            value={`#/definitions/${key}`}
-                            key={key}
-                            disabled={model.key === key}
-                          >
-                            <span>{`#/definitions/${key}`}</span>
-                            <span
-                              style={{
-                                color: "#999",
-                              }}
-                            >{` (${description})`}</span>
+                        {standDataTypes.map(item => (
+                          <Option value={item} key={item}>
+                            {item}
                           </Option>
                         ))}
                       </Select>
                     )}
                   </Form.Item>
-                  <Form.Item label="数组字段">
-                    <Table
-                      columns={[
-                        {
-                          title: "Type",
-                          dataIndex: "type",
-                        },
-                        {
-                          title: "Key",
-                          dataIndex: "key",
-                        },
-                        {
-                          title: "Description",
-                          dataIndex: "description",
-                        },
-                        {
-                          title: "Example",
-                          dataIndex: "example",
-                          render: text => (
-                            <div
-                              style={{
-                                wordWrap: "break-word",
-                                wordBreak: "break-all",
-                              }}
-                            >
-                              {text}
-                            </div>
-                          ),
-                        },
-                      ]}
-                      dataSource={arrayFields}
-                      size="small"
-                      pagination={false}
-                      bordered
-                    />
-                  </Form.Item>
+                  {getFieldValue("arrayType") === "object" && (
+                    <Fragment>
+                      <Form.Item label="数组模型">
+                        {getFieldDecorator("arrayRef", {
+                          initialValue: field.arrayRef,
+                          rules: [
+                            {
+                              required: true,
+                              message: "请选择!",
+                            },
+                          ],
+                        })(
+                          <Select
+                            placeholder="请选择"
+                            onChange={handleArrayModelChange}
+                          >
+                            {models.map(({ key, description }) => (
+                              <Option
+                                value={`#/definitions/${key}`}
+                                key={key}
+                                disabled={model.key === key}
+                              >
+                                <span>{`#/definitions/${key}`}</span>
+                                <span
+                                  style={{
+                                    color: "#999",
+                                  }}
+                                >{` (${description})`}</span>
+                              </Option>
+                            ))}
+                          </Select>
+                        )}
+                      </Form.Item>
+                      <Form.Item label="数组字段">
+                        <Table
+                          columns={[
+                            {
+                              title: "Type",
+                              dataIndex: "type",
+                            },
+                            {
+                              title: "Key",
+                              dataIndex: "key",
+                            },
+                            {
+                              title: "Description",
+                              dataIndex: "description",
+                            },
+                            {
+                              title: "Example",
+                              dataIndex: "example",
+                              render: text => (
+                                <div
+                                  style={{
+                                    wordWrap: "break-word",
+                                    wordBreak: "break-all",
+                                  }}
+                                >
+                                  {text}
+                                </div>
+                              ),
+                            },
+                          ]}
+                          dataSource={arrayFields}
+                          size="small"
+                          pagination={false}
+                          bordered
+                        />
+                      </Form.Item>
+                    </Fragment>
+                  )}
                 </Fragment>
               )}
 
@@ -875,14 +919,6 @@ function FieldEdit({
                   return (
                     <Fragment>
                       <Form.Item label="默认值">
-                        {/* {getFieldDecorator(`default`, {
-                          initialValue: field.default && moment(field.default),
-                        })(
-                          <DatePicker
-                            placeholder="请选择"
-                            showTime={getFieldValue("format") === "date-time"}
-                          />
-                        )} */}
                         {getFieldDecorator(`default`, {
                           initialValue: field.default,
                         })(
@@ -892,14 +928,6 @@ function FieldEdit({
                         )}
                       </Form.Item>
                       <Form.Item label="示例值">
-                        {/* {getFieldDecorator(`example`, {
-                          initialValue: field.example && moment(field.example),
-                        })(
-                          <DatePicker
-                            placeholder="请选择"
-                            showTime={getFieldValue("format") === "date-time"}
-                          />
-                        )} */}
                         {getFieldDecorator(`example`, {
                           initialValue: field.example,
                         })(
@@ -912,9 +940,7 @@ function FieldEdit({
                   );
                 } else if (
                   getFieldValue("format") === "text" ||
-                  getFieldValue("format") === "json" ||
-                  getFieldValue("type") === "object" ||
-                  getFieldValue("type") === "array"
+                  getFieldValue("format") === "json"
                 ) {
                   return (
                     <Fragment>
@@ -930,7 +956,10 @@ function FieldEdit({
                       </Form.Item>
                     </Fragment>
                   );
-                } else {
+                } else if (
+                  getFieldValue("type") !== "object" &&
+                  getFieldValue("type") !== "array"
+                ) {
                   return (
                     <Fragment>
                       <Form.Item label="默认值" hasFeedback>

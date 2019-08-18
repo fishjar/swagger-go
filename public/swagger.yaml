@@ -3,6 +3,7 @@ swagger: "2.0"
 info:
   version: "0.0.1"
   title: "Hello World App"
+  description: "app description"
 host: "localhost:3000"
 basePath: "/"
 schemes:
@@ -17,6 +18,7 @@ securityDefinitions:
     type: apiKey
     in: header
     name: X-API-Key
+    description: "test description"
   JWT:
     description: "Authorization: Bearer {token}"
     type: "apiKey"
@@ -344,6 +346,12 @@ definitions:
         description: "扩展字段2"
         items:
           $ref: '#/definitions/UserDemo'
+      tages:
+        type: "array"
+        format: "array"
+        description: "标签"
+        items:
+          type: "string"
       status:
         type: "integer"
         format: "int4"

@@ -42,7 +42,7 @@ export default function Definition({ models, model, dispatch }) {
    * 计算值
    * 将字段对象转为字段列表
    */
-  const fields = Object.entries(model.properties).map(([key, field]) => {
+  const fields = Object.entries(model.properties || {}).map(([key, field]) => {
     // 外链模型
     const [refModel, refFields] = parseRef(models, field.$ref);
 
@@ -50,6 +50,8 @@ export default function Definition({ models, model, dispatch }) {
     const subFields = getModelProps(field);
 
     // 数组类型
+    const arrayType =
+      field.items && (field.items.$ref ? "object" : field.items.type);
     const arrayRef = field.items && field.items.$ref;
     const [arrayModel, arrayFields] = parseRef(models, arrayRef);
 
@@ -74,6 +76,7 @@ export default function Definition({ models, model, dispatch }) {
           : field.example,
       refModel,
       refFields,
+      arrayType,
       arrayRef,
       arrayModel,
       arrayFields,
@@ -205,20 +208,28 @@ export default function Definition({ models, model, dispatch }) {
             </div>
           );
         } else if (record.format === "array") {
-          return (
-            <div>
-              <div>{`${record["x-message"] || ""} - ${text} [ ${
-                record.arrayModel.description
-              } ( ${record.arrayModel.key} ) ]`}</div>
-              <ul style={{ margin: 0 }}>
-                {record.arrayFields.map(({ key, type, description }) => (
-                  <li key={key}>
-                    {type} - {key} ({description})
-                  </li>
-                ))}
-              </ul>
-            </div>
-          );
+          if (record.arrayType === "object") {
+            return (
+              <div>
+                <div>{`${record["x-message"] || ""} - ${text} [ ${
+                  record.arrayType
+                } - ${record.arrayModel.description} ( ${
+                  record.arrayModel.key
+                } ) ]`}</div>
+                <ul style={{ margin: 0 }}>
+                  {record.arrayFields.map(({ key, type, description }) => (
+                    <li key={key}>
+                      {type} - {key} ({description})
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          } else {
+            return `${record["x-message"] || ""} - ${text} [ ${
+              record.arrayType
+            } ]`;
+          }
         }
         return `${record["x-message"] || ""} - ${text}`;
       },
@@ -340,7 +351,6 @@ export default function Definition({ models, model, dispatch }) {
         models={models}
         model={model}
         fields={fields}
-        field={{}}
       >
         <Button
           style={{

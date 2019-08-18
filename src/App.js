@@ -6,6 +6,7 @@ import "antd/dist/antd.css";
 
 import GeneralInfo from "./components/generalInfo";
 import Definitions from "./components/definitions";
+import GeneralInfoEdit from "./components/forms/generalInfoEdit";
 
 import {
   Layout,
@@ -114,7 +115,15 @@ function App() {
                 style={{ marginBottom: 24, textAlign: "center" }}
               />
               <Collapse defaultActiveKey={["definitions"]}>
-                <Panel header="General Info" key="info">
+                <Panel
+                  header="General Info"
+                  key="info"
+                  extra={
+                    <GeneralInfoEdit state={state} dispatch={dispatch}>
+                      <Icon type="edit" />
+                    </GeneralInfoEdit>
+                  }
+                >
                   <GeneralInfo state={state} dispatch={dispatch} />
                 </Panel>
                 <Panel header="Definitions" key="definitions">

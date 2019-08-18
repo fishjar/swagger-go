@@ -1,10 +1,26 @@
 import React, { Fragment, useState, useEffect } from "react";
-import SecurityAddModal from "./securityAddModal";
+// import SecurityAddModal from "./securityAddModal";
 import { formItemLayout } from "../config";
-import { Form, Input, Checkbox, Card, Icon, Button, Radio, Modal } from "antd";
+import {
+  Form,
+  Input,
+  Checkbox,
+  Card,
+  Icon,
+  Button,
+  Radio,
+  Modal,
+  Table,
+} from "antd";
 const CheckboxGroup = Checkbox.Group;
 
 export default function GeneralInfo({ state, dispatch }) {
+  const securityDefinitions = Object.entries(
+    (state && state.securityDefinitions) || {}
+  ).map(([key, values]) => ({
+    ...values,
+    key,
+  }));
   const [modalVisible, setModalVisible] = useState(false);
 
   function handleInputChange(e) {
@@ -81,187 +97,61 @@ export default function GeneralInfo({ state, dispatch }) {
   return (
     <Fragment>
       <Form {...formItemLayout}>
-        <Form.Item label="swagger">
-          <Input
-            name="swagger"
-            placeholder="2.0"
-            value={state.swagger}
-            disabled
-          />
-        </Form.Item>
-        <Form.Item label="info.title">
-          <Input
-            name="title"
-            placeholder="Swagger Petstore"
-            value={state.info.title}
-            onChange={handleInputInfoChange}
-          />
-        </Form.Item>
-        <Form.Item label="info.version">
-          <Input
-            name="version"
-            placeholder="0.1.0"
-            value={state.info.version}
-            onChange={handleInputInfoChange}
-          />
-        </Form.Item>
-        <Form.Item label="info.description">
-          <Input
-            name="description"
-            placeholder="0.1.0"
-            value={state.info.description}
-            onChange={handleInputInfoChange}
-          />
-        </Form.Item>
+        <Form.Item label="swagger">{state.swagger}</Form.Item>
+        <Form.Item label="info.title">{state.info.title}</Form.Item>
+        <Form.Item label="info.version">{state.info.version}</Form.Item>
+        <Form.Item label="info.description">{state.info.description}</Form.Item>
         <Form.Item label="schemes">
           <CheckboxGroup
             options={["http", "https"]}
             value={state.schemes}
-            onChange={checkedList => {
-              dispatch({
-                type: "DATA_UPDATE",
-                payload: { schemes: checkedList },
-              });
-            }}
+            disabled
           />
         </Form.Item>
-        <Form.Item label="host">
-          <Input
-            name="host"
-            placeholder="localhost:3000"
-            value={state.host}
-            onChange={handleInputChange}
-          />
-        </Form.Item>
-        <Form.Item label="basePath">
-          <Input
-            name="basePath"
-            placeholder="/api"
-            value={state.basePath}
-            onChange={handleInputChange}
-          />
-        </Form.Item>
+        <Form.Item label="host">{state.host}</Form.Item>
+        <Form.Item label="basePath">{state.basePath}</Form.Item>
         <Form.Item label="consumes">
           <CheckboxGroup
             options={["application/json", "application/xml"]}
             value={state.consumes}
-            onChange={checkedList => {
-              dispatch({
-                type: "DATA_UPDATE",
-                payload: { consumes: checkedList },
-              });
-            }}
+            disabled
           />
         </Form.Item>
         <Form.Item label="produces">
           <CheckboxGroup
             options={["application/json", "application/xml"]}
             value={state.produces}
-            onChange={checkedList => {
-              dispatch({
-                type: "DATA_UPDATE",
-                payload: { produces: checkedList },
-              });
-            }}
+            disabled
           />
         </Form.Item>
         <Form.Item label="securityDefinitions">
-          {Object.keys(state.securityDefinitions).map(key => (
-            <Card key={key} style={{ marginBottom: 16, position: "relative" }}>
-              <Form.Item {...formItemLayout} label="security">
-                {key}
-              </Form.Item>
-              <Form.Item {...formItemLayout} label="type">
-                <Radio.Group
-                  onChange={e => {
-                    handleSecurityType(key, e.target.value);
-                  }}
-                  value={state.securityDefinitions[key].type}
-                >
-                  <Radio value={"basic"}>basic</Radio>
-                  <Radio value={"apiKey"}>apiKey</Radio>
-                  <Radio value={"oauth2"} disabled>
-                    oauth2
-                  </Radio>
-                </Radio.Group>
-              </Form.Item>
-              {state.securityDefinitions[key].type === "apiKey" && (
-                <Fragment>
-                  <Form.Item {...formItemLayout} label="name">
-                    <Input
-                      name="name"
-                      placeholder="Authorization"
-                      value={state.securityDefinitions[key].name}
-                      onChange={e => {
-                        handleSecurityChange(
-                          key,
-                          e.target.name,
-                          e.target.value
-                        );
-                      }}
-                    />
-                  </Form.Item>
-                  <Form.Item {...formItemLayout} label="in">
-                    <Radio.Group
-                      name="in"
-                      onChange={e => {
-                        handleSecurityChange(
-                          key,
-                          e.target.name,
-                          e.target.value
-                        );
-                      }}
-                      value={state.securityDefinitions[key].in}
-                    >
-                      <Radio value={"header"}>header</Radio>
-                      <Radio value={"query"}>query</Radio>
-                    </Radio.Group>
-                  </Form.Item>
-                  <Form.Item {...formItemLayout} label="description">
-                    <Input
-                      name="description"
-                      placeholder="Authorization: Bearer {token}"
-                      value={state.securityDefinitions[key].description}
-                      onChange={e => {
-                        handleSecurityChange(
-                          key,
-                          e.target.name,
-                          e.target.value
-                        );
-                      }}
-                    />
-                  </Form.Item>
-                </Fragment>
-              )}
-
-              <Icon
-                className="dynamic-delete-button"
-                type="minus-circle-o"
-                onClick={() => {
-                  handleRemoveSecurity(key);
-                }}
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  right: -20,
-                }}
-              />
-            </Card>
-          ))}
-          <Button
-            type="dashed"
-            style={{ width: "100%" }}
-            onClick={() => {
-              setModalVisible(true);
-            }}
-          >
-            <Icon type="plus" /> Add field
-          </Button>
-          <SecurityAddModal
-            state={state}
-            dispatch={dispatch}
-            visible={modalVisible}
-            setModalVisible={setModalVisible}
+          <Table
+            columns={[
+              {
+                title: "security",
+                dataIndex: "key",
+              },
+              {
+                title: "type",
+                dataIndex: "type",
+              },
+              {
+                title: "in",
+                dataIndex: "in",
+              },
+              {
+                title: "name",
+                dataIndex: "name",
+              },
+              {
+                title: "description",
+                dataIndex: "description",
+              },
+            ]}
+            dataSource={securityDefinitions}
+            size="small"
+            pagination={false}
+            bordered
           />
         </Form.Item>
       </Form>
