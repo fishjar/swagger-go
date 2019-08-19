@@ -251,6 +251,44 @@ function FieldEdit({
     callback();
   }
 
+  function handleTypeChange(value) {
+    // setFieldsValue({
+    //   format: undefined,
+    // });
+    switch (value) {
+      case "integer":
+        setFieldsValue({
+          format: "int32",
+        });
+        break;
+      case "number":
+        setFieldsValue({
+          format: "float",
+        });
+        break;
+      case "string":
+        setFieldsValue({
+          format: "string",
+        });
+        break;
+      case "object":
+        setFieldsValue({
+          format: "object",
+        });
+        break;
+      case "array":
+        setFieldsValue({
+          format: "array",
+        });
+        break;
+      case "boolean":
+        setFieldsValue({
+          format: "boolean",
+        });
+        break;
+    }
+  }
+
   /**
    * 枚举项目校验
    * @param {*} rule
@@ -466,11 +504,7 @@ function FieldEdit({
                     filterOption={(input, option) =>
                       option.key.toLowerCase().indexOf(input.toLowerCase()) >= 0
                     }
-                    onChange={() => {
-                      setFieldsValue({
-                        format: undefined,
-                      });
-                    }}
+                    onChange={handleTypeChange}
                   >
                     {standDataTypes.map(item => (
                       <Option value={item} key={item}>
@@ -518,7 +552,7 @@ function FieldEdit({
               <Form.Item
                 label="是否枚举"
                 required
-                extra="仅当字段格式为[int4, string, char]时支持枚举"
+                extra="仅当字段格式为[int4, int32, string, char]时支持枚举"
               >
                 {getFieldDecorator("isEnum", {
                   initialValue: field.isEnum,
@@ -528,7 +562,7 @@ function FieldEdit({
                     checkedChildren="是"
                     unCheckedChildren="否"
                     disabled={
-                      !["int4", "string", "char"].includes(
+                      !["int4", "int32", "string", "char"].includes(
                         getFieldValue("format")
                       )
                     }
@@ -577,7 +611,7 @@ function FieldEdit({
                 </Form.Item>
               )}
 
-              {getFieldValue("format") === "object" && (
+              {getFieldValue("type") === "object" && (
                 <Fragment>
                   <Form.Item label="快速填充数据">
                     <Select
@@ -613,7 +647,7 @@ function FieldEdit({
                 </Fragment>
               )}
 
-              {getFieldValue("format") === "array" && (
+              {getFieldValue("type") === "array" && (
                 <Fragment>
                   <Form.Item label="数组类型">
                     {getFieldDecorator("arrayType", {

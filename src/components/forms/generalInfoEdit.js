@@ -44,14 +44,6 @@ function GeneralInfoEdit({ children, title = "编辑", dispatch, state, form }) 
     resetFields,
     setFieldsValue,
   } = form;
-  const [securityDefinitions, setSecurityDefinitions] = useState(
-    Object.entries((state && state.securityDefinitions) || {}).map(
-      ([key, values]) => ({
-        ...values,
-        key,
-      })
-    )
-  );
 
   /**
    * 设置state hooks
@@ -79,14 +71,6 @@ function GeneralInfoEdit({ children, title = "编辑", dispatch, state, form }) 
    */
   function handleReset() {
     resetFields();
-    setSecurityDefinitions(
-      Object.entries((state && state.securityDefinitions) || {}).map(
-        ([key, values]) => ({
-          ...values,
-          key,
-        })
-      )
-    );
   }
 
   /**
@@ -96,45 +80,19 @@ function GeneralInfoEdit({ children, title = "编辑", dispatch, state, form }) 
     e.preventDefault();
     form.validateFieldsAndScroll((err, values) => {
       if (err) {
-        // message.error("表单填写有问题？");
         return;
       }
       console.log(values);
-      // updateData(values);
-      // setVisible(false);
+      updateData(values);
+      setVisible(false);
     });
   }
 
-  function updateData({ key, ...newData }) {
-    // const { key: _, ...oldData } = model;
-    // dispatch({
-    //   type: "MODEL_UPDATE",
-    //   payload: {
-    //     [key]: {
-    //       ...oldData,
-    //       ...newData,
-    //     },
-    //   },
-    // });
-  }
-
-  // function handleModelKeyValidator(rule, value, callback) {
-  //   if (models.map(item => item.key).includes(value) && formMode === "create") {
-  //     callback("模型名称重复");
-  //   }
-  //   callback();
-  // }
-
-  function handleRemoveSecurity(index) {
-    // const newData = [...securityDefinitions];
-    const newData = [...getFieldValue("securityDefinitions")];
-    newData.splice(index, 1);
-    setSecurityDefinitions(newData);
-  }
-
-  function handleAddSecurity() {
-    const newData = [...getFieldValue("securityDefinitions"), {}];
-    setSecurityDefinitions(newData);
+  function updateData(values) {
+    dispatch({
+      type: "DATA_UPDATE",
+      payload: values,
+    });
   }
 
   return (
@@ -170,7 +128,7 @@ function GeneralInfoEdit({ children, title = "编辑", dispatch, state, form }) 
             })(<Input disabled />)}
           </Form.Item>
           <Form.Item label="文档标题" hasFeedback>
-            {getFieldDecorator("into.title", {
+            {getFieldDecorator("info.title", {
               initialValue: state.info.title,
               rules: [
                 {
@@ -181,7 +139,7 @@ function GeneralInfoEdit({ children, title = "编辑", dispatch, state, form }) 
             })(<Input />)}
           </Form.Item>
           <Form.Item label="文档版本" hasFeedback>
-            {getFieldDecorator("into.version", {
+            {getFieldDecorator("info.version", {
               initialValue: state.info.version,
               rules: [
                 {
@@ -192,7 +150,7 @@ function GeneralInfoEdit({ children, title = "编辑", dispatch, state, form }) 
             })(<Input />)}
           </Form.Item>
           <Form.Item label="文档描述" hasFeedback>
-            {getFieldDecorator("into.description", {
+            {getFieldDecorator("info.description", {
               initialValue: state.info.description,
               rules: [
                 {
@@ -264,106 +222,6 @@ function GeneralInfoEdit({ children, title = "编辑", dispatch, state, form }) 
                 options={["application/json", "application/xml"]}
               />
             )}
-          </Form.Item>
-          <Form.Item label="security">
-            {securityDefinitions.map((item, index) => (
-              <Card
-                key={index}
-                style={{ marginBottom: 16, position: "relative" }}
-              >
-                <Form.Item {...formItemLayout} label="security">
-                  {getFieldDecorator(`securityDefinitions[${index}].key`, {
-                    initialValue: item.key,
-                    rules: [
-                      {
-                        required: true,
-                        message: "请填写!",
-                      },
-                    ],
-                  })(<Input />)}
-                </Form.Item>
-                <Form.Item {...formItemLayout} label="type">
-                  {getFieldDecorator(`securityDefinitions[${index}].type`, {
-                    initialValue: item.type,
-                    rules: [
-                      {
-                        required: true,
-                        message: "请选择!",
-                      },
-                    ],
-                  })(
-                    <Radio.Group>
-                      <Radio value={"basic"}>basic</Radio>
-                      <Radio value={"apiKey"}>apiKey</Radio>
-                      <Radio value={"oauth2"} disabled>
-                        oauth2
-                      </Radio>
-                    </Radio.Group>
-                  )}
-                </Form.Item>
-
-                {getFieldValue(`securityDefinitions[${index}].type`) ===
-                  "apiKey" && (
-                  <Fragment>
-                    <Form.Item {...formItemLayout} label="name">
-                      {getFieldDecorator(`securityDefinitions[${index}].name`, {
-                        initialValue: item.name,
-                        rules: [
-                          {
-                            required: true,
-                            message: "请填写!",
-                          },
-                        ],
-                      })(<Input />)}
-                    </Form.Item>
-                    <Form.Item {...formItemLayout} label="in">
-                      {getFieldDecorator(`securityDefinitions[${index}].in`, {
-                        initialValue: item.in,
-                        rules: [
-                          {
-                            required: true,
-                            message: "请选择!",
-                          },
-                        ],
-                      })(
-                        <Radio.Group>
-                          <Radio value={"header"}>header</Radio>
-                          <Radio value={"query"}>query</Radio>
-                        </Radio.Group>
-                      )}
-                    </Form.Item>
-                    <Form.Item {...formItemLayout} label="description">
-                      {getFieldDecorator(
-                        `securityDefinitions[${index}].description`,
-                        {
-                          initialValue: item.description,
-                        }
-                      )(<Input />)}
-                    </Form.Item>
-                  </Fragment>
-                )}
-
-                <Icon
-                  className="dynamic-delete-button"
-                  type="minus-circle-o"
-                  onClick={() => {
-                    handleRemoveSecurity(index);
-                  }}
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    right: -20,
-                  }}
-                />
-              </Card>
-            ))}
-            <Button
-              type="dashed"
-              style={{ width: "100%" }}
-              onClick={handleAddSecurity}
-            >
-              <Icon type="plus" /> Add field
-            </Button>
           </Form.Item>
         </Form>
         <div

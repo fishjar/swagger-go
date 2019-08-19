@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-
-import { useData } from "./hooks";
 import "./App.css";
 import "antd/dist/antd.css";
 
+import { useData } from "./hooks";
 import GeneralInfo from "./components/generalInfo";
 import Definitions from "./components/definitions";
+import SecurityDefinitions from "./components/securityDefinitions";
 import GeneralInfoEdit from "./components/forms/generalInfoEdit";
 
 import {
@@ -114,7 +114,7 @@ function App() {
                 closable
                 style={{ marginBottom: 24, textAlign: "center" }}
               />
-              <Collapse defaultActiveKey={["definitions"]}>
+              <Collapse defaultActiveKey={["info"]}>
                 <Panel
                   header="General Info"
                   key="info"
@@ -126,11 +126,14 @@ function App() {
                 >
                   <GeneralInfo state={state} dispatch={dispatch} />
                 </Panel>
+                <Panel header="SecurityDefinitions" key="security">
+                  <SecurityDefinitions state={state} dispatch={dispatch} />
+                </Panel>
                 <Panel header="Definitions" key="definitions">
                   <Definitions state={state} dispatch={dispatch} />
                 </Panel>
                 <Panel header="Paths" key="paths">
-                  <p>This is panel header 1</p>
+                  <p>开发中...</p>
                 </Panel>
               </Collapse>
             </div>

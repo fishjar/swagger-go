@@ -48,7 +48,7 @@ export default function Definitions({ state, dispatch }) {
 
   return (
     <Fragment>
-      <Collapse defaultActiveKey={["Foo"]}>
+      <Collapse defaultActiveKey={[]}>
         {models.map(model => (
           <Panel
             header={

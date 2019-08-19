@@ -15,85 +15,6 @@ import {
 const CheckboxGroup = Checkbox.Group;
 
 export default function GeneralInfo({ state, dispatch }) {
-  const securityDefinitions = Object.entries(
-    (state && state.securityDefinitions) || {}
-  ).map(([key, values]) => ({
-    ...values,
-    key,
-  }));
-  const [modalVisible, setModalVisible] = useState(false);
-
-  function handleInputChange(e) {
-    const { name, value } = e.target;
-    dispatch({
-      type: "DATA_UPDATE",
-      payload: { [name]: value },
-    });
-  }
-
-  function handleInputInfoChange(e) {
-    const { name, value } = e.target;
-    dispatch({
-      type: "DATA_UPDATE",
-      payload: { info: { ...state.info, [name]: value } },
-    });
-  }
-
-  function handleSecurityType(securityKey, securityType) {
-    if (securityType === "basic") {
-      dispatch({
-        type: "DATA_UPDATE",
-        payload: {
-          securityDefinitions: {
-            ...state.securityDefinitions,
-            [securityKey]: { type: securityType },
-          },
-        },
-      });
-    } else if (securityType === "apiKey") {
-      dispatch({
-        type: "DATA_UPDATE",
-        payload: {
-          securityDefinitions: {
-            ...state.securityDefinitions,
-            [securityKey]: {
-              type: securityType,
-              in: "header",
-              name: "X-Authorization",
-              description: "X-Authorization: Bearer {token}",
-            },
-          },
-        },
-      });
-    }
-  }
-
-  function handleSecurityChange(key, name, value) {
-    dispatch({
-      type: "DATA_UPDATE",
-      payload: {
-        securityDefinitions: {
-          ...state.securityDefinitions,
-          [key]: {
-            ...state.securityDefinitions[key],
-            [name]: value,
-          },
-        },
-      },
-    });
-  }
-
-  function handleRemoveSecurity(key) {
-    const newSecurityDefinitions = { ...state.securityDefinitions };
-    delete newSecurityDefinitions[key];
-    dispatch({
-      type: "DATA_UPDATE",
-      payload: {
-        securityDefinitions: newSecurityDefinitions,
-      },
-    });
-  }
-
   return (
     <Fragment>
       <Form {...formItemLayout}>
@@ -122,36 +43,6 @@ export default function GeneralInfo({ state, dispatch }) {
             options={["application/json", "application/xml"]}
             value={state.produces}
             disabled
-          />
-        </Form.Item>
-        <Form.Item label="securityDefinitions">
-          <Table
-            columns={[
-              {
-                title: "security",
-                dataIndex: "key",
-              },
-              {
-                title: "type",
-                dataIndex: "type",
-              },
-              {
-                title: "in",
-                dataIndex: "in",
-              },
-              {
-                title: "name",
-                dataIndex: "name",
-              },
-              {
-                title: "description",
-                dataIndex: "description",
-              },
-            ]}
-            dataSource={securityDefinitions}
-            size="small"
-            pagination={false}
-            bordered
           />
         </Form.Item>
       </Form>

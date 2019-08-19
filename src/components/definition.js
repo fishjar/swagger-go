@@ -153,7 +153,7 @@ export default function Definition({ models, model, dispatch }) {
           <Badge
             status={record.isRequired ? "success" : "default"}
             text={
-              `${record.type} ( ${text} )` +
+              `${record.type} ( ${text || ""} )` +
               `${record.isEnum ? " ( enum )" : ""}`
             }
           />
@@ -231,7 +231,7 @@ export default function Definition({ models, model, dispatch }) {
             } ]`;
           }
         }
-        return `${record["x-message"] || ""} - ${text}`;
+        return `${record["x-message"] || ""} - ${text || ""}`;
       },
     },
     {
