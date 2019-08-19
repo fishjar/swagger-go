@@ -1,5 +1,8 @@
-export default (definitionsToPaths = definitions => {
+export default function definitionsToPaths(definitions) {
   const paths = {};
+  if (!definitions) {
+    return paths;
+  }
   Object.entries(definitions)
     .filter(([_, model]) => model["x-isModel"])
     .forEach(([modelKey, model], index) => {
@@ -8,7 +11,7 @@ export default (definitionsToPaths = definitions => {
       const modelName = model["description"] || _name;
       const apis = model["x-apis"] || [];
 
-      console.log(`模型${index + 1}: ${modelName}`);
+      // console.log(`模型${index + 1}: ${modelName}`);
 
       // 根据条件查找单条
       if (apis.includes("findOne")) {
@@ -323,4 +326,4 @@ export default (definitionsToPaths = definitions => {
     });
 
   return paths;
-});
+}

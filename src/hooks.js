@@ -7,6 +7,7 @@ import {
   writeLocalStorage,
   readLocalStorage,
 } from "./utils";
+import definitionsToPaths from "./utils/definitionsToPaths";
 
 /**
  * 初始化state
@@ -65,6 +66,21 @@ export const useData = () => {
   const [showCode, setShowCode] = useState(false);
 
   const [state, dispatch] = useReducer(dataReducer, "state", init);
+
+  useEffect(() => {
+    if (page === "preview") {
+      const apiPaths = definitionsToPaths(state && state.definitions);
+      dispatch({
+        type: "DATA_UPDATE",
+        payload: {
+          paths: {
+            ...state.paths,
+            ...apiPaths,
+          },
+        },
+      });
+    }
+  }, [page]);
 
   useEffect(() => {
     const loadFile = async () => {
