@@ -83,7 +83,6 @@ function ModelEdit({
     e.preventDefault();
     form.validateFieldsAndScroll((err, values) => {
       if (err) {
-        message.error("表单填写有问题？");
         return;
       }
       console.log(values);
@@ -193,11 +192,13 @@ function ModelEdit({
                   initialValue: model["x-apis"],
                 })(
                   <Checkbox.Group>
-                    {apiOptions.map(({ key, method, notice, path }) => (
+                    {apiOptions.map(({ key, method, notice, path, plural }) => (
                       <Row key={key}>
-                        <Checkbox value={key}>{`${method}("/${(
-                          getFieldValue("key") || ""
-                        ).toLowerCase()}${path}") ${notice}(${key})`}</Checkbox>
+                        <Checkbox value={key}>{`${method}("/${
+                          plural
+                            ? (getFieldValue("x-plural") || "").toLowerCase()
+                            : (getFieldValue("key") || "").toLowerCase()
+                        }${path}") ${notice}(${key})`}</Checkbox>
                       </Row>
                     ))}
                   </Checkbox.Group>

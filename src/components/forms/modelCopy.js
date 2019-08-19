@@ -83,7 +83,6 @@ function ModelCopy({
     e.preventDefault();
     form.validateFieldsAndScroll((err, values) => {
       if (err) {
-        message.error("表单填写有问题？");
         return;
       }
       console.log(values);
@@ -157,31 +156,49 @@ function ModelCopy({
         }}
       >
         <Form {...formItemLayout} onSubmit={handleSubmit}>
-          <Form.Item label="旧模型名">{model.key}</Form.Item>
-          <Form.Item label="新模型名" hasFeedback>
-            {getFieldDecorator("key", {
-              rules: [
-                {
-                  required: true,
-                  message: "请填写!",
-                },
-                {
-                  validator: handleModelKeyValidator,
-                },
-              ],
-            })(<Input disabled={formMode === "edit"} />)}
+          <Form.Item label="模型名">
+            <Row gutter={8}>
+              <Col span={11}>
+                <Input value={model.key} disabled />
+              </Col>
+              <Col span={2} style={{ textAlign: "center" }}>
+                <Icon type="arrow-right" />
+              </Col>
+              <Col span={11}>
+                {getFieldDecorator("key", {
+                  rules: [
+                    {
+                      required: true,
+                      message: "请填写!",
+                    },
+                    {
+                      validator: handleModelKeyValidator,
+                    },
+                  ],
+                })(<Input placeholder="请填写新模型名" />)}
+              </Col>
+            </Row>
           </Form.Item>
 
-          <Form.Item label="旧描述">{model.description}</Form.Item>
-          <Form.Item label="新描述" hasFeedback>
-            {getFieldDecorator("description", {
-              rules: [
-                {
-                  required: true,
-                  message: "请填写!",
-                },
-              ],
-            })(<Input />)}
+          <Form.Item label="描述">
+            <Row gutter={8}>
+              <Col span={11}>
+                <Input value={model.description} disabled />
+              </Col>
+              <Col span={2} style={{ textAlign: "center" }}>
+                <Icon type="arrow-right" />
+              </Col>
+              <Col span={11}>
+                {getFieldDecorator("description", {
+                  rules: [
+                    {
+                      required: true,
+                      message: "请填写!",
+                    },
+                  ],
+                })(<Input placeholder="请填写新描述" />)}
+              </Col>
+            </Row>
           </Form.Item>
 
           <Form.Item label="是否实体">
@@ -195,34 +212,52 @@ function ModelCopy({
 
           {model["x-isModel"] && (
             <Fragment>
-              <Form.Item label="旧复数形式">{model["x-plural"]}</Form.Item>
-              <Form.Item label="新复数形式" hasFeedback>
-                {getFieldDecorator("x-plural", {
-                  rules: [
-                    {
-                      required: true,
-                      message: "请填写!",
-                    },
-                    {
-                      validator: handlePluralValidator,
-                    },
-                  ],
-                })(<Input />)}
+              <Form.Item label="复数形式">
+                <Row gutter={8}>
+                  <Col span={11}>
+                    <Input value={model["x-plural"]} disabled />
+                  </Col>
+                  <Col span={2} style={{ textAlign: "center" }}>
+                    <Icon type="arrow-right" />
+                  </Col>
+                  <Col span={11}>
+                    {getFieldDecorator("x-plural", {
+                      rules: [
+                        {
+                          required: true,
+                          message: "请填写!",
+                        },
+                        {
+                          validator: handlePluralValidator,
+                        },
+                      ],
+                    })(<Input placeholder="请填写新复数形式" />)}
+                  </Col>
+                </Row>
               </Form.Item>
 
-              <Form.Item label="旧表名">{model["x-tableName"]}</Form.Item>
-              <Form.Item label="新表名" hasFeedback>
-                {getFieldDecorator("x-tableName", {
-                  rules: [
-                    {
-                      required: true,
-                      message: "请填写!",
-                    },
-                    {
-                      validator: handleTableNameValidator,
-                    },
-                  ],
-                })(<Input />)}
+              <Form.Item label="表名">
+                <Row gutter={8}>
+                  <Col span={11}>
+                    <Input value={model["x-tableName"]} disabled />
+                  </Col>
+                  <Col span={2} style={{ textAlign: "center" }}>
+                    <Icon type="arrow-right" />
+                  </Col>
+                  <Col span={11}>
+                    {getFieldDecorator("x-tableName", {
+                      rules: [
+                        {
+                          required: true,
+                          message: "请填写!",
+                        },
+                        {
+                          validator: handleTableNameValidator,
+                        },
+                      ],
+                    })(<Input placeholder="请填写新表名" />)}
+                  </Col>
+                </Row>
               </Form.Item>
             </Fragment>
           )}

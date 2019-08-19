@@ -126,7 +126,6 @@ function FieldEdit({
     e.preventDefault();
     form.validateFieldsAndScroll((err, values) => {
       if (err) {
-        message.error("表单填写有问题？");
         return;
       }
       console.log(values);

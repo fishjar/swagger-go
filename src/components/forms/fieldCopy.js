@@ -1,6 +1,11 @@
 import React, { Fragment, useState, useEffect } from "react";
 import moment from "moment";
-import { formItemLayout, dataFormats, numTypes, standDataTypes } from "../../config";
+import {
+  formItemLayout,
+  dataFormats,
+  numTypes,
+  standDataTypes,
+} from "../../config";
 import { getModelProps, deepClone } from "../../utils";
 import {
   Form,
@@ -21,6 +26,8 @@ import {
   InputNumber,
   DatePicker,
   message,
+  Row,
+  Col,
 } from "antd";
 const { Panel } = Collapse;
 const { Option } = Select;
@@ -75,7 +82,6 @@ function FieldCopy({
     e.preventDefault();
     form.validateFieldsAndScroll((err, values) => {
       if (err) {
-        message.error("表单填写有问题？");
         return;
       }
       console.log(values);
@@ -90,8 +96,7 @@ function FieldCopy({
     const { properties = {}, required = [], example = {} } = modelData;
 
     oldData.isRequired && required.push(key);
-    oldData.isExample &&
-      (example[key] = oldData.example || example[fieldKey]);
+    oldData.isExample && (example[key] = oldData.example || example[fieldKey]);
 
     const copyData = deepClone({
       ...oldData,
@@ -139,36 +144,57 @@ function FieldCopy({
         visible={visible}
       >
         <Form {...formItemLayout} onSubmit={handleSubmit}>
-          <Form.Item label="旧字段名">{field.key}</Form.Item>
-          <Form.Item label="新字段名" hasFeedback>
-            {getFieldDecorator("key", {
-              rules: [
-                {
-                  required: true,
-                  message: "请填写!",
-                },
-                {
-                  validator: handleFieldKeyValidator,
-                },
-              ],
-            })(<Input disabled={formMode === "edit"} />)}
+          <Form.Item label="字段名">
+            <Row gutter={8}>
+              <Col span={11}>
+                <Input value={field.key} disabled />
+              </Col>
+              <Col span={2} style={{ textAlign: "center" }}>
+                <Icon type="arrow-right" />
+              </Col>
+              <Col span={11}>
+                {getFieldDecorator("key", {
+                  rules: [
+                    {
+                      required: true,
+                      message: "请填写!",
+                    },
+                    {
+                      validator: handleFieldKeyValidator,
+                    },
+                  ],
+                })(<Input placeholder="请填写新字段名" />)}
+              </Col>
+            </Row>
           </Form.Item>
 
-          <Form.Item label="旧描述">
-            {field.isEnum ? field["x-description"] : field.description}
-          </Form.Item>
-          <Form.Item label="新描述" hasFeedback>
-            {getFieldDecorator(
-              field.isEnum ? "x-description" : "description",
-              {
-                rules: [
+          <Form.Item label="描述">
+            <Row gutter={8}>
+              <Col span={11}>
+                <Input
+                  value={
+                    field.isEnum ? field["x-description"] : field.description
+                  }
+                  disabled
+                />
+              </Col>
+              <Col span={2} style={{ textAlign: "center" }}>
+                <Icon type="arrow-right" />
+              </Col>
+              <Col span={11}>
+                {getFieldDecorator(
+                  field.isEnum ? "x-description" : "description",
                   {
-                    required: true,
-                    message: "请填写!",
-                  },
-                ],
-              }
-            )(<Input />)}
+                    rules: [
+                      {
+                        required: true,
+                        message: "请填写!",
+                      },
+                    ],
+                  }
+                )(<Input placeholder="请填写新描述" />)}
+              </Col>
+            </Row>
           </Form.Item>
         </Form>
         <div

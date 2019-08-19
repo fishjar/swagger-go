@@ -36,7 +36,7 @@ export default function Definitions({ state, dispatch }) {
 
   /**
    * 删除模型
-   * @param {String} modelKey 
+   * @param {String} modelKey
    */
   function handleModelRemove(modelKey) {
     const { [modelKey]: _, ...payload } = state.definitions;
@@ -63,21 +63,27 @@ export default function Definitions({ state, dispatch }) {
               <span>
                 {model["x-isModel"] && (
                   <span style={{ marginRight: 12 }}>
-                    {apiOptions.map(({ key, method, notice, path }, index) => (
-                      <Badge
-                        key={key}
-                        count={index}
-                        showZero
-                        style={{
-                          backgroundColor: "#fff",
-                          color: (model["x-apis"] || []).includes(key)
-                            ? "#52c41a"
-                            : "#999",
-                          boxShadow: "0 0 0 1px #d9d9d9 inset",
-                        }}
-                        title={`${method}("/${model.key.toLowerCase()}${path}") ${notice}(${key})`}
-                      />
-                    ))}
+                    {apiOptions.map(
+                      ({ key, method, notice, path, plural }, index) => (
+                        <Badge
+                          key={key}
+                          count={index}
+                          showZero
+                          style={{
+                            backgroundColor: "#fff",
+                            color: (model["x-apis"] || []).includes(key)
+                              ? "#52c41a"
+                              : "#999",
+                            boxShadow: "0 0 0 1px #d9d9d9 inset",
+                          }}
+                          title={`${method}("/${
+                            plural
+                              ? (model["x-plural"] || "").toLowerCase()
+                              : model.key.toLowerCase()
+                          }${path}") ${notice}(${key})`}
+                        />
+                      )
+                    )}
                   </span>
                 )}
 
@@ -92,7 +98,7 @@ export default function Definitions({ state, dispatch }) {
                 </ModelEdit>
 
                 <ModelCopy
-                  title="编辑模型"
+                  title="复制模型"
                   formMode="copy"
                   models={models}
                   model={model}

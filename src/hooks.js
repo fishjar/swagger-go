@@ -61,6 +61,8 @@ export const useData = () => {
   const [isLoading, setLoading] = useState(false);
   const [isSaving, setSaving] = useState(false);
   const [isResetting, setResetting] = useState(false);
+  const [page, setPage] = useState("edit");
+  const [showCode, setShowCode] = useState(false);
 
   const [state, dispatch] = useReducer(dataReducer, "state", init);
 
@@ -129,6 +131,10 @@ export const useData = () => {
     setLoading,
     setSaving,
     setResetting,
+    page,
+    setPage,
+    showCode,
+    setShowCode,
     dispatch,
   };
 };
