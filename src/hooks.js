@@ -148,20 +148,28 @@ export const useData = () => {
         writeLocalStorage("state", state);
         message.success("写入缓存成功");
 
+        const history = readLocalStorage("history");
         if (state === null) {
           writeLocalStorage("history", [null]);
           setCurrent(0);
+          setUndo(false);
+          setRedo(false);
+        } else if (isUndo) {
+          setCurrent(current - 1);
+          setUndo(false);
+        } else if (isRedo) {
+          setCurrent(current + 1);
+          setRedo(false);
         } else {
-          const history = readLocalStorage("history");
-          if (current === history.length - 1) {
-            const lastHistory = history[history.length - 1];
-            if (JSON.stringify(lastHistory) !== JSON.stringify(state)) {
-              writeLocalStorage("history", [...history, state]);
-              setCurrent(history.length);
-            }
+          const lastHistory = history[current];
+          if (JSON.stringify(lastHistory) !== JSON.stringify(state)) {
+            writeLocalStorage("history", [
+              ...history.slice(0, current + 1),
+              state,
+            ]);
+            setCurrent(current + 1);
           }
         }
-
       } catch (err) {
         message.error(err.message || "写入缓存失败");
       }
@@ -173,7 +181,6 @@ export const useData = () => {
     if (isUndo) {
       const history = readLocalStorage("history");
       if (current > 0) {
-        setCurrent(current - 1);
         if (history[current - 1] === null) {
           dispatch({ type: "DATA_INIT" });
         } else {
@@ -182,8 +189,9 @@ export const useData = () => {
             payload: history[current - 1],
           });
         }
+      } else {
+        setUndo(false);
       }
-      setUndo(false);
     }
   }, [isUndo]);
 
@@ -191,13 +199,13 @@ export const useData = () => {
     if (isRedo) {
       const history = readLocalStorage("history");
       if (current < history.length - 1) {
-        setCurrent(current + 1);
         dispatch({
           type: "DATA_RESET",
           payload: history[current + 1],
         });
+      } else {
+        setRedo(false);
       }
-      setRedo(false);
     }
   }, [isRedo]);
 
