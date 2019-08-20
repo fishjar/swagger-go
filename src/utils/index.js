@@ -207,7 +207,7 @@ export const writeLocalStorage = (key, data) => {
     localStorage.setItem(key, JSON.stringify(data));
     return;
   }
-  localStorage.setItem(key, data || "");
+  localStorage.setItem(key, data);
 };
 
 /**
@@ -219,9 +219,6 @@ export const readLocalStorage = key => {
     return null;
   }
   const data = localStorage.getItem(key);
-  if (!data) {
-    return null;
-  }
   try {
     return JSON.parse(data);
   } catch (err) {

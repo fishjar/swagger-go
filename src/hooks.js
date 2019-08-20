@@ -3,9 +3,9 @@ import { message } from "antd";
 import {
   openAndReadFile,
   saveAndWriteFile,
-  readDefaultData,
+  readDefaultData, // demo数据
   writeLocalStorage,
-  readLocalStorage,
+  readLocalStorage, // 缓存数据
 } from "./utils";
 import definitionsToPaths from "./utils/definitionsToPaths";
 
@@ -14,7 +14,8 @@ import definitionsToPaths from "./utils/definitionsToPaths";
  * @param {String} key
  */
 const init = key => {
-  return readLocalStorage(key);
+  const state = readLocalStorage(key);
+  return state;
 };
 
 /**
@@ -27,6 +28,14 @@ const dataReducer = (state, action) => {
   switch (action.type) {
     case "DATA_INIT":
       return null;
+    case "DATA_NEW":
+      return {
+        swagger: "2.0",
+        info: {},
+        securityDefinitions: {},
+        paths: {},
+        definitions: {},
+      };
     case "DATA_RESET":
       return {
         ...action.payload,
@@ -62,8 +71,14 @@ export const useData = () => {
   const [isLoading, setLoading] = useState(false);
   const [isSaving, setSaving] = useState(false);
   const [isResetting, setResetting] = useState(false);
+  const [isUndo, setUndo] = useState(false);
+  const [isRedo, setRedo] = useState(false);
   const [page, setPage] = useState("edit");
   const [showCode, setShowCode] = useState(false);
+  const [current, setCurrent] = useState(0);
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
+  const [isClose, setClose] = useState(false);
 
   const [state, dispatch] = useReducer(dataReducer, "state", init);
 
@@ -132,12 +147,80 @@ export const useData = () => {
         // await writeCache(state);
         writeLocalStorage("state", state);
         message.success("写入缓存成功");
+
+        if (state === null) {
+          writeLocalStorage("history", [null]);
+          setCurrent(0);
+        } else {
+          const history = readLocalStorage("history");
+          if (current === history.length - 1) {
+            const lastHistory = history[history.length - 1];
+            if (JSON.stringify(lastHistory) !== JSON.stringify(state)) {
+              writeLocalStorage("history", [...history, state]);
+              setCurrent(history.length);
+            }
+          }
+        }
+
       } catch (err) {
         message.error(err.message || "写入缓存失败");
       }
     };
     saveCache();
   }, [state]);
+
+  useEffect(() => {
+    if (isUndo) {
+      const history = readLocalStorage("history");
+      if (current > 0) {
+        setCurrent(current - 1);
+        if (history[current - 1] === null) {
+          dispatch({ type: "DATA_INIT" });
+        } else {
+          dispatch({
+            type: "DATA_RESET",
+            payload: history[current - 1],
+          });
+        }
+      }
+      setUndo(false);
+    }
+  }, [isUndo]);
+
+  useEffect(() => {
+    if (isRedo) {
+      const history = readLocalStorage("history");
+      if (current < history.length - 1) {
+        setCurrent(current + 1);
+        dispatch({
+          type: "DATA_RESET",
+          payload: history[current + 1],
+        });
+      }
+      setRedo(false);
+    }
+  }, [isRedo]);
+
+  useEffect(() => {
+    const history = readLocalStorage("history");
+    if (current > 0) {
+      setCanUndo(true);
+    } else {
+      setCanUndo(false);
+    }
+    if (current < history.length - 1) {
+      setCanRedo(true);
+    } else {
+      setCanRedo(false);
+    }
+  }, [current]);
+
+  useEffect(() => {
+    if (isClose) {
+      dispatch({ type: "DATA_INIT" });
+      setClose(false);
+    }
+  }, [isClose]);
 
   return {
     state,
@@ -152,5 +235,14 @@ export const useData = () => {
     showCode,
     setShowCode,
     dispatch,
+    isUndo,
+    setUndo,
+    isRedo,
+    setRedo,
+    canUndo,
+    canRedo,
+    isClose,
+    setClose,
+    current,
   };
 };

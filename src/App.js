@@ -22,6 +22,8 @@ import {
   Radio,
   Menu,
   Alert,
+  Row,
+  Col,
 } from "antd";
 
 const { Header, Content, Footer } = Layout;
@@ -43,11 +45,72 @@ function App() {
     showCode,
     setShowCode,
     dispatch,
+    isUndo,
+    setUndo,
+    isRedo,
+    setRedo,
+    canUndo,
+    canRedo,
+    isClose,
+    setClose,
+    current,
   } = useData();
   console.log(state);
+  console.log(current);
+
+  if (!state) {
+    return (
+      <div className="App" style={{ overflow: "hidden" }}>
+        <Row
+          type="flex"
+          justify="center"
+          align="middle"
+          gutter={24}
+          style={{ height: "100vh" }}
+        >
+          <Col>
+            <Button
+              type="dashed"
+              icon="plus"
+              style={{ width: 200, height: 100 }}
+              onClick={() => {
+                dispatch({ type: "DATA_NEW" });
+              }}
+            >
+              New
+            </Button>
+          </Col>
+          <Col>
+            <Button
+              type="dashed"
+              icon="edit"
+              style={{ width: 200, height: 100 }}
+              onClick={() => {
+                setResetting(true);
+              }}
+            >
+              Demo
+            </Button>
+          </Col>
+          <Col>
+            <Button
+              type="dashed"
+              icon="upload"
+              style={{ width: 200, height: 100 }}
+              onClick={() => {
+                setLoading(true);
+              }}
+            >
+              Import
+            </Button>
+          </Col>
+        </Row>
+      </div>
+    );
+  }
 
   return (
-    <div className="App">
+    <div className="App" style={{ overflow: "hidden" }}>
       <Layout className="layout">
         <Header style={{ position: "fixed", zIndex: 100, width: "100%" }}>
           <div className="header">
@@ -76,11 +139,29 @@ function App() {
                     marginRight: 16,
                   }}
                 >
-                  <Button icon="undo">Undo</Button>
-                  <Button icon="redo">Redo</Button>
+                  <Button
+                    icon="undo"
+                    loading={isUndo}
+                    disabled={isUndo || !canUndo}
+                    onClick={() => {
+                      setUndo(true);
+                    }}
+                  >
+                    Undo
+                  </Button>
+                  <Button
+                    icon="redo"
+                    loading={isRedo}
+                    disabled={isRedo || !canRedo}
+                    onClick={() => {
+                      setRedo(true);
+                    }}
+                  >
+                    Redo
+                  </Button>
                 </ButtonGroup>
                 <ButtonGroup>
-                  <Button
+                  {/* <Button
                     icon="upload"
                     loading={isLoading}
                     disabled={isLoading}
@@ -89,7 +170,7 @@ function App() {
                     }}
                   >
                     Import
-                  </Button>
+                  </Button> */}
                   <Button
                     icon="download"
                     loading={isSaving}
@@ -101,14 +182,13 @@ function App() {
                     Export
                   </Button>
                   <Button
-                    icon="rollback"
-                    loading={isResetting}
-                    disabled={isResetting}
+                    icon="close"
+                    loading={isClose}
                     onClick={() => {
-                      setResetting(true);
+                      setClose(true);
                     }}
                   >
-                    Reset
+                    Close
                   </Button>
                 </ButtonGroup>
               </div>
@@ -130,54 +210,50 @@ function App() {
           </div>
         </Header>
         <Content style={{ marginTop: 64 }}>
-          {state && (
-            <div>
-              {page === "edit" && (
-                <div style={{ background: "#fff", padding: "24px 50px" }}>
-                  <Alert
-                    message="仅支持2.0，未作3.0适配"
-                    type="warning"
-                    closable
-                    style={{ marginBottom: 24, textAlign: "center" }}
-                  />
-                  <Collapse defaultActiveKey={["info"]}>
-                    <Panel
-                      header="General Info"
-                      key="info"
-                      extra={
-                        <GeneralInfoEdit state={state} dispatch={dispatch}>
-                          <Icon type="edit" />
-                        </GeneralInfoEdit>
-                      }
-                    >
-                      <GeneralInfo state={state} dispatch={dispatch} />
-                    </Panel>
-                    <Panel header="SecurityDefinitions" key="security">
-                      <SecurityDefinitions state={state} dispatch={dispatch} />
-                    </Panel>
-                    <Panel header="Definitions" key="definitions">
-                      <Definitions state={state} dispatch={dispatch} />
-                    </Panel>
-                    <Panel header="Paths" key="paths">
-                      <p>开发中...</p>
-                    </Panel>
-                  </Collapse>
-                </div>
-              )}
-              {page === "preview" && (
-                <div
-                  style={{
-                    background: "#fff",
-                    padding: "24px 0",
-                  }}
+          {page === "edit" && (
+            <div style={{ background: "#fff", padding: "24px 50px" }}>
+              <Alert
+                message="仅支持2.0，未作3.0适配"
+                type="warning"
+                closable
+                style={{ marginBottom: 24, textAlign: "center" }}
+              />
+              <Collapse defaultActiveKey={["info"]}>
+                <Panel
+                  header="General Info"
+                  key="info"
+                  extra={
+                    <GeneralInfoEdit state={state} dispatch={dispatch}>
+                      <Icon type="edit" />
+                    </GeneralInfoEdit>
+                  }
                 >
-                  <Preview
-                    showCode={showCode}
-                    setShowCode={setShowCode}
-                    state={state}
-                  />
-                </div>
-              )}
+                  <GeneralInfo state={state} dispatch={dispatch} />
+                </Panel>
+                <Panel header="SecurityDefinitions" key="security">
+                  <SecurityDefinitions state={state} dispatch={dispatch} />
+                </Panel>
+                <Panel header="Definitions" key="definitions">
+                  <Definitions state={state} dispatch={dispatch} />
+                </Panel>
+                <Panel header="Paths" key="paths">
+                  <p>开发中...</p>
+                </Panel>
+              </Collapse>
+            </div>
+          )}
+          {page === "preview" && (
+            <div
+              style={{
+                background: "#fff",
+                padding: "24px 0",
+              }}
+            >
+              <Preview
+                showCode={showCode}
+                setShowCode={setShowCode}
+                state={state}
+              />
             </div>
           )}
         </Content>

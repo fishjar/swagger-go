@@ -110,13 +110,16 @@ export default function SecurityDefinitions({ state, dispatch }) {
 
   return (
     <Fragment>
-      <Table
-        columns={columns}
-        bordered
-        dataSource={securityItems}
-        pagination={false}
-        size="middle"
-      />
+      {securityItems.length > 0 && (
+        <Table
+          columns={columns}
+          bordered
+          dataSource={securityItems}
+          pagination={false}
+          size="middle"
+        />
+      )}
+
       <SecurityEdit
         title="新增"
         formMode="create"
