@@ -101,8 +101,12 @@ export const useData = () => {
     const loadFile = async () => {
       try {
         const data = await openAndReadFile();
-        dispatch({ type: "DATA_RESET", payload: data });
-        message.success("文件上传成功");
+        if (data.swagger === "2.0") {
+          dispatch({ type: "DATA_RESET", payload: data });
+          message.success("文件上传成功");
+        } else {
+          message.error("导入失败！仅支持swagger2.0版本");
+        }
       } catch (err) {
         message.error(err.message || "文件上传失败");
       } finally {
@@ -211,12 +215,12 @@ export const useData = () => {
 
   useEffect(() => {
     const history = readLocalStorage("history");
-    if (current > 0) {
+    if (current > 1) {
       setCanUndo(true);
     } else {
       setCanUndo(false);
     }
-    if (current < history.length - 1) {
+    if (history && current < history.length - 1) {
       setCanRedo(true);
     } else {
       setCanRedo(false);

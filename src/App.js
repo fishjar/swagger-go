@@ -24,7 +24,9 @@ import {
   Alert,
   Row,
   Col,
+  Modal,
 } from "antd";
+const { confirm } = Modal;
 
 const { Header, Content, Footer } = Layout;
 const { Panel } = Collapse;
@@ -58,9 +60,35 @@ function App() {
   console.log(state);
   console.log(current);
 
+  function handleClose() {
+    confirm({
+      title: "确认关闭项目文件?",
+      content: "关闭后不可恢复，请先导出文件，谨慎操作!",
+      okText: "关闭",
+      okType: "danger",
+      cancelText: "取消",
+      onOk() {
+        console.log("OK");
+        setClose(true);
+      },
+      onCancel() {
+        console.log("Cancel");
+      },
+    });
+  }
+
   if (!state) {
     return (
       <div className="App" style={{ overflow: "hidden" }}>
+        <div style={{ position: "absolute", top: 0, left: 0, width: "100%" }}>
+          <Alert
+            message="注：仅支持swagger2.0，未作3.0适配"
+            type="warning"
+            closable
+            style={{ margin: 24, textAlign: "center" }}
+          />
+        </div>
+
         <Row
           type="flex"
           justify="center"
@@ -83,13 +111,13 @@ function App() {
           <Col>
             <Button
               type="dashed"
-              icon="edit"
+              icon="snippets"
               style={{ width: 200, height: 100 }}
               onClick={() => {
                 setResetting(true);
               }}
             >
-              Demo
+              Boilerplate
             </Button>
           </Col>
           <Col>
@@ -181,13 +209,7 @@ function App() {
                   >
                     Export
                   </Button>
-                  <Button
-                    icon="close"
-                    loading={isClose}
-                    onClick={() => {
-                      setClose(true);
-                    }}
-                  >
+                  <Button icon="close" loading={isClose} onClick={handleClose}>
                     Close
                   </Button>
                 </ButtonGroup>
@@ -197,7 +219,7 @@ function App() {
               <div className="header_buttons">
                 <ButtonGroup>
                   <Button
-                    icon="eye"
+                    icon="number"
                     onClick={() => {
                       setShowCode(true);
                     }}
@@ -212,13 +234,7 @@ function App() {
         <Content style={{ marginTop: 64 }}>
           {page === "edit" && (
             <div style={{ background: "#fff", padding: "24px 50px" }}>
-              <Alert
-                message="仅支持2.0，未作3.0适配"
-                type="warning"
-                closable
-                style={{ marginBottom: 24, textAlign: "center" }}
-              />
-              <Collapse defaultActiveKey={["info"]}>
+              <Collapse defaultActiveKey={[]}>
                 <Panel
                   header="General Info"
                   key="info"
@@ -257,7 +273,6 @@ function App() {
             </div>
           )}
         </Content>
-        {/* <Footer style={{ textAlign: "center" }}>©2018</Footer> */}
       </Layout>
     </div>
   );

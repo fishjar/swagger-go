@@ -1,5 +1,131 @@
 swagger: '2.0'
-info:
-  version: 0.0.1
-  title: Hello World App
-  
+info: {}
+securityDefinitions: {}
+paths:
+  /foo:
+    get:
+      summary: 查询单个test
+      description: 查询单个test...
+      parameters:
+        - in: query
+          name: id
+          type: string
+          description: 不限于id，可以是任意参数
+          required: true
+      responses:
+        '200':
+          description: 查询成功
+          schema:
+            $ref: '#/definitions/Foo'
+    post:
+      summary: 查找或创建单个test
+      description: 查找或创建单个test...
+      parameters:
+        - in: body
+          name: body
+          description: 模型参数
+          required: true
+          schema:
+            $ref: '#/definitions/Foo'
+      responses:
+        '200':
+          description: 创建成功
+          schema:
+            $ref: '#/definitions/Foo'
+  /foos:
+    get:
+      summary: 查询多个test
+      description: 查询多个test...
+      parameters:
+        - in: query
+          name: pageNum
+          type: integer
+          description: 页码
+          default: 1
+        - in: query
+          name: pageSize
+          type: integer
+          description: 分页大小
+          default: 10
+        - in: query
+          name: sorter
+          type: string
+          description: 排序
+      responses:
+        '200':
+          description: 查询成功
+          schema:
+            type: object
+            properties:
+              count:
+                type: integer
+              rows:
+                type: array
+                items:
+                  $ref: '#/definitions/Foo'
+definitions:
+  Foo:
+    description: test
+    x-isModel: true
+    x-plural: Foos
+    x-tableName: foo
+    x-apis:
+      - findOne
+      - findOrCreate
+      - findAndCountAll
+    required:
+      - id
+      - status
+    example:
+      id: '123454331'
+      status: 2
+    properties:
+      id:
+        x-primaryKey: true
+        type: string
+        format: uuid
+        description: ID
+        x-showTable: true
+        example: '123454331'
+      status:
+        type: integer
+        format: int32
+        x-showTable: true
+        x-description: 状态
+        default: 1
+        example: 2
+        enum:
+          - 1
+          - 2
+        x-enumMap:
+          '1': 可用
+          '2': 不可用
+        description: "\"状态\"\t* 1 - 可用\t* 2 - 不可用"
+      user:
+        $ref: '#/definitions/user'
+      users:
+        type: array
+        format: array
+        description: 用户名
+        items:
+          $ref: '#/definitions/user'
+  user:
+    description: 用户
+    x-isModel: false
+    required:
+      - name
+    example:
+      name: gabe
+      gender: 1
+    properties:
+      name:
+        type: string
+        format: string
+        description: 姓名
+        example: gabe
+      gender:
+        type: integer
+        format: int32
+        description: 性别
+        default: 0
+        example: 1

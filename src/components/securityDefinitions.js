@@ -135,7 +135,7 @@ export default function SecurityDefinitions({ state, dispatch }) {
           type="dashed"
           icon="plus"
         >
-          Add field
+          Add Security
         </Button>
       </SecurityEdit>
     </Fragment>

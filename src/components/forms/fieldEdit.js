@@ -77,12 +77,12 @@ function FieldEdit({
   // const [isExample, setExample] = useState(field.isExample);
 
   // const [refModel, setRefModel] = useState(field.refModel);
-  const [refFields, setRefFields] = useState(field.refFields);
+  const [refFields, setRefFields] = useState(field.refFields || []);
   // const [arrayRef, setArrayRef] = useState(field.arrayRef);
   // const [arrayModel, setArrayModel] = useState(field.arrayModel);
-  const [arrayFields, setArrayFields] = useState(field.arrayFields);
+  const [arrayFields, setArrayFields] = useState(field.arrayFields || []);
   // const [subFields, setSubFields] = useState(field.subFields);
-  const [enumItems, setEnumItems] = useState(field.enumItems);
+  // const [enumItems, setEnumItems] = useState(field.enumItems || []);
 
   /**
    * 关闭抽屉
@@ -116,7 +116,7 @@ function FieldEdit({
     // setArrayModel(field.arrayModel);
     setArrayFields(field.arrayFields);
     // setSubFields(field.subFields);
-    setEnumItems(field.enumItems);
+    // setEnumItems(field.enumItems);
   }
 
   /**
@@ -845,16 +845,18 @@ function FieldEdit({
                           initialValue: field.default,
                         })(
                           <Select placeholder="请选择" allowClear>
-                            {enumItems.map(({ key, description }) => (
-                              <Option value={key} key={key}>
-                                <span>{key}</span>
-                                <span
-                                  style={{
-                                    color: "#999",
-                                  }}
-                                >{` (${description})`}</span>
-                              </Option>
-                            ))}
+                            {(getFieldValue("enumItems") || []).map(
+                              ({ key, description }, index) => (
+                                <Option value={key} key={key || index}>
+                                  <span>{key}</span>
+                                  <span
+                                    style={{
+                                      color: "#999",
+                                    }}
+                                  >{` (${description})`}</span>
+                                </Option>
+                              )
+                            )}
                           </Select>
                         )}
                       </Form.Item>
@@ -863,16 +865,18 @@ function FieldEdit({
                           initialValue: field.example,
                         })(
                           <Select placeholder="请选择" allowClear>
-                            {enumItems.map(({ key, description }) => (
-                              <Option value={key} key={key}>
-                                <span>{key}</span>
-                                <span
-                                  style={{
-                                    color: "#999",
-                                  }}
-                                >{` (${description})`}</span>
-                              </Option>
-                            ))}
+                            {(getFieldValue("enumItems") || []).map(
+                              ({ key, description }, index) => (
+                                <Option value={key} key={key || index}>
+                                  <span>{key}</span>
+                                  <span
+                                    style={{
+                                      color: "#999",
+                                    }}
+                                  >{` (${description})`}</span>
+                                </Option>
+                              )
+                            )}
                           </Select>
                         )}
                       </Form.Item>

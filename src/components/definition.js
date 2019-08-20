@@ -337,13 +337,16 @@ export default function Definition({ models, model, dispatch }) {
 
   return (
     <Fragment>
-      <Table
-        columns={columns}
-        bordered
-        dataSource={fields}
-        pagination={false}
-        size="middle"
-      />
+      {fields.length > 0 && (
+        <Table
+          columns={columns}
+          bordered
+          dataSource={fields}
+          pagination={false}
+          size="middle"
+        />
+      )}
+
       <FieldEdit
         title="新增"
         formMode="create"
