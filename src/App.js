@@ -24,8 +24,9 @@ import {
   Alert,
   Row,
   Col,
-  Modal,
+  Modal
 } from "antd";
+import { autoUpdater } from "electron";
 const { confirm } = Modal;
 
 const { Header, Content, Footer } = Layout;
@@ -55,7 +56,7 @@ function App() {
     canRedo,
     isClose,
     setClose,
-    current,
+    current
   } = useData();
   console.log(state);
   console.log(current);
@@ -73,7 +74,7 @@ function App() {
       },
       onCancel() {
         console.log("Cancel");
-      },
+      }
     });
   }
 
@@ -164,7 +165,7 @@ function App() {
               <div className="header_buttons">
                 <ButtonGroup
                   style={{
-                    marginRight: 16,
+                    marginRight: 16
                   }}
                 >
                   <Button
@@ -231,7 +232,7 @@ function App() {
             )}
           </div>
         </Header>
-        <Content style={{ marginTop: 64 }}>
+        <Content style={{ marginTop: 64, overflow: autoUpdater }}>
           {page === "edit" && (
             <div style={{ background: "#fff", padding: "24px 50px" }}>
               <Collapse defaultActiveKey={[]}>
@@ -262,7 +263,7 @@ function App() {
             <div
               style={{
                 background: "#fff",
-                padding: "24px 0",
+                padding: "24px 0"
               }}
             >
               <Preview
