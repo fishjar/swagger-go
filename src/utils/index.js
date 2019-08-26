@@ -185,7 +185,7 @@ export const writeCache = data => {
   return new Promise((resolve, reject) => {
     ipcRenderer.send("write-cache", yaml.dump(data));
     ipcRenderer.on("write-cache-ok", event => {
-      resolve(new Error("写入缓存数据成功"));
+      resolve("写入缓存数据成功");
     });
     ipcRenderer.on("write-cache-err", (event, err) => {
       console.log(err);
@@ -347,4 +347,17 @@ export const parseArrayToObject = (a, key = "key") => {
     o[k || i] = data;
   });
   return o;
+};
+
+export const downloadBoilerplate = () => {
+  return new Promise((resolve, reject) => {
+    ipcRenderer.send("download-boilerplate", "koa");
+    ipcRenderer.on("download-boilerplate-ok", event => {
+      resolve("下载模板文件成功");
+    });
+    ipcRenderer.on("download-boilerplate-err", (event, err) => {
+      console.log(err);
+      reject(new Error("下载模板文件失败"));
+    });
+  });
 };

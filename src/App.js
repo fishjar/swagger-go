@@ -56,6 +56,8 @@ function App() {
     isClose,
     setClose,
     current,
+    isTest,
+    setTest,
   } = useData();
   console.log(state);
   console.log(current);
@@ -228,6 +230,14 @@ function App() {
                     }}
                   >
                     Code
+                  </Button>
+                  <Button
+                    icon="number"
+                    onClick={() => {
+                      setTest(true)
+                    }}
+                  >
+                    Test
                   </Button>
                 </ButtonGroup>
               </div>

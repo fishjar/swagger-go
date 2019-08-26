@@ -1,6 +1,7 @@
 const path = require("path");
 const fs = require("fs");
 const { ipcMain, dialog } = require("electron");
+const downloadRepo = require("download-git-repo");
 
 /**
  * 监听打开文件
@@ -12,8 +13,8 @@ ipcMain.on("open-file-dialog", event => {
       properties: ["openFile"],
       filters: [
         { name: "Swagger Files", extensions: ["yaml", "yml", "json"] },
-        { name: "All Files", extensions: ["*"] }
-      ]
+        { name: "All Files", extensions: ["*"] },
+      ],
     },
     filePaths => {
       if (filePaths) {
@@ -35,8 +36,8 @@ ipcMain.on("save-file-dialog", event => {
       defaultPath: "swagger.yaml",
       filters: [
         { name: "Swagger Files", extensions: ["yaml", "yml", "json"] },
-        { name: "All Files", extensions: ["*"] }
-      ]
+        { name: "All Files", extensions: ["*"] },
+      ],
     },
     filePath => {
       if (filePath) {
@@ -112,6 +113,21 @@ ipcMain.on("write-cache", (event, data) => {
       event.sender.send("write-cache-err", err);
     } else {
       event.sender.send("write-cache-ok");
+    }
+  });
+});
+
+const boilerplates = {
+  koa: "fishjar/koa-rest-boilerplate",
+};
+ipcMain.on("download-boilerplate", (event, bpName) => {
+  const repo = boilerplates[bpName];
+  const temDir = path.join(__dirname, "tmp", bpName);
+  downloadRepo(repo, temDir, err => {
+    if (err) {
+      event.sender.send("download-boilerplate-err", err);
+    } else {
+      event.sender.send("download-boilerplate-ok");
     }
   });
 });

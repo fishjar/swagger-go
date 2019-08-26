@@ -86,6 +86,7 @@ definitions:
         description: "ID"
         uniqueItems: true
         x-primaryKey: true
+        x-fieldName: "id"
       user:
         $ref: "#/definitions/UserDemo"
       name:

@@ -6,6 +6,7 @@ import {
   readDefaultData, // demo数据
   writeLocalStorage,
   readLocalStorage, // 缓存数据
+  downloadBoilerplate,
 } from "./utils";
 import definitionsToPaths from "./utils/definitionsToPaths";
 
@@ -79,6 +80,7 @@ export const useData = () => {
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
   const [isClose, setClose] = useState(false);
+  const [isTest, setTest] = useState(false);
 
   const [state, dispatch] = useReducer(dataReducer, "state", init);
 
@@ -129,6 +131,20 @@ export const useData = () => {
     };
     isSaving && saveFile();
   }, [isSaving]);
+
+  useEffect(() => {
+    const downloadFiles = async () => {
+      try {
+        await downloadBoilerplate(state);
+        message.success("下载成功");
+      } catch (err) {
+        message.error(err.message || "下载失败");
+      } finally {
+        setTest(false);
+      }
+    };
+    isTest && downloadFiles();
+  }, [isTest]);
 
   useEffect(() => {
     const resetData = async () => {
@@ -256,5 +272,7 @@ export const useData = () => {
     isClose,
     setClose,
     current,
+    isTest,
+    setTest,
   };
 };

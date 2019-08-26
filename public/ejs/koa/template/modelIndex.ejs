@@ -1,0 +1,9 @@
+<% Object.keys(definitions).forEach(function (key) { -%>
+import <%- key -%> from "./<%- key.toLowerCase() -%>";
+<% }) -%>
+
+export default {
+<% Object.keys(definitions).forEach(function (key) { -%>
+  <%- key -%>,
+<% }) -%>
+};

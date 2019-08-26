@@ -8,9 +8,12 @@
   "homepage": "./",
   "dependencies": {
     "antd": "^3.20.7",
+    "download-git-repo": "^2.0.0",
+    "ejs": "^2.6.2",
     "electron-is-dev": "^1.1.0",
     "js-yaml": "^3.13.1",
     "moment": "^2.24.0",
+    "mustache": "^3.0.2",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-scripts": "3.0.1",
