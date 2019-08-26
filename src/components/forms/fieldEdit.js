@@ -157,11 +157,11 @@ function FieldEdit({
       if (isEnum) {
         data.enum = [];
         data["x-enumMap"] = {};
-        data.description = `"状态"`;
+        data.description = `"${data["x-description"]}"`;
         enumItems.forEach(item => {
           data.enum.push(item.key);
           data["x-enumMap"][item.key] = item.description;
-          data.description += `\t* ${item.key} - ${item.description}`;
+          data.description += `\n  * ${item.key} - ${item.description}`;
         });
       }
       console.log(key);
@@ -232,6 +232,42 @@ function FieldEdit({
   }
 
   /**
+   * 字段名称校验
+   * @param {*} rule
+   * @param {*} value
+   * @param {*} callback
+   */
+  function handleFieldNameValidator(rule, value, callback) {
+    if (formMode === "create") {
+      if (fields.map(item => item["x-fieldName"]).includes(value)) {
+        callback("数据库字段名称重复");
+      }
+      if (fields.map(item => item.key).includes(value)) {
+        callback("字段名称重复");
+      }
+    }
+    if (formMode === "edit") {
+      if (
+        fields
+          .filter(item => item.key !== field.key)
+          .map(item => item["x-fieldName"])
+          .includes(value)
+      ) {
+        callback("数据库字段名称重复");
+      }
+      if (
+        fields
+          .filter(item => item.key !== field.key)
+          .map(item => item.key)
+          .includes(value)
+      ) {
+        callback("字段名称重复");
+      }
+    }
+    callback();
+  }
+
+  /**
    * 子字段校验
    * @param {*} rule
    * @param {*} value
@@ -285,6 +321,7 @@ function FieldEdit({
           format: "boolean",
         });
         break;
+      default:
     }
   }
 
@@ -365,9 +402,22 @@ function FieldEdit({
                   validator: handleFieldKeyValidator,
                 },
               ],
-            })(
-              <Input placeholder="field_key" disabled={formMode === "edit"} />
-            )}
+            })(<Input placeholder="fieldKey" disabled={formMode === "edit"} />)}
+          </Form.Item>
+
+          <Form.Item label="数据库字段名" hasFeedback>
+            {getFieldDecorator("x-fieldName", {
+              initialValue: field["x-fieldName"] || field.key,
+              rules: [
+                {
+                  required: true,
+                  message: "请填写!",
+                },
+                {
+                  validator: handleFieldNameValidator,
+                },
+              ],
+            })(<Input placeholder="field_name" />)}
           </Form.Item>
 
           <Form.Item label="外链模型" required>
@@ -391,6 +441,17 @@ function FieldEdit({
 
           {getFieldValue("isRef") ? (
             <Fragment>
+              <Form.Item label="描述" hasFeedback>
+                {getFieldDecorator("x-description", {
+                  initialValue: field["x-description"],
+                  rules: [
+                    {
+                      required: true,
+                      message: "请填写!",
+                    },
+                  ],
+                })(<Input placeholder="x-description" />)}
+              </Form.Item>
               <Form.Item label="选择模型">
                 {getFieldDecorator("$ref", {
                   initialValue: field.$ref,

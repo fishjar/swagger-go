@@ -116,24 +116,28 @@ export default function Definition({ models, model, dispatch }) {
 
   const columns = [
     {
-      title: "Index",
+      title: "[Unique]Index",
       dataIndex: "index",
-      render: (_, __, index) => index + 1,
-    },
-    {
-      title: "[Unique] Field",
-      dataIndex: "key",
-      render: (text, record) => {
+      render: (_, record, index) => {
         return (
           <Badge
             status={record.uniqueItems ? "success" : "default"}
-            text={text}
-            style={
-              record["x-primaryKey"]
-                ? { color: "#52c41a", fontWeight: "bold" }
-                : {}
-            }
+            text={index + 1}
           />
+        );
+      },
+    },
+    {
+      title: "Field",
+      dataIndex: "key",
+      render: (text, record) => {
+        return (
+          <div>
+            <div>{text}</div>
+            {record["x-fieldName"] && record["x-fieldName"] !== text && (
+              <div style={{ color: "#999" }}>{record["x-fieldName"]}</div>
+            )}
+          </div>
         );
       },
     },
@@ -167,9 +171,8 @@ export default function Definition({ models, model, dispatch }) {
         if (record.$ref) {
           return (
             <div>
-              <div>{`- ${record.refModel.description} ( ${
-                record.refModel.key
-              } )`}</div>
+              <div>{`- ${record["x-description"]}`}</div>
+              <div>{`- ${record.refModel.description} ( ${record.refModel.key} )`}</div>
               <ul style={{ margin: 0 }}>
                 {record.refFields.map(({ key, type, description }) => (
                   <li key={key}>
@@ -211,11 +214,8 @@ export default function Definition({ models, model, dispatch }) {
           if (record.arrayType === "object") {
             return (
               <div>
-                <div>{`${record["x-message"] || ""} - ${text} [ ${
-                  record.arrayType
-                } - ${record.arrayModel.description} ( ${
-                  record.arrayModel.key
-                } ) ]`}</div>
+                <div>{`${record["x-message"] || ""} - ${text}`}</div>
+                <div>{`[ ${record.arrayType} - ${record.arrayModel.description} ( ${record.arrayModel.key} ) ]`}</div>
                 <ul style={{ margin: 0 }}>
                   {record.arrayFields.map(({ key, type, description }) => (
                     <li key={key}>

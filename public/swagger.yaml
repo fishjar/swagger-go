@@ -76,8 +76,8 @@ definitions:
     required:
       - "id"
       - "name"
-      - "good_time"
-      - "is_good"
+      - "goodTime"
+      - "isGood"
       - "status"
     properties:
       id:
@@ -88,6 +88,7 @@ definitions:
         x-primaryKey: true
         x-fieldName: "id"
       user:
+        x-fieldName: "user"
         $ref: "#/definitions/UserDemo"
       name:
         type: "string"
@@ -100,6 +101,7 @@ definitions:
         x-showTable: true
         x-showFilter: true
         x-length: 20
+        x-fieldName: "name"
       age:
         type: "integer"
         format: "int4"
@@ -110,6 +112,7 @@ definitions:
         x-showTable: true
         x-showFilter: true
         x-showSorter: true
+        x-fieldName: "age"
       weight:
         type: "number"
         format: "float"
@@ -120,6 +123,7 @@ definitions:
         x-showTable: true
         x-showFilter: true
         x-showSorter: true
+        x-fieldName: "weight"
       birthday:
         type: "string"
         format: "date"
@@ -127,13 +131,15 @@ definitions:
         x-message: "请选择"
         x-showTable: true
         x-showSorter: true
-      good_time:
+        x-fieldName: "birthday"
+      goodTime:
         type: "string"
         format: "date-time"
         description: "快乐时光"
         x-message: "请选择"
         x-showTable: true
         x-showSorter: true
+        x-fieldName: "good_time"
       email:
         type: "string"
         format: "email"
@@ -142,23 +148,27 @@ definitions:
         x-message: "请输入"
         x-showTable: true
         x-showFilter: true
+        x-fieldName: "email"
       homepage:
         type: "string"
         format: "uri"
         description: "主页"
         x-message: "请输入"
+        x-fieldName: "homepage"
       notice:
         type: "string"
         format: "text"
         description: "备注"
         x-message: "请输入"
+        x-fieldName: "notice"
       intro:
         type: "string"
         format: "text"
         description: "介绍"
         x-message: "请输入"
         x-isRichText: true
-      is_good:
+        x-fieldName: "intro"
+      isGood:
         type: "boolean"
         format: "boolean"
         description: "是否安好"
@@ -166,11 +176,13 @@ definitions:
         x-message: "请选择"
         x-showTable: true
         x-showFilter: true
-      my_extra:
+        x-fieldName: "is_good"
+      myExtra:
         type: "object"
         format: "object"
         description: "扩展字段1"
         x-message: "请输入"
+        x-fieldName: "my_extra"
         properties:
           id:
             type: "integer"
@@ -178,16 +190,18 @@ definitions:
           username:
             type: "string"
             description: "用户名"
-      my_extra_array:
+      myExtraArray:
         type: "array"
         format: "array"
         description: "扩展字段2"
+        x-fieldName: "my_extra_array"
         items:
           $ref: '#/definitions/UserDemo'
       tages:
         type: "array"
         format: "array"
         description: "标签"
+        x-fieldName: "tages"
         items:
           type: "string"
       status:
@@ -201,6 +215,7 @@ definitions:
         x-message: "请选择"
         x-showTable: true
         x-showFilter: true
+        x-fieldName: "status"
         x-enumMap: {
           1: "正常",
           2: "异常",
@@ -217,10 +232,10 @@ definitions:
       age: 12
       name: "foo"
       birthday: "2012-12-12"
-      good_time: "2012-12-12 12:12:12"
+      goodTime: "2012-12-12 12:12:12"
       email: "test@test.com"
       notice: "备注"
-      is_good: true
+      isGood: true
       status: 1
   UserDemo:
     type: "object"

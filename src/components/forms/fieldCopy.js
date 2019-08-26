@@ -6,7 +6,7 @@ import {
   numTypes,
   standDataTypes,
 } from "../../config";
-import { getModelProps, deepClone } from "../../utils";
+import { getModelProps, deepClone, filterObjectItems } from "../../utils";
 import {
   Form,
   Input,
@@ -90,16 +90,23 @@ function FieldCopy({
     });
   }
 
-  function updateData({ key, ...newData }) {
+  function updateData({ key: newKey, ...newData }) {
     const { key: modelKey, ...modelData } = model;
-    const { key: fieldKey, ...oldData } = field;
+    const { key: oldKey, ...oldData } = field;
     const { properties = {}, required = [], example = {} } = modelData;
 
-    oldData.isRequired && required.push(key);
-    oldData.isExample && (example[key] = oldData.example || example[fieldKey]);
+    oldData.isRequired && required.push(newKey);
+    oldData.isExample && (example[newKey] = oldData.example || example[oldKey]);
+
+    if (oldData.isEnum) {
+      newData.description = `"${newData["x-description"]}"`;
+      oldData.enumItems.forEach(item => {
+        newData.description += `\n  * ${item.key} - ${item.description}`;
+      });
+    }
 
     const copyData = deepClone({
-      ...oldData,
+      ...model.properties[oldKey],
       ...newData,
     });
 
@@ -112,7 +119,7 @@ function FieldCopy({
           example,
           properties: {
             ...properties,
-            [key]: copyData,
+            [newKey]: copyData,
           },
         },
       },
@@ -120,6 +127,16 @@ function FieldCopy({
   }
 
   function handleFieldKeyValidator(rule, value, callback) {
+    if (fields.map(item => item.key).includes(value)) {
+      callback("字段名称重复");
+    }
+    callback();
+  }
+
+  function handleFieldNameValidator(rule, value, callback) {
+    if (fields.map(item => item["x-fieldName"]).includes(value)) {
+      callback("数据库字段名称重复");
+    }
     if (fields.map(item => item.key).includes(value)) {
       callback("字段名称重复");
     }
@@ -168,12 +185,38 @@ function FieldCopy({
             </Row>
           </Form.Item>
 
+          <Form.Item label="数据库字段名">
+            <Row gutter={8}>
+              <Col span={11}>
+                <Input value={field["x-fieldName"] || field.key} disabled />
+              </Col>
+              <Col span={2} style={{ textAlign: "center" }}>
+                <Icon type="arrow-right" />
+              </Col>
+              <Col span={11}>
+                {getFieldDecorator("x-fieldName", {
+                  rules: [
+                    {
+                      required: true,
+                      message: "请填写!",
+                    },
+                    {
+                      validator: handleFieldNameValidator,
+                    },
+                  ],
+                })(<Input placeholder="请填写新字段名" />)}
+              </Col>
+            </Row>
+          </Form.Item>
+
           <Form.Item label="描述">
             <Row gutter={8}>
               <Col span={11}>
                 <Input
                   value={
-                    field.isEnum ? field["x-description"] : field.description
+                    field.isRef || field.isEnum
+                      ? field["x-description"]
+                      : field.description
                   }
                   disabled
                 />
@@ -183,7 +226,7 @@ function FieldCopy({
               </Col>
               <Col span={11}>
                 {getFieldDecorator(
-                  field.isEnum ? "x-description" : "description",
+                  field.isRef || field.isEnum ? "x-description" : "description",
                   {
                     rules: [
                       {
