@@ -127,8 +127,12 @@ export const dataTypes = {
   },
 };
 
-export const dataFormats = Object.entries(dataTypes)
+export const dataTypesTable = Object.entries(dataTypes)
   .map(([key, value]) => Object.entries(value).map(([k, v]) => [key, k, ...v]))
   .reduce((accumulator, currentValue) => [...accumulator, ...currentValue]);
+
+export const dataFormats = Object.assign(
+  ...Object.entries(dataTypes).map(([_, item]) => item)
+);
 
 export const standDataTypes = Object.keys(dataTypes);

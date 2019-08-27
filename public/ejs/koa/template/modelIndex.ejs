@@ -1,9 +1,13 @@
-<% Object.keys(definitions).forEach(function (key) { -%>
-import <%- key -%> from "./<%- key.toLowerCase() -%>";
+<% Object.entries(definitions)
+  .filter(([_,model])=>model['x-isModel'])
+  .forEach(([modelKey]) => { -%>
+import <%- modelKey -%> from "./<%- modelKey.toLowerCase() -%>";
 <% }) -%>
 
 export default {
-<% Object.keys(definitions).forEach(function (key) { -%>
-  <%- key -%>,
+<% Object.entries(definitions)
+  .filter(([_,model])=>model['x-isModel'])
+  .forEach(([modelKey]) => { -%>
+  <%- modelKey -%>,
 <% }) -%>
 };

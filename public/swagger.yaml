@@ -89,7 +89,17 @@ definitions:
         x-fieldName: "id"
       user:
         x-fieldName: "user"
+        x-refFieldKey: "id"
+        x-description: "引用用户ID"
         $ref: "#/definitions/UserDemo"
+      userId:
+        type: "string"
+        format: "string"
+        description: "引用用户ID"
+        x-fieldName: "user_id"
+        x-foreignKey: true
+        x-refFieldKey: "id"
+        x-ref: "#/definitions/UserDemo"
       name:
         type: "string"
         format: "string"

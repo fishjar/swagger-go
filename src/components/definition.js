@@ -44,7 +44,10 @@ export default function Definition({ models, model, dispatch }) {
    */
   const fields = Object.entries(model.properties || {}).map(([key, field]) => {
     // 外链模型
-    const [refModel, refFields] = parseRef(models, field.$ref);
+    const [refModel, refFields] = parseRef(
+      models,
+      field.$ref || field["x-ref"]
+    );
 
     // 对象类型
     const subFields = getModelProps(field);
@@ -171,14 +174,40 @@ export default function Definition({ models, model, dispatch }) {
         if (record.$ref) {
           return (
             <div>
-              <div>{`- ${record["x-description"]}`}</div>
+              <div>{`- ${record["x-description"] || ""}`}</div>
               <div>{`- ${record.refModel.description} ( ${record.refModel.key} )`}</div>
               <ul style={{ margin: 0 }}>
-                {record.refFields.map(({ key, type, description }) => (
-                  <li key={key}>
-                    {type} - {key} ({description})
-                  </li>
-                ))}
+                {record.refFields.map(({ key, type, description }) =>
+                  key === record["x-refFieldKey"] ? (
+                    <li key={key} style={{ color: "#52c41a" }}>
+                      {type} - {key} ({description})
+                    </li>
+                  ) : (
+                    <li key={key}>
+                      {type} - {key} ({description})
+                    </li>
+                  )
+                )}
+              </ul>
+            </div>
+          );
+        } else if (record["x-foreignKey"]) {
+          return (
+            <div>
+              <div>{`- ${record.description || ""}`}</div>
+              <div>{`- ${record.refModel.description} ( ${record.refModel.key} )`}</div>
+              <ul style={{ margin: 0 }}>
+                {record.refFields.map(({ key, type, description }) =>
+                  key === record["x-refFieldKey"] ? (
+                    <li key={key} style={{ color: "#52c41a" }}>
+                      {type} - {key} ({description})
+                    </li>
+                  ) : (
+                    <li key={key}>
+                      {type} - {key} ({description})
+                    </li>
+                  )
+                )}
               </ul>
             </div>
           );

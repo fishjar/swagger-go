@@ -18,6 +18,7 @@ import {
 import SubFields from "./subFields";
 import EnumItems from "./enumItems";
 import DateSelect from "./dateSelect";
+import RefFields from "./refFields";
 import {
   Form,
   Input,
@@ -372,6 +373,14 @@ function FieldEdit({
     setArrayFields(newArrayFields);
   }
 
+  function handleRefFieldKeyChange(key) {
+    const refField = refFields.find(item => item.key === key);
+    setFieldsValue({
+      type: refField.type,
+      format: refField.format,
+    });
+  }
+
   return (
     <span>
       <span
@@ -480,41 +489,16 @@ function FieldEdit({
                   </Select>
                 )}
               </Form.Item>
-              <Form.Item label="模型字段">
-                <Table
-                  columns={[
+              <Form.Item label="关联字段">
+                {getFieldDecorator("x-refFieldKey", {
+                  initialValue: field["x-refFieldKey"],
+                  rules: [
                     {
-                      title: "Type",
-                      dataIndex: "type",
+                      required: true,
+                      message: "选择!",
                     },
-                    {
-                      title: "Key",
-                      dataIndex: "key",
-                    },
-                    {
-                      title: "Description",
-                      dataIndex: "description",
-                    },
-                    {
-                      title: "Example",
-                      dataIndex: "example",
-                      render: text => (
-                        <div
-                          style={{
-                            wordWrap: "break-word",
-                            wordBreak: "break-all",
-                          }}
-                        >
-                          {text}
-                        </div>
-                      ),
-                    },
-                  ]}
-                  dataSource={refFields}
-                  size="small"
-                  pagination={false}
-                  bordered
-                />
+                  ],
+                })(<RefFields refFields={refFields} />)}
               </Form.Item>
               <Form.Item label="其他选项">
                 {getFieldDecorator("isRequired", {
@@ -543,9 +527,61 @@ function FieldEdit({
                   {getFieldDecorator("x-foreignKey", {
                     initialValue: field["x-foreignKey"],
                     valuePropName: "checked",
-                  })(<Checkbox disabled>外键(暂不支持)</Checkbox>)}
+                  })(<Checkbox>外键</Checkbox>)}
                 </Form.Item>
               </Form.Item>
+
+              {getFieldValue("x-foreignKey") && (
+                <Fragment>
+                  <Form.Item label="选择模型">
+                    {getFieldDecorator("x-ref", {
+                      initialValue: field["x-ref"],
+                      rules: [
+                        {
+                          required: true,
+                          message: "请选择!",
+                        },
+                      ],
+                    })(
+                      <Select
+                        placeholder="请选择"
+                        onChange={handleRefModelChange}
+                      >
+                        {models.map(({ key, description }) => (
+                          <Option
+                            value={`#/definitions/${key}`}
+                            key={key}
+                            disabled={model.key === key}
+                          >
+                            <span>{`#/definitions/${key}`}</span>
+                            <span
+                              style={{
+                                color: "#999",
+                              }}
+                            >{` (${description})`}</span>
+                          </Option>
+                        ))}
+                      </Select>
+                    )}
+                  </Form.Item>
+                  <Form.Item label="关联字段">
+                    {getFieldDecorator("x-refFieldKey", {
+                      initialValue: field["x-refFieldKey"],
+                      rules: [
+                        {
+                          required: true,
+                          message: "选择!",
+                        },
+                      ],
+                    })(
+                      <RefFields
+                        refFields={refFields}
+                        onChange={handleRefFieldKeyChange}
+                      />
+                    )}
+                  </Form.Item>
+                </Fragment>
+              )}
 
               <Form.Item label="字段类型">
                 {getFieldDecorator("type", {
@@ -624,7 +660,7 @@ function FieldEdit({
                     disabled={
                       !["int4", "int32", "string", "char"].includes(
                         getFieldValue("format")
-                      )
+                      ) || getFieldValue("x-foreignKey")
                     }
                   />
                 )}
