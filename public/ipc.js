@@ -118,11 +118,11 @@ ipcMain.on("write-cache", (event, data) => {
 });
 
 const boilerplates = {
-  koa: "fishjar/koa-rest-boilerplate",
+  koa: "fishjar/koa-rest-boilerplate#dev",
 };
-ipcMain.on("download-boilerplate", (event, bpName) => {
-  const repo = boilerplates[bpName];
-  const temDir = path.join(__dirname, "tmp", bpName);
+ipcMain.on("download-boilerplate", (event, boilerplateName) => {
+  const repo = boilerplates[boilerplateName];
+  const temDir = path.join(__dirname, "tmp", boilerplateName);
   downloadRepo(repo, temDir, err => {
     if (err) {
       event.sender.send("download-boilerplate-err", err);

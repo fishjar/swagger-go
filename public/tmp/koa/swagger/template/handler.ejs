@@ -1,0 +1,142 @@
+import model from "../model";
+
+<% if(model['x-apis']includes('findAndCountAll')) { %>
+/**
+ * 查询多条信息
+ */
+const findAndCountAll = async (ctx, next) => {
+  const { page_num = 1, page_size = 10, sorter, ...where } = ctx.query;
+  let order = [];
+  if (Array.isArray(sorter)) {
+    order = [...sorter.map(item => item.split("__"))];
+  } else if (sorter) {
+    order = [sorter.split("__")];
+  }
+  ctx.body = await model.<%- modelKey -%>.findAndCountAll({
+    where,
+    offset: (page_num - 1) * page_size,
+    limit: page_size,
+    order
+  });
+  await next();
+};
+<% } %>
+
+
+<% if(model['x-apis']includes('findById')) { %>
+/**
+ * 根据ID查询单条信息
+ */
+const findById = async (ctx, next) => {
+  ctx.body = await model.<%- modelKey -%>.findById(ctx.params.id);
+  await next();
+};
+<% } %>
+
+
+<% if(model['x-apis']includes('singleCreate')) { %>
+/**
+ * 创建单条信息
+ */
+const singleCreate = async (ctx, next) => {
+  ctx.body = await model.<%- modelKey -%>.create(ctx.request.body);
+  await next();
+};
+<% } %>
+
+
+<% if(model['x-apis']includes('bulkCreate')) { %>
+/**
+ * 创建多条信息
+ */
+const bulkCreate = async (ctx, next) => {
+  ctx.body = await model.<%- modelKey -%>.bulkCreate(ctx.request.body);
+  await next();
+};
+<% } %>
+
+
+<% if(model['x-apis']includes('bulkUpdate')) { %>
+/**
+ * 更新多条信息
+ */
+const bulkUpdate = async (ctx, next) => {
+  ctx.body = await model.<%- modelKey -%>.update(ctx.request.body.fields, {
+    where: ctx.request.body.filter
+  });
+  await next();
+};
+<% } %>
+
+
+<% if(model['x-apis']includes('updateById')) { %>
+/**
+ * 更新单条信息
+ */
+const updateById = async (ctx, next) => {
+  const obj = await model.<%- modelKey -%>.findById(ctx.params.id);
+  ctx.body = await obj.update(ctx.request.body);
+  await next();
+};
+<% } %>
+
+
+<% if(model['x-apis']includes('bulkDestroy')) { %>
+/**
+ * 删除多条信息
+ */
+const bulkDestroy = async (ctx, next) => {
+  ctx.body = await model.<%- modelKey -%>.destroy({
+    where: ctx.request.body
+  });
+  await next();
+};
+<% } %>
+
+
+<% if(model['x-apis']includes('destroyById')) { %>
+/**
+ * 删除单条信息
+ */
+const destroyById = async (ctx, next) => {
+  const obj = await model.<%- modelKey -%>.findById(ctx.params.id);
+  ctx.body = await obj.destroy();
+  await next();
+};
+<% } %>
+
+
+<% if(model['x-apis']includes('findOne')) { %>
+/**
+ * 查询单条信息
+ */
+const findOne = async (ctx, next) => {
+  ctx.body = await model.<%- modelKey -%>.findOne({ where: ctx.query });
+  await next();
+};
+<% } %>
+
+
+<% if(model['x-apis']includes('findOrCreate')) { %>
+/**
+ * 查询或创建单条信息
+ */
+const findOrCreate = async (ctx, next) => {
+  const [data, is_new_record] = await model.<%- modelKey -%>.findOrCreate({
+    where: ctx.request.body
+  });
+  ctx.body = {
+    // ...data.toJSON(),
+    ...data.get({ plain: true }),
+    is_new_record
+  };
+  await next();
+};
+<% } %>
+
+
+export default {
+  <% model['x-apis'].forEach(item=>{ %>
+  <%- item %>,
+  <% }) %>
+};

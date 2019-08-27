@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+  koa:
+    build: .
+    restart: always
+    depends_on:
+      - mysql
+    ports:
+      - 3000:3000
+    volumes:
+      - "./vol/logs:/app/dist/log"
+    networks:
+      - koarest
+  mysql:
+    image: mysql
+    restart: always
+    networks:
+      - koarest
+    volumes:
+      - ./vol/mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: '123456'
+      MYSQL_DATABASE: 'testdb'
+      # MYSQL_USER: 'user'
+      # MYSQL_PASSWORD: '123456'
+    ports:
+      - 3306:3306
+    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']

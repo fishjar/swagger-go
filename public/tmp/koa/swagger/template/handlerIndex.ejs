@@ -1,10 +1,12 @@
+import Account from "./Account";
 <% Object.entries(definitions)
   .filter(([_,model])=>model['x-isModel'])
   .forEach(([modelKey]) => { -%>
-import <%- modelKey -%> from "./<%- modelKey.toLowerCase() -%>";
+import <%- modelKey -%> from "./<%- modelKey -%>";
 <% }) -%>
 
 export default {
+  Account,
 <% Object.entries(definitions)
   .filter(([_,model])=>model['x-isModel'])
   .forEach(([modelKey]) => { -%>

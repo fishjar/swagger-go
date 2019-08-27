@@ -1,0 +1,13 @@
+<% Object.entries(definitions)
+  .filter(([_,model])=>model['x-isModel'])
+  .forEach(([modelKey]) => { -%>
+import <%- modelKey -%> from "./<%- modelKey -%>";
+<% }) -%>
+
+export default {
+<% Object.entries(definitions)
+  .filter(([_,model])=>model['x-isModel'])
+  .forEach(([modelKey]) => { -%>
+  <%- modelKey -%>,
+<% }) -%>
+};
