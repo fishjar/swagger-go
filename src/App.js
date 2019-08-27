@@ -233,8 +233,9 @@ function App() {
                   </Button>
                   <Button
                     icon="number"
+                    loading={isTest}
                     onClick={() => {
-                      setTest(true)
+                      setTest(true);
                     }}
                   >
                     Test

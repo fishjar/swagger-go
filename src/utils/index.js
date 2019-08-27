@@ -361,3 +361,22 @@ export const downloadBoilerplate = () => {
     });
   });
 };
+
+export const generateBoilerplate = ({ definitions, dataFormats }) => {
+  console.log(definitions);
+  console.log(dataFormats);
+  return new Promise((resolve, reject) => {
+    ipcRenderer.send("generate-boilerplate", "koa", {
+      definitions,
+      dataFormats,
+    });
+    ipcRenderer.on("generate-boilerplate-ok", (event, str) => {
+      console.log(str);
+      resolve("生成模板文件成功");
+    });
+    ipcRenderer.on("generate-boilerplate-err", (event, err) => {
+      console.log(err);
+      reject(new Error("生成模板文件失败"));
+    });
+  });
+};

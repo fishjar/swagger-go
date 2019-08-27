@@ -2,6 +2,8 @@ const path = require("path");
 const fs = require("fs");
 const { ipcMain, dialog } = require("electron");
 const downloadRepo = require("download-git-repo");
+const ejs = require("ejs");
+const prettier = require("prettier");
 
 /**
  * 监听打开文件
@@ -131,3 +133,60 @@ ipcMain.on("download-boilerplate", (event, boilerplateName) => {
     }
   });
 });
+
+ipcMain.on(
+  "generate-boilerplate",
+  (event, boilerplateName, { definitions, dataFormats }) => {
+    // const repo = boilerplates[boilerplateName];
+    // const temDir = path.join(__dirname, "tmp", boilerplateName);
+    // downloadRepo(repo, temDir, err => {
+    //   if (err) {
+    //     event.sender.send("download-boilerplate-err", err);
+    //   } else {
+    //     event.sender.send("download-boilerplate-ok");
+    //   }
+    // });
+    const [modelKey, model] = Object.entries(definitions).find(
+      ([_, item]) => item["x-isModel"]
+    );
+    // const modelKey = Object.keys(definitions)[0];
+    // const model = definitions[modelKey];
+    // console.log(modelKey);
+    // console.log(model);
+
+    ejs.renderFile(
+      path.join(
+        __dirname,
+        "tmp",
+        boilerplateName,
+        "swagger",
+        "template",
+        "model.ejs"
+      ),
+      { definitions, modelKey, model, dataFormats },
+      function(err, str) {
+        if (err) {
+          console.log(err);
+          event.sender.send("generate-boilerplate-err", err);
+        } else {
+          console.log("----1----");
+          console.log(str);
+          console.log("----2----");
+          try {
+            const formatStr = prettier.format(str, {
+              semi: true,
+              trailingComma: "es5",
+              parser: "babel",
+            });
+            console.log(formatStr);
+            event.sender.send("generate-boilerplate-ok", formatStr);
+          } catch (err) {
+            console.log("格式化失败");
+            console.log(err);
+            event.sender.send("generate-boilerplate-err", err);
+          }
+        }
+      }
+    );
+  }
+);

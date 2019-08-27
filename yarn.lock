@@ -6971,11 +6971,6 @@ multicast-dns@^6.0.1:
     dns-packet "^1.3.1"
     thunky "^1.0.2"
 
-mustache@^3.0.2:
-  version "3.0.2"
-  resolved "https://registry.npm.taobao.org/mustache/download/mustache-3.0.2.tgz#35bb886a1e5baad0a8f192258fe9a904f711868c"
-  integrity sha1-NbuIah5bqtCo8ZIlj+mpBPcRhow=
-
 mutationobserver-shim@^0.3.2:
   version "0.3.3"
   resolved "https://registry.npm.taobao.org/mutationobserver-shim/download/mutationobserver-shim-0.3.3.tgz#65869630bc89d7bf8c9cd9cb82188cd955aacd2b"
@@ -8325,6 +8320,11 @@ prelude-ls@~1.1.2:
 prepend-http@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npm.taobao.org/prepend-http/download/prepend-http-2.0.0.tgz#e92434bfa5ea8c19f41cdfd401d741a3c819d897"
+
+prettier@^1.18.2:
+  version "1.18.2"
+  resolved "https://registry.npm.taobao.org/prettier/download/prettier-1.18.2.tgz#6823e7c5900017b4bd3acf46fe9ac4b4d7bda9ea"
+  integrity sha1-aCPnxZAAF7S9Os9G/prEtNe9qeo=
 
 pretty-bytes@^1.0.2:
   version "1.0.4"

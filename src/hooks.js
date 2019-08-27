@@ -7,7 +7,9 @@ import {
   writeLocalStorage,
   readLocalStorage, // 缓存数据
   downloadBoilerplate,
+  generateBoilerplate,
 } from "./utils";
+import { dataFormats } from "./config";
 import definitionsToPaths from "./utils/definitionsToPaths";
 
 /**
@@ -133,17 +135,32 @@ export const useData = () => {
   }, [isSaving]);
 
   useEffect(() => {
-    const downloadFiles = async () => {
+    // const downloadFiles = async () => {
+    //   try {
+    //     await downloadBoilerplate(state);
+    //     message.success("下载成功");
+    //   } catch (err) {
+    //     message.error(err.message || "下载失败");
+    //   } finally {
+    //     setTest(false);
+    //   }
+    // };
+    // isTest && downloadFiles();
+
+    const generateFiles = async () => {
       try {
-        await downloadBoilerplate(state);
-        message.success("下载成功");
+        await generateBoilerplate({
+          definitions: state.definitions,
+          dataFormats,
+        });
+        message.success("生成成功");
       } catch (err) {
-        message.error(err.message || "下载失败");
+        message.error(err.message || "生成失败");
       } finally {
         setTest(false);
       }
     };
-    isTest && downloadFiles();
+    isTest && generateFiles();
   }, [isTest]);
 
   useEffect(() => {

@@ -4,13 +4,12 @@ import sequelize from "../db";
   .filter(([_,field])=>field.$ref)
   .forEach(([fieldKey,field])=>{
     const refModelKey = field.$ref.replace('#/definitions/','');
-    const refTableName = definitions[refModelKey]['x-tableName'];
 %>
-import <%- refModelKey -%> from "./<%- refTableName -%>";
+import <%- refModelKey -%> from "./<%- refModelKey -%>";
 <% }) %>
 
 const <%- modelKey -%> = sequelize.define(
-  "<%- modelKey.toLowerCase() -%>",
+  "<%- modelKey -%>",
   {
     <% Object.entries(model.properties).forEach(([fieldKey,field])=>{ -%>
       <%- fieldKey -%>: {
@@ -21,13 +20,13 @@ const <%- modelKey -%> = sequelize.define(
         <% } %>
 
         <% if(field.$ref) { %>
-        type: Sequelize.<%- dataFormats.['object'][0] -%>,
+        type: Sequelize.<%- dataFormats['object'][0] -%>,
         <% } else if (field['x-foreignKey']) { %>
-        type: Sequelize.<%- dataFormats.[field.format][0] -%>,
+        type: Sequelize.<%- dataFormats[field.format][0] -%>,
         references: {
           model: <%- field['x-ref'].replace('#/definitions/','') -%>,
           key: "<%- field['x-refFieldKey'] -%>",
-        }
+        },
         <% } else { %>
         type: Sequelize.<%- dataFormats[field.format][0] -%>,
         <% } -%>
@@ -39,7 +38,7 @@ const <%- modelKey -%> = sequelize.define(
         <% } -%>
 
         <% if (field['x-primaryKey']) { -%>
-        primaryKey: true
+        primaryKey: true,
         <% } -%>
 
         <% if (field.uniqueItems) { %>
@@ -75,7 +74,7 @@ const <%- modelKey -%> = sequelize.define(
     underscored: true, // 下划线字段
     paranoid: true, // 软删除
     freezeTableName: true, // 禁用修改表名
-    tableName: "<%- modelKey.toLowerCase() -%>", // 定义表的名称
+    tableName: "<%- model['x-tableName'] -%>", // 定义表的名称
   }
 );
 
