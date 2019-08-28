@@ -307,7 +307,7 @@ ipcMain.on("archiver-boilerplate", (event, boilerplateName, outDir) => {
     archive.directory(temDir, boilerplateName);
     archive.finalize();
   } catch (err) {
-    console.log("压缩错误");
+    console.log("打包错误");
     console.log(err);
     event.sender.send("archiver-boilerplate-err", err);
   }

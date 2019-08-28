@@ -1,7 +1,8 @@
-swagger: '3.0'
+swagger: '2.0'
 info:
   version: 0.0.1
   title: Hello World App
+  description: app description
 host: 'localhost:3000'
 basePath: /
 schemes:
@@ -16,6 +17,7 @@ securityDefinitions:
     type: apiKey
     in: header
     name: X-API-Key
+    description: test description
   JWT:
     description: 'Authorization: Bearer {token}'
     type: apiKey
@@ -59,170 +61,6 @@ paths:
           $ref: '#/responses/Unauthorized'
         '404':
           $ref: '#/responses/NotFound'
-  /foos:
-    post:
-      summary: 创建单个
-      description: 创建单个...
-      parameters:
-        - in: body
-          name: body
-          description: 模型参数
-          required: true
-          schema:
-            $ref: '#/definitions/Foo'
-      responses:
-        '200':
-          description: 创建成功
-    get:
-      summary: 查询集合
-      description: 查询集合...
-      parameters:
-        - in: query
-          name: page_num
-          type: integer
-          description: 页码
-          default: 1
-        - in: query
-          name: page_size
-          type: integer
-          description: 分页大小
-          default: 10
-        - in: query
-          name: sorter
-          type: string
-          description: 排序(created_at__desc)
-      responses:
-        '200':
-          description: 查询成功
-          schema:
-            type: object
-            properties:
-              count:
-                type: integer
-              rows:
-                type: array
-                items:
-                  $ref: '#/definitions/Foo'
-    patch:
-      summary: 更新集合
-      description: 更新集合...
-      parameters:
-        - in: body
-          name: body
-          description: body参数
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Foo'
-      responses:
-        '200':
-          description: 更新成功
-    delete:
-      summary: 删除集合
-      description: 删除集合...
-      parameters:
-        - in: body
-          name: body
-          description: body参数
-          schema:
-            type: object
-            example:
-              id:
-                - '1'
-                - '2'
-      responses:
-        '200':
-          description: 更新成功
-  '/foos/{id}':
-    get:
-      summary: 查询单个
-      description: 查询单个..
-      parameters:
-        - in: path
-          name: id
-          type: string
-          required: true
-          description: ID
-      responses:
-        '200':
-          description: 查询成功
-          schema:
-            $ref: '#/definitions/Foo'
-    patch:
-      summary: 修改单个
-      description: 修改单个..
-      parameters:
-        - in: path
-          name: id
-          type: string
-          required: true
-          description: ID
-        - in: body
-          name: body
-          description: 模型参数
-          required: true
-          schema:
-            $ref: '#/definitions/Foo'
-      responses:
-        '200':
-          description: 修改成功
-    delete:
-      summary: 删除单个
-      description: 删除单个..
-      parameters:
-        - in: path
-          name: id
-          type: string
-          required: true
-          description: ID
-      responses:
-        '200':
-          description: 删除成功
-  /foos/multiple:
-    post:
-      summary: 创建集合
-      description: 创建集合...
-      parameters:
-        - in: body
-          name: body
-          description: body参数
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Foo'
-      responses:
-        '200':
-          description: 创建成功
-  /foo:
-    get:
-      summary: 查询单个
-      description: 查询单个..
-      parameters:
-        - in: query
-          name: id
-          type: string
-          required: true
-          description: 可以是任意参数
-      responses:
-        '200':
-          description: 查询成功
-          schema:
-            $ref: '#/definitions/Foo'
-    post:
-      summary: 查找或创建单个
-      description: 查找或创建单个...
-      parameters:
-        - in: body
-          name: body
-          description: 模型参数
-          required: true
-          schema:
-            $ref: '#/definitions/Foo'
-      responses:
-        '200':
-          description: 创建成功
-          schema:
-            $ref: '#/definitions/Foo'
 definitions:
   Foo:
     type: object
@@ -230,15 +68,15 @@ definitions:
     x-plural: Foos
     x-tableName: foo
     x-apis:
-      - 1
-      - 3
-      - 5
+      - findOne
+      - findOrCreate
+      - singleCreate
     description: 测试模型
     required:
       - id
       - name
-      - good_time
-      - is_good
+      - goodTime
+      - isGood
       - status
     properties:
       id:
@@ -246,6 +84,21 @@ definitions:
         format: uuid
         description: ID
         uniqueItems: true
+        x-primaryKey: true
+        x-fieldName: id
+      user:
+        x-fieldName: user
+        x-refFieldKey: id
+        x-description: 引用用户ID
+        $ref: '#/definitions/UserDemo'
+      userId:
+        type: string
+        format: string
+        description: 引用用户ID
+        x-fieldName: user_id
+        x-foreignKey: true
+        x-refFieldKey: id
+        x-ref: '#/definitions/UserDemo'
       name:
         type: string
         format: string
@@ -257,6 +110,7 @@ definitions:
         x-showTable: true
         x-showFilter: true
         x-length: 20
+        x-fieldName: name
       age:
         type: integer
         format: int4
@@ -267,6 +121,7 @@ definitions:
         x-showTable: true
         x-showFilter: true
         x-showSorter: true
+        x-fieldName: age
       weight:
         type: number
         format: float
@@ -277,6 +132,7 @@ definitions:
         x-showTable: true
         x-showFilter: true
         x-showSorter: true
+        x-fieldName: weight
       birthday:
         type: string
         format: date
@@ -284,13 +140,15 @@ definitions:
         x-message: 请选择
         x-showTable: true
         x-showSorter: true
-      good_time:
+        x-fieldName: birthday
+      goodTime:
         type: string
         format: date-time
         description: 快乐时光
         x-message: 请选择
         x-showTable: true
         x-showSorter: true
+        x-fieldName: good_time
       email:
         type: string
         format: email
@@ -299,23 +157,27 @@ definitions:
         x-message: 请输入
         x-showTable: true
         x-showFilter: true
+        x-fieldName: email
       homepage:
         type: string
         format: uri
         description: 主页
         x-message: 请输入
+        x-fieldName: homepage
       notice:
         type: string
         format: text
         description: 备注
         x-message: 请输入
+        x-fieldName: notice
       intro:
         type: string
         format: text
         description: 介绍
         x-message: 请输入
         x-isRichText: true
-      is_good:
+        x-fieldName: intro
+      isGood:
         type: boolean
         format: boolean
         description: 是否安好
@@ -323,11 +185,13 @@ definitions:
         x-message: 请选择
         x-showTable: true
         x-showFilter: true
-      my_extra:
+        x-fieldName: is_good
+      myExtra:
         type: object
         format: object
         description: 扩展字段1
         x-message: 请输入
+        x-fieldName: my_extra
         properties:
           id:
             type: integer
@@ -335,12 +199,20 @@ definitions:
           username:
             type: string
             description: 用户名
-      my_extra_array:
+      myExtraArray:
         type: array
         format: array
         description: 扩展字段2
+        x-fieldName: my_extra_array
         items:
           $ref: '#/definitions/UserDemo'
+      tages:
+        type: array
+        format: array
+        description: 标签
+        x-fieldName: tages
+        items:
+          type: string
       status:
         type: integer
         format: int4
@@ -352,6 +224,7 @@ definitions:
         x-message: 请选择
         x-showTable: true
         x-showFilter: true
+        x-fieldName: status
         x-enumMap:
           '1': 正常
           '2': 异常
@@ -367,10 +240,10 @@ definitions:
       age: 12
       name: foo
       birthday: '2012-12-12'
-      good_time: '2012-12-12 12:12:12'
+      goodTime: '2012-12-12 12:12:12'
       email: test@test.com
       notice: 备注
-      is_good: true
+      isGood: true
       status: 1
   UserDemo:
     type: object

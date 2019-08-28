@@ -46,6 +46,8 @@ function App() {
     setPage,
     showCode,
     setShowCode,
+    showGenerator,
+    setShowGenerator,
     dispatch,
     isUndo,
     setUndo,
@@ -119,7 +121,7 @@ function App() {
                 setResetting(true);
               }}
             >
-              Boilerplate
+              Sample
             </Button>
           </Col>
           <Col>
@@ -167,11 +169,7 @@ function App() {
             </Menu>
             {page === "edit" && (
               <div className="header_buttons">
-                <ButtonGroup
-                  style={{
-                    marginRight: 16,
-                  }}
-                >
+                <ButtonGroup>
                   <Button
                     icon="undo"
                     loading={isUndo}
@@ -192,28 +190,6 @@ function App() {
                   >
                     Redo
                   </Button>
-                </ButtonGroup>
-                <ButtonGroup>
-                  {/* <Button
-                    icon="upload"
-                    loading={isLoading}
-                    disabled={isLoading}
-                    onClick={() => {
-                      setLoading(true);
-                    }}
-                  >
-                    Import
-                  </Button> */}
-                  <Button
-                    icon="download"
-                    loading={isSaving}
-                    disabled={!state || isSaving}
-                    onClick={() => {
-                      setSaving(true);
-                    }}
-                  >
-                    Export
-                  </Button>
                   <Button icon="close" loading={isClose} onClick={handleClose}>
                     Close
                   </Button>
@@ -224,7 +200,7 @@ function App() {
               <div className="header_buttons">
                 <ButtonGroup>
                   <Button
-                    icon="number"
+                    icon="code"
                     onClick={() => {
                       setShowCode(true);
                     }}
@@ -232,6 +208,24 @@ function App() {
                     Code
                   </Button>
                   <Button
+                    icon="download"
+                    loading={isSaving}
+                    disabled={!state || isSaving}
+                    onClick={() => {
+                      setSaving(true);
+                    }}
+                  >
+                    Export
+                  </Button>
+                  <Button
+                    icon="experiment"
+                    onClick={() => {
+                      setShowGenerator(true);
+                    }}
+                  >
+                    Generator
+                  </Button>
+                  {/* <Button
                     icon="number"
                     loading={isTest}
                     onClick={() => {
@@ -239,7 +233,7 @@ function App() {
                     }}
                   >
                     Test
-                  </Button>
+                  </Button> */}
                 </ButtonGroup>
               </div>
             )}
@@ -282,6 +276,8 @@ function App() {
               <Preview
                 showCode={showCode}
                 setShowCode={setShowCode}
+                showGenerator={showGenerator}
+                setShowGenerator={setShowGenerator}
                 state={state}
               />
             </div>

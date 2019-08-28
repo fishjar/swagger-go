@@ -80,6 +80,7 @@ export const useData = () => {
   const [isRedo, setRedo] = useState(false);
   const [page, setPage] = useState("edit");
   const [showCode, setShowCode] = useState(false);
+  const [showGenerator, setShowGenerator] = useState(false);
   const [current, setCurrent] = useState(0);
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
@@ -187,7 +188,6 @@ export const useData = () => {
     //   }
     // };
     // isTest && generateFiles();
-
   }, [isTest]);
 
   useEffect(() => {
@@ -318,5 +318,7 @@ export const useData = () => {
     current,
     isTest,
     setTest,
+    showGenerator,
+    setShowGenerator,
   };
 };
