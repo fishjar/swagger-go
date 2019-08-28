@@ -1,6 +1,6 @@
 import model from "../model";
 
-<% if(model['x-apis']includes('findAndCountAll')) { %>
+<% if(model['x-apis'].includes('findAndCountAll')) { %>
 /**
  * 查询多条信息
  */
@@ -23,7 +23,7 @@ const findAndCountAll = async (ctx, next) => {
 <% } %>
 
 
-<% if(model['x-apis']includes('findById')) { %>
+<% if(model['x-apis'].includes('findById')) { %>
 /**
  * 根据ID查询单条信息
  */
@@ -34,7 +34,7 @@ const findById = async (ctx, next) => {
 <% } %>
 
 
-<% if(model['x-apis']includes('singleCreate')) { %>
+<% if(model['x-apis'].includes('singleCreate')) { %>
 /**
  * 创建单条信息
  */
@@ -45,7 +45,7 @@ const singleCreate = async (ctx, next) => {
 <% } %>
 
 
-<% if(model['x-apis']includes('bulkCreate')) { %>
+<% if(model['x-apis'].includes('bulkCreate')) { %>
 /**
  * 创建多条信息
  */
@@ -56,7 +56,7 @@ const bulkCreate = async (ctx, next) => {
 <% } %>
 
 
-<% if(model['x-apis']includes('bulkUpdate')) { %>
+<% if(model['x-apis'].includes('bulkUpdate')) { %>
 /**
  * 更新多条信息
  */
@@ -69,7 +69,7 @@ const bulkUpdate = async (ctx, next) => {
 <% } %>
 
 
-<% if(model['x-apis']includes('updateById')) { %>
+<% if(model['x-apis'].includes('updateById')) { %>
 /**
  * 更新单条信息
  */
@@ -81,7 +81,7 @@ const updateById = async (ctx, next) => {
 <% } %>
 
 
-<% if(model['x-apis']includes('bulkDestroy')) { %>
+<% if(model['x-apis'].includes('bulkDestroy')) { %>
 /**
  * 删除多条信息
  */
@@ -94,7 +94,7 @@ const bulkDestroy = async (ctx, next) => {
 <% } %>
 
 
-<% if(model['x-apis']includes('destroyById')) { %>
+<% if(model['x-apis'].includes('destroyById')) { %>
 /**
  * 删除单条信息
  */
@@ -106,7 +106,7 @@ const destroyById = async (ctx, next) => {
 <% } %>
 
 
-<% if(model['x-apis']includes('findOne')) { %>
+<% if(model['x-apis'].includes('findOne')) { %>
 /**
  * 查询单条信息
  */
@@ -117,7 +117,7 @@ const findOne = async (ctx, next) => {
 <% } %>
 
 
-<% if(model['x-apis']includes('findOrCreate')) { %>
+<% if(model['x-apis'].includes('findOrCreate')) { %>
 /**
  * 查询或创建单条信息
  */

@@ -1,0 +1,26 @@
+{
+  "globalEjs": [
+    {
+      "ejsFile": "swagger/template/router.ejs",
+      "outFile": "src/router/index.js"
+    },
+    {
+      "ejsFile": "swagger/template/modelIndex.ejs",
+      "outFile": "src/model/index.js"
+    },
+    {
+      "ejsFile": "swagger/template/handlerIndex.ejs",
+      "outFile": "src/handler/index.js"
+    }
+  ],
+  "modelEjs": [
+    {
+      "ejsFile": "swagger/template/model.ejs",
+      "outFile": "src/model/*.js"
+    },
+    {
+      "ejsFile": "swagger/template/handler.ejs",
+      "outFile": "src/handler/*.js"
+    }
+  ]
+}

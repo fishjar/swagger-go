@@ -1,0 +1,58 @@
+import Router from "koa-router";
+import handler from "../handler";
+
+const router = new Router();
+
+router
+  <% Object.entries(definitions)
+    .filter(([_,model])=>model['x-isModel'])
+    .forEach(([modelKey,model]) => { 
+    const modelKeyLower = modelKey.toLowerCase();
+    const modelKeyPlural = model["x-plural"].toLowerCase();
+  -%>
+
+  <% if(model['x-apis'].includes('findOne')) { %>
+    .get("/<%- modelKeyLower -%>", handler.<%- modelKey -%>.findOne)                 // 根据条件查找单条
+  <% } %>
+
+  <% if(model['x-apis'].includes('findOrCreate')) { %>
+    .post("/<%- modelKeyLower -%>", handler.<%- modelKey -%>.findOrCreate)           // 查找或创建单条
+  <% } %>
+  
+  <% if(model['x-apis'].includes('findAndCountAll')) { %>
+    .get("/<%- modelKeyPlural -%>", handler.<%- modelKey -%>.findAndCountAll)        // 获取多条
+  <% } %>
+  
+  <% if(model['x-apis'].includes('singleCreate')) { %>
+    .post("/<%- modelKeyPlural -%>", handler.<%- modelKey -%>.singleCreate)          // 创建单条
+  <% } %>
+  
+  <% if(model['x-apis'].includes('bulkUpdate')) { %>
+    .patch("/<%- modelKeyPlural -%>", handler.<%- modelKey -%>.bulkUpdate)           // 更新多条
+  <% } %>
+  
+  <% if(model['x-apis'].includes('bulkDestroy')) { %>
+    .delete("/<%- modelKeyPlural -%>", handler.<%- modelKey -%>.bulkDestroy)         // 删除多条
+  <% } %>
+  
+  <% if(model['x-apis'].includes('findById')) { %>
+    .get("/<%- modelKeyPlural -%>/:id", handler.<%- modelKey -%>.findById)           // 根据ID查找单条
+  <% } %>
+  
+  <% if(model['x-apis'].includes('updateById')) { %>
+    .patch("/<%- modelKeyPlural -%>/:id", handler.<%- modelKey -%>.updateById)       // 更新单条
+  <% } %>
+  
+  <% if(model['x-apis'].includes('destroyById')) { %>
+    .delete("/<%- modelKeyPlural -%>/:id", handler.<%- modelKey -%>.destroyById)     // 删除单条
+  <% } %>
+  
+  <% if(model['x-apis'].includes('bulkCreate')) { %>
+    .post("/<%- modelKeyPlural -%>/multiple", handler.<%- modelKey -%>.bulkCreate)   // 创建多条
+  <% } %>
+
+  <% }) -%>
+
+  .post("/account/login", handler.Account.login);
+
+export default router;

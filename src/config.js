@@ -136,3 +136,8 @@ export const dataFormats = Object.assign(
 );
 
 export const standDataTypes = Object.keys(dataTypes);
+
+
+export const boilerplates = {
+  koa: "fishjar/koa-rest-boilerplate#dev",
+};

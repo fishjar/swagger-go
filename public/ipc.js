@@ -4,6 +4,8 @@ const { ipcMain, dialog } = require("electron");
 const downloadRepo = require("download-git-repo");
 const ejs = require("ejs");
 const prettier = require("prettier");
+const archiver = require("archiver");
+const fse = require("fs-extra");
 
 /**
  * 监听打开文件
@@ -23,6 +25,25 @@ ipcMain.on("open-file-dialog", event => {
         event.sender.send("open-file-ok", filePaths);
       } else {
         event.sender.send("open-file-err");
+      }
+    }
+  );
+});
+
+/**
+ * 监听打开文件夹
+ */
+ipcMain.on("open-path-dialog", event => {
+  dialog.showOpenDialog(
+    {
+      title: "请选择一个文件",
+      properties: ["openDirectory"],
+    },
+    filePaths => {
+      if (filePaths) {
+        event.sender.send("open-path-ok", filePaths);
+      } else {
+        event.sender.send("open-path-err");
       }
     }
   );
@@ -119,13 +140,12 @@ ipcMain.on("write-cache", (event, data) => {
   });
 });
 
-const boilerplates = {
-  koa: "fishjar/koa-rest-boilerplate#dev",
-};
-ipcMain.on("download-boilerplate", (event, boilerplateName) => {
-  const repo = boilerplates[boilerplateName];
-  const temDir = path.join(__dirname, "tmp", boilerplateName);
-  downloadRepo(repo, temDir, err => {
+/**
+ * 下载样板文件
+ */
+ipcMain.on("download-boilerplate", (event, boilerplateName, repoUrl) => {
+  const localDir = path.join(__dirname, "download", boilerplateName);
+  downloadRepo(repoUrl, localDir, err => {
     if (err) {
       event.sender.send("download-boilerplate-err", err);
     } else {
@@ -134,59 +154,176 @@ ipcMain.on("download-boilerplate", (event, boilerplateName) => {
   });
 });
 
+/**
+ * 生成样板文件
+ */
 ipcMain.on(
   "generate-boilerplate",
-  (event, boilerplateName, { definitions, dataFormats }) => {
-    // const repo = boilerplates[boilerplateName];
-    // const temDir = path.join(__dirname, "tmp", boilerplateName);
-    // downloadRepo(repo, temDir, err => {
-    //   if (err) {
-    //     event.sender.send("download-boilerplate-err", err);
-    //   } else {
-    //     event.sender.send("download-boilerplate-ok");
-    //   }
-    // });
-    const [modelKey, model] = Object.entries(definitions).find(
-      ([_, item]) => item["x-isModel"]
+  (event, boilerplateName, { definitions, dataFormats, isOnline = false }) => {
+    const modelKeys = Object.keys(definitions).filter(
+      key => definitions[key]["x-isModel"]
     );
-    // const modelKey = Object.keys(definitions)[0];
-    // const model = definitions[modelKey];
-    // console.log(modelKey);
-    // console.log(model);
+    const sourceDir = path.join(
+      __dirname,
+      isOnline ? "download" : "boilerplate",
+      boilerplateName
+    );
+    const tmpDir = path.join(__dirname, "tmp", boilerplateName);
 
-    ejs.renderFile(
-      path.join(
-        __dirname,
-        "tmp",
-        boilerplateName,
-        "swagger",
-        "template",
-        "model.ejs"
-      ),
-      { definitions, modelKey, model, dataFormats },
-      function(err, str) {
-        if (err) {
-          console.log(err);
-          event.sender.send("generate-boilerplate-err", err);
-        } else {
-          console.log("----1----");
-          console.log(str);
-          console.log("----2----");
-          try {
-            const formatStr = prettier.format(str, {
-              semi: true,
-              trailingComma: "es5",
-              parser: "babel",
-            });
-            console.log(formatStr);
-            event.sender.send("generate-boilerplate-ok", formatStr);
-          } catch (err) {
-            console.log("格式化失败");
+    const swaggerEjs = require(path.join(sourceDir, "swagger", "ejs.json"));
+    const { globalEjs = [], modelEjs = [] } = swaggerEjs;
+
+    const renderPromise = (ejsFile, data) => {
+      return new Promise((resolve, reject) => {
+        ejs.renderFile(ejsFile, data, function(err, str) {
+          if (err) {
+            console.log("渲染失败");
             console.log(err);
-            event.sender.send("generate-boilerplate-err", err);
+            reject(err);
+          } else {
+            // console.log(str);
+            try {
+              let formatStr = "";
+              if (boilerplateName === "koa") {
+                formatStr = prettier.format(str, {
+                  semi: true,
+                  trailingComma: "es5",
+                  parser: "babel",
+                });
+              }
+              resolve(formatStr);
+            } catch (err) {
+              console.log("格式化失败");
+              console.log(err);
+              reject(err);
+            }
           }
-        }
-      }
-    );
+        });
+      });
+    };
+
+    const doPromise = (ejsFile, outFile, data) => {
+      return fse
+        .remove(outFile)
+        .then(() => {
+          console.log("删除成功", outFile);
+          return renderPromise(ejsFile, data);
+        })
+        .then(fileStr => {
+          console.log("渲染成功", outFile);
+          return fse.outputFile(outFile, fileStr);
+        });
+    };
+
+    fse
+      .emptyDir(tmpDir)
+      .then(() => {
+        console.log("清空文件夹", tmpDir);
+        return fse.copy(sourceDir, tmpDir);
+      })
+      .then(() => {
+        console.log("拷贝成功");
+        return Promise.all(
+          globalEjs.map(item => {
+            const ejsFile = path.join(tmpDir, item.ejsFile);
+            const outFile = path.join(tmpDir, item.outFile);
+            return doPromise(ejsFile, outFile, { definitions, dataFormats });
+          })
+        );
+      })
+      .then(() => {
+        console.log("生成全局文件成功");
+        const tasks = [];
+        modelKeys.forEach(key => {
+          modelEjs.forEach(item => {
+            const ejsFile = path.join(tmpDir, item.ejsFile);
+            const outFile = path.join(
+              tmpDir,
+              item.outFile.replace("*", key.toLowerCase())
+            );
+            tasks.push(
+              doPromise(ejsFile, outFile, {
+                definitions,
+                modelKey: key,
+                model: definitions[key],
+                dataFormats,
+              })
+            );
+          });
+        });
+        return Promise.all(tasks);
+      })
+      .then(() => {
+        console.log("生成模型文件成功");
+        event.sender.send("generate-boilerplate-ok");
+      })
+      .catch(err => {
+        console.log(err);
+        event.sender.send("generate-boilerplate-err", err);
+      });
   }
 );
+
+/**
+ * 打包样板文件
+ */
+ipcMain.on("archiver-boilerplate", (event, boilerplateName, outDir) => {
+  const temDir = path.join(__dirname, "tmp", boilerplateName);
+
+  try {
+    var output = fs.createWriteStream(
+      path.join(outDir, `${boilerplateName}.zip`)
+    );
+    var archive = archiver("zip", {
+      zlib: { level: 9 },
+    });
+
+    output.on("close", function() {
+      console.log(archive.pointer() + " total bytes");
+      console.log("打包成功");
+      event.sender.send("archiver-boilerplate-ok");
+    });
+
+    output.on("end", function() {
+      console.log("Data has been drained");
+    });
+
+    archive.on("warning", function(err) {
+      console.log("警告", err);
+      event.sender.send("archiver-boilerplate-err", err);
+      if (err.code === "ENOENT") {
+        //
+      } else {
+        //
+      }
+    });
+
+    archive.on("error", function(err) {
+      console.log("打包失败");
+      event.sender.send("archiver-boilerplate-err", err);
+    });
+
+    archive.pipe(output);
+    archive.directory(temDir, boilerplateName);
+    archive.finalize();
+  } catch (err) {
+    console.log("压缩错误");
+    console.log(err);
+    event.sender.send("archiver-boilerplate-err", err);
+  }
+});
+
+/**
+ * 拷贝样板文件
+ */
+ipcMain.on("copy-boilerplate", (event, boilerplateName, outDir) => {
+  const temDir = path.join(__dirname, "tmp", boilerplateName);
+  fse.copy(temDir, outDir, err => {
+    if (err) {
+      console.log("拷贝错误");
+      event.sender.send("copy-boilerplate-err", err);
+    } else {
+      event.sender.send("copy-boilerplate-ok");
+    }
+  });
+});

@@ -8,6 +8,8 @@ import {
   readLocalStorage, // 缓存数据
   downloadBoilerplate,
   generateBoilerplate,
+  archiverBoilerplate,
+  openPath,
 } from "./utils";
 import { dataFormats } from "./config";
 import definitionsToPaths from "./utils/definitionsToPaths";
@@ -161,6 +163,31 @@ export const useData = () => {
       }
     };
     isTest && generateFiles();
+
+    // const generateFiles = async () => {
+    //   try {
+    //     await openPath();
+    //     message.success("选择成功");
+    //   } catch (err) {
+    //     message.error(err.message || "选择失败");
+    //   } finally {
+    //     setTest(false);
+    //   }
+    // };
+    // isTest && generateFiles();
+
+    // const generateFiles = async () => {
+    //   try {
+    //     await archiverBoilerplate();
+    //     message.success("打包成功");
+    //   } catch (err) {
+    //     message.error(err.message || "失败");
+    //   } finally {
+    //     setTest(false);
+    //   }
+    // };
+    // isTest && generateFiles();
+
   }, [isTest]);
 
   useEffect(() => {

@@ -48,6 +48,22 @@ export const openFile = () => {
 };
 
 /**
+ * 打开文件夹
+ */
+export const openPath = () => {
+  return new Promise((resolve, reject) => {
+    ipcRenderer.send("open-path-dialog");
+    ipcRenderer.on("open-path-ok", (event, filePaths) => {
+      console.log(filePaths);
+      resolve(filePaths[0]);
+    });
+    ipcRenderer.on("open-path-err", event => {
+      reject(new Error("打开文件夹失败或已取消"));
+    });
+  });
+};
+
+/**
  * 读取文件
  * @param {String} filePath
  */
@@ -349,34 +365,74 @@ export const parseArrayToObject = (a, key = "key") => {
   return o;
 };
 
-export const downloadBoilerplate = () => {
+/**
+ * 从github下载样板文件
+ * @param {String} boilerplateName 
+ * @param {String} repoUrl 
+ */
+export const downloadBoilerplate = (boilerplateName, repoUrl) => {
   return new Promise((resolve, reject) => {
-    ipcRenderer.send("download-boilerplate", "koa");
+    ipcRenderer.send("download-boilerplate", boilerplateName, repoUrl);
     ipcRenderer.on("download-boilerplate-ok", event => {
-      resolve("下载模板文件成功");
+      resolve("下载样板文件成功");
     });
     ipcRenderer.on("download-boilerplate-err", (event, err) => {
       console.log(err);
-      reject(new Error("下载模板文件失败"));
+      reject(new Error("下载样板文件失败"));
     });
   });
 };
 
-export const generateBoilerplate = ({ definitions, dataFormats }) => {
-  console.log(definitions);
-  console.log(dataFormats);
+/**
+ * 生成样板文件
+ * @param {String} boilerplateName 
+ * @param {Object} options { definitions, dataFormats, isOnline }
+ */
+export const generateBoilerplate = (boilerplateName, options) => {
   return new Promise((resolve, reject) => {
-    ipcRenderer.send("generate-boilerplate", "koa", {
-      definitions,
-      dataFormats,
-    });
-    ipcRenderer.on("generate-boilerplate-ok", (event, str) => {
-      console.log(str);
-      resolve("生成模板文件成功");
+    ipcRenderer.send("generate-boilerplate", boilerplateName, options);
+    ipcRenderer.on("generate-boilerplate-ok", event => {
+      resolve("生成样板文件成功");
     });
     ipcRenderer.on("generate-boilerplate-err", (event, err) => {
       console.log(err);
-      reject(new Error("生成模板文件失败"));
+      reject(new Error("生成样板文件失败"));
+    });
+  });
+};
+
+/**
+ * 打包样板文件
+ * @param {String} boilerplateName 
+ * @param {String} outDir 
+ */
+export const archiverBoilerplate = (boilerplateName, outDir) => {
+  return new Promise((resolve, reject) => {
+    ipcRenderer.send("archiver-boilerplate", boilerplateName, outDir);
+    ipcRenderer.on("archiver-boilerplate-ok", event => {
+      resolve("打包样板文件成功");
+    });
+    ipcRenderer.on("archiver-boilerplate-err", (event, err) => {
+      console.log(err);
+      reject(new Error("打包样板文件失败"));
+    });
+  });
+};
+
+/**
+ * 复制样板文件
+ * @param {String} boilerplateName 
+ * @param {String} outDir 
+ */
+export const copyBoilerplate = (boilerplateName, outDir) => {
+  return new Promise((resolve, reject) => {
+    ipcRenderer.send("copy-boilerplate", boilerplateName, outDir);
+    ipcRenderer.on("copy-boilerplate-ok", event => {
+      resolve("复制样板文件失败");
+    });
+    ipcRenderer.on("copy-boilerplate-err", (event, err) => {
+      console.log(err);
+      reject(new Error("复制样板文件失败"));
     });
   });
 };
