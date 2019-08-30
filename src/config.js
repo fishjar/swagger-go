@@ -139,14 +139,17 @@ export const standDataTypes = Object.keys(dataTypes);
 
 export const defaultBoilerplates = {
   koa: {
+    language: "nodejs",
     url: "fishjar/koa-rest-boilerplate",
     disabled: false,
   },
   gin: {
+    language: "go",
     url: "fishjar/gin-rest-boilerplate",
     disabled: true,
   },
   flask: {
+    language: "python",
     url: "fishjar/flask-rest-boilerplate",
     disabled: true,
   },

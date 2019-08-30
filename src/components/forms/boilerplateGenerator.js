@@ -30,6 +30,7 @@ import {
   Col,
   Switch,
   Spin,
+  Tooltip,
 } from "antd";
 import PathSelect from "./pathSelect";
 
@@ -39,6 +40,8 @@ import {
   generateBoilerplate,
   downloadBoilerplate,
   checkPath,
+  clearCachePath,
+  clipboardWrite,
 } from "../../utils";
 
 function BoilerplateGenerator({
@@ -131,6 +134,8 @@ function BoilerplateGenerator({
         await copyBoilerplate(boilerplateName, outDir);
       }
       message.success("生成成功!");
+      setTip("清空临时文件...");
+      await clearCachePath();
     } catch (err) {
       console.log(err);
       message.error(err.message || "生成失败!");
@@ -138,6 +143,11 @@ function BoilerplateGenerator({
       setSpinning(false);
       setTip("");
     }
+  }
+
+  function handleCopyRepoUrl() {
+    clipboardWrite("https://github.com/" + getFieldValue("repoUrl"));
+    message.success("复制成功");
   }
 
   const radioStyle = {
@@ -151,9 +161,7 @@ function BoilerplateGenerator({
       title="Boilerplate Generator"
       placement="right"
       width="60%"
-      onClose={() => {
-        setShowGenerator(false);
-      }}
+      onClose={handleHide}
       visible={showGenerator}
       destroyOnClose
     >
@@ -193,14 +201,14 @@ function BoilerplateGenerator({
               })(
                 <Radio.Group>
                   {Object.entries(defaultBoilerplates).map(
-                    ([key, { disabled }]) => (
+                    ([key, { disabled, language }]) => (
                       <Radio
                         style={radioStyle}
                         value={key}
                         key={key}
                         disabled={disabled}
                       >
-                        {key}
+                        {`${key} ( ${language} )`}
                       </Radio>
                     )
                   )}
@@ -228,21 +236,21 @@ function BoilerplateGenerator({
                     }}
                   >
                     {Object.entries(defaultBoilerplates).map(
-                      ([key, { disabled }]) => (
+                      ([key, { disabled, language }]) => (
                         <Radio
                           style={radioStyle}
                           value={key}
                           key={key}
                           disabled={disabled}
                         >
-                          {key}
+                          {`${key} ( ${language} )`}
                         </Radio>
                       )
                     )}
                   </Radio.Group>
                 )}
               </Form.Item>
-              <Form.Item label="项目地址" hasFeedback>
+              <Form.Item label="项目地址">
                 {getFieldDecorator("repoUrl", {
                   rules: [
                     {
@@ -250,7 +258,23 @@ function BoilerplateGenerator({
                       message: "请填写!",
                     },
                   ],
-                })(<Input addonBefore="https://github.com/" disabled />)}
+                })(
+                  <Input
+                    addonBefore="https://github.com/"
+                    disabled
+                    suffix={
+                      getFieldValue("repoUrl") && (
+                        <Tooltip title="复制URL">
+                          <Icon
+                            onClick={handleCopyRepoUrl}
+                            style={{ cursor: "pointer" }}
+                            type="copy"
+                          />
+                        </Tooltip>
+                      )
+                    }
+                  />
+                )}
               </Form.Item>
               <Form.Item label="项目分支">
                 {getFieldDecorator("repoBranch", {
@@ -367,7 +391,11 @@ function BoilerplateGenerator({
         <Button onClick={handleHide} style={{ marginRight: 8 }}>
           Cancel
         </Button>
-        <Button onClick={handleReset} style={{ marginRight: 8 }}>
+        <Button
+          disabled={spinning}
+          onClick={handleReset}
+          style={{ marginRight: 8 }}
+        >
           Reset
         </Button>
         <Button

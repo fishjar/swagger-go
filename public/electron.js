@@ -1,9 +1,10 @@
 // 判断是否开发环境
 const isDev = require("electron-is-dev");
 // Modules to control application life and create native browser window
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, shell } = require("electron");
 const path = require("path");
 const os = require("os");
+const URL = require("url").URL;
 
 // ipc事件监听
 require("./ipc");
@@ -102,6 +103,24 @@ app.on("activate", function() {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) createWindow();
+});
+
+// https://electronjs.org/docs/tutorial/security#12-disable-or-limit-navigation
+app.on("web-contents-created", (event, contents) => {
+  // 禁用或限制网页跳转
+  contents.on("will-navigate", (event, navigationUrl) => {
+    const parsedUrl = new URL(navigationUrl);
+    if (parsedUrl.origin !== "https://example.com") {
+      event.preventDefault();
+    }
+  });
+  // 禁用或限制新窗口的创建
+  contents.on("new-window", async (event, navigationUrl) => {
+    // In this example, we'll ask the operating system
+    // to open this event's url in the default browser.
+    event.preventDefault();
+    await shell.openExternal(navigationUrl);
+  });
 });
 
 // In this file you can include the rest of your app's specific main process

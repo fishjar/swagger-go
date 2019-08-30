@@ -103,7 +103,7 @@ ipcMain.on("write-file", (event, filePath, data) => {
  */
 ipcMain.on("read-default-data", event => {
   const filePath = path.join(__dirname, "swagger.yaml");
-  fs.readFile(filePath, (err, data) => {
+  fs.readFile(filePath, "utf8", (err, data) => {
     if (err) {
       event.sender.send("read-default-data-err", err);
     } else {
@@ -113,11 +113,25 @@ ipcMain.on("read-default-data", event => {
 });
 
 /**
+ * 监听读取README
+ */
+ipcMain.on("read-readme", event => {
+  const filePath = path.join(__dirname, "README.md");
+  fs.readFile(filePath, "utf8", (err, data) => {
+    if (err) {
+      event.sender.send("read-readme-err", err);
+    } else {
+      event.sender.send("read-readme-ok", data);
+    }
+  });
+});
+
+/**
  * 监听读取缓存数据
  */
 ipcMain.on("read-cache", event => {
   const filePath = path.join(__dirname, "cache.yaml");
-  fs.readFile(filePath, (err, data) => {
+  fs.readFile(filePath, "utf8", (err, data) => {
     if (err) {
       event.sender.send("read-cache-err", err);
     } else {
@@ -287,7 +301,7 @@ ipcMain.on(
  * 打包样板文件
  */
 ipcMain.on("archiver-boilerplate", (event, boilerplateName, outDir) => {
-  const temDir = path.join(__dirname, "tmp", boilerplateName);
+  const tmpDir = path.join(__dirname, "tmp", boilerplateName);
 
   try {
     var output = fs.createWriteStream(
@@ -323,7 +337,7 @@ ipcMain.on("archiver-boilerplate", (event, boilerplateName, outDir) => {
     });
 
     archive.pipe(output);
-    archive.directory(temDir, boilerplateName);
+    archive.directory(tmpDir, boilerplateName);
     archive.finalize();
   } catch (err) {
     console.log("打包错误");
@@ -336,8 +350,8 @@ ipcMain.on("archiver-boilerplate", (event, boilerplateName, outDir) => {
  * 拷贝样板文件
  */
 ipcMain.on("copy-boilerplate", (event, boilerplateName, outDir) => {
-  const temDir = path.join(__dirname, "tmp", boilerplateName);
-  fse.copy(temDir, path.join(outDir, boilerplateName), err => {
+  const tmpDir = path.join(__dirname, "tmp", boilerplateName);
+  fse.copy(tmpDir, path.join(outDir, boilerplateName), err => {
     if (err) {
       console.log("拷贝错误");
       event.sender.send("copy-boilerplate-err", err);
@@ -360,4 +374,22 @@ ipcMain.on("path-exists", (event, pathStrs) => {
       event.sender.send("path-exists-ok", exists, outPath);
     }
   });
+});
+
+/**
+ * 清除缓存文件
+ */
+ipcMain.on("clear-cache-path", event => {
+  const tmpDir = path.join(__dirname, "tmp");
+  const downloadDir = path.join(__dirname, "download");
+  fse
+    .emptyDir(tmpDir)
+    .then(() => fse.emptyDir(downloadDir))
+    .then(() => {
+      event.sender.send("clear-cache-path-ok");
+    })
+    .catch(err => {
+      console.log("清空临时文件夹错误");
+      event.sender.send("clear-cache-path-err", err);
+    });
 });
