@@ -147,7 +147,7 @@ export const defaultBoilerplates = {
     disabled: true,
   },
   flask: {
-    url: "",
+    url: "fishjar/flask-rest-boilerplate",
     disabled: true,
   },
 };
