@@ -137,7 +137,17 @@ export const dataFormats = Object.assign(
 
 export const standDataTypes = Object.keys(dataTypes);
 
-
-export const boilerplates = {
-  koa: "fishjar/koa-rest-boilerplate#dev",
+export const defaultBoilerplates = {
+  koa: {
+    url: "fishjar/koa-rest-boilerplate",
+    disabled: false,
+  },
+  gin: {
+    url: "fishjar/gin-rest-boilerplate",
+    disabled: true,
+  },
+  flask: {
+    url: "",
+    disabled: true,
+  },
 };

@@ -367,12 +367,17 @@ export const parseArrayToObject = (a, key = "key") => {
 
 /**
  * 从github下载样板文件
- * @param {String} boilerplateName 
- * @param {String} repoUrl 
+ * @param {String} boilerplateName
+ * @param {String} repoUrl
  */
-export const downloadBoilerplate = (boilerplateName, repoUrl) => {
+export const downloadBoilerplate = (boilerplateName, repoUrl, repoBranch) => {
   return new Promise((resolve, reject) => {
-    ipcRenderer.send("download-boilerplate", boilerplateName, repoUrl);
+    ipcRenderer.send(
+      "download-boilerplate",
+      boilerplateName,
+      repoUrl,
+      repoBranch
+    );
     ipcRenderer.on("download-boilerplate-ok", event => {
       resolve("下载样板文件成功");
     });
@@ -385,7 +390,7 @@ export const downloadBoilerplate = (boilerplateName, repoUrl) => {
 
 /**
  * 生成样板文件
- * @param {String} boilerplateName 
+ * @param {String} boilerplateName
  * @param {Object} options { definitions, dataFormats, isOnline }
  */
 export const generateBoilerplate = (boilerplateName, options) => {
@@ -403,8 +408,8 @@ export const generateBoilerplate = (boilerplateName, options) => {
 
 /**
  * 打包样板文件
- * @param {String} boilerplateName 
- * @param {String} outDir 
+ * @param {String} boilerplateName
+ * @param {String} outDir
  */
 export const archiverBoilerplate = (boilerplateName, outDir) => {
   return new Promise((resolve, reject) => {
@@ -421,8 +426,8 @@ export const archiverBoilerplate = (boilerplateName, outDir) => {
 
 /**
  * 复制样板文件
- * @param {String} boilerplateName 
- * @param {String} outDir 
+ * @param {String} boilerplateName
+ * @param {String} outDir
  */
 export const copyBoilerplate = (boilerplateName, outDir) => {
   return new Promise((resolve, reject) => {
@@ -433,6 +438,23 @@ export const copyBoilerplate = (boilerplateName, outDir) => {
     ipcRenderer.on("copy-boilerplate-err", (event, err) => {
       console.log(err);
       reject(new Error("复制样板文件失败"));
+    });
+  });
+};
+
+/**
+ * 判断文件/文件夹是否存在
+ * @param {String} file
+ */
+export const checkPath = pathStrs => {
+  return new Promise((resolve, reject) => {
+    ipcRenderer.send("path-exists", pathStrs);
+    ipcRenderer.on("path-exists-ok", (event, exists, outPath) => {
+      resolve({ exists, outPath });
+    });
+    ipcRenderer.on("path-exists-err", (event, err) => {
+      console.log(err);
+      reject(new Error("判断文件出错了"));
     });
   });
 };

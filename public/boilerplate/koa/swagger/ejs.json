@@ -1,4 +1,5 @@
 {
+  "boilerplateLanguage": "nodejs",
   "globalEjs": [
     {
       "ejsFile": "swagger/template/router.ejs",

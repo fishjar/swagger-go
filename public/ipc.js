@@ -143,35 +143,51 @@ ipcMain.on("write-cache", (event, data) => {
 /**
  * 下载样板文件
  */
-ipcMain.on("download-boilerplate", (event, boilerplateName, repoUrl) => {
-  const localDir = path.join(__dirname, "download", boilerplateName);
-  downloadRepo(repoUrl, localDir, err => {
-    if (err) {
-      event.sender.send("download-boilerplate-err", err);
-    } else {
-      event.sender.send("download-boilerplate-ok");
-    }
-  });
-});
+ipcMain.on(
+  "download-boilerplate",
+  (event, boilerplateName, repoUrl, repoBranch = "master") => {
+    const localDir = path.join(__dirname, "download", boilerplateName);
+    downloadRepo(`${repoUrl}#${repoBranch}`, localDir, err => {
+      if (err) {
+        event.sender.send("download-boilerplate-err", err);
+      } else {
+        event.sender.send("download-boilerplate-ok");
+      }
+    });
+  }
+);
 
 /**
  * 生成样板文件
  */
 ipcMain.on(
   "generate-boilerplate",
-  (event, boilerplateName, { definitions, dataFormats, isOnline = false }) => {
+  (
+    event,
+    boilerplateName,
+    { definitions, dataFormats, sourceType = "defaultLocal", sourceDir }
+  ) => {
     const modelKeys = Object.keys(definitions).filter(
       key => definitions[key]["x-isModel"]
     );
-    const sourceDir = path.join(
-      __dirname,
-      isOnline ? "download" : "boilerplate",
-      boilerplateName
-    );
+    // 默认样板
+    if (sourceType === "defaultLocal") {
+      sourceDir = path.join(__dirname, "boilerplate", boilerplateName);
+    }
+    // 在线下载的样板
+    if (sourceType === "defaultOnline" || sourceType === "customOnline") {
+      sourceDir = path.join(__dirname, "download", boilerplateName);
+    }
+    if (!sourceDir) {
+      event.sender.send(
+        "generate-boilerplate-err",
+        new Error("缺少样本来源目录")
+      );
+      return;
+    }
     const tmpDir = path.join(__dirname, "tmp", boilerplateName);
-
     const swaggerEjs = require(path.join(sourceDir, "swagger", "ejs.json"));
-    const { globalEjs = [], modelEjs = [] } = swaggerEjs;
+    const { globalEjs = [], modelEjs = [], boilerplateLanguage } = swaggerEjs;
 
     const renderPromise = (ejsFile, data) => {
       return new Promise((resolve, reject) => {
@@ -184,12 +200,18 @@ ipcMain.on(
             // console.log(str);
             try {
               let formatStr = "";
-              if (boilerplateName === "koa") {
+              if (
+                ["js", "javascript", "node", "nodejs"].includes(
+                  boilerplateLanguage
+                )
+              ) {
                 formatStr = prettier.format(str, {
                   semi: true,
                   trailingComma: "es5",
                   parser: "babel",
                 });
+              } else {
+                formatStr = str;
               }
               resolve(formatStr);
             } catch (err) {
@@ -218,7 +240,7 @@ ipcMain.on(
     fse
       .emptyDir(tmpDir)
       .then(() => {
-        console.log("清空文件夹", tmpDir);
+        console.log("已清空文件夹", tmpDir);
         return fse.copy(sourceDir, tmpDir);
       })
       .then(() => {
@@ -237,10 +259,7 @@ ipcMain.on(
         modelKeys.forEach(key => {
           modelEjs.forEach(item => {
             const ejsFile = path.join(tmpDir, item.ejsFile);
-            const outFile = path.join(
-              tmpDir,
-              item.outFile.replace("*", key.toLowerCase())
-            );
+            const outFile = path.join(tmpDir, item.outFile.replace("*", key));
             tasks.push(
               doPromise(ejsFile, outFile, {
                 definitions,
@@ -318,12 +337,27 @@ ipcMain.on("archiver-boilerplate", (event, boilerplateName, outDir) => {
  */
 ipcMain.on("copy-boilerplate", (event, boilerplateName, outDir) => {
   const temDir = path.join(__dirname, "tmp", boilerplateName);
-  fse.copy(temDir, outDir, err => {
+  fse.copy(temDir, path.join(outDir, boilerplateName), err => {
     if (err) {
       console.log("拷贝错误");
       event.sender.send("copy-boilerplate-err", err);
     } else {
       event.sender.send("copy-boilerplate-ok");
+    }
+  });
+});
+
+/**
+ * 判断文件/文件夹是否存在
+ */
+ipcMain.on("path-exists", (event, pathStrs) => {
+  const outPath = path.join(...pathStrs);
+  fse.pathExists(outPath, (err, exists) => {
+    if (err) {
+      console.log(err); // => null
+      event.sender.send("path-exists-err", err);
+    } else {
+      event.sender.send("path-exists-ok", exists, outPath);
     }
   });
 });
