@@ -6,6 +6,7 @@ import { useData } from "./hooks";
 import GeneralInfo from "./components/generalInfo";
 import Definitions from "./components/definitions";
 import Preview from "./components/preview";
+import Readme from "./components/readme";
 import SecurityDefinitions from "./components/securityDefinitions";
 import GeneralInfoEdit from "./components/forms/generalInfoEdit";
 
@@ -166,6 +167,10 @@ function App() {
                 <Icon type="eye" />
                 Preview
               </Menu.Item>
+              <Menu.Item key="readme">
+                <Icon type="question-circle" />
+                Readme
+              </Menu.Item>
             </Menu>
             {page === "edit" && (
               <div className="header_buttons">
@@ -280,6 +285,11 @@ function App() {
                 setShowGenerator={setShowGenerator}
                 state={state}
               />
+            </div>
+          )}
+          {page === "readme" && (
+            <div style={{ background: "#fff", padding: "24px 50px" }}>
+              <Readme />
             </div>
           )}
         </Content>
