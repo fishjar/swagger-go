@@ -14,11 +14,14 @@ import {
   parseArrayToObject,
   filterObjectItems,
   filterArrayItems2,
+  getType,
+  deepClone,
 } from "../../utils";
 import SubFields from "./subFields";
 import EnumItems from "./enumItems";
 import DateSelect from "./dateSelect";
 import RefFields from "./refFields";
+import JSONEdit from "./jsonEdit";
 import {
   Form,
   Input,
@@ -41,6 +44,7 @@ import {
   Switch,
 } from "antd";
 import { setTimeout } from "timers";
+import { Utils } from "handlebars";
 const { Panel } = Collapse;
 const { Option } = Select;
 const CheckboxGroup = Checkbox.Group;
@@ -179,7 +183,14 @@ function FieldEdit({
       }
       if (isExample) {
         if (data.example !== undefined) {
-          example[key] = data.example;
+          if (
+            Array.isArray(data.example) ||
+            getType(data.example) === "object"
+          ) {
+            example[key] = deepClone(data.example);
+          } else {
+            example[key] = data.example;
+          }
         }
       } else {
         delete example[key];
@@ -373,11 +384,16 @@ function FieldEdit({
     setArrayFields(newArrayFields);
   }
 
+  /**
+   * 选择外键
+   * @param {*} key
+   */
   function handleRefFieldKeyChange(key) {
     const refField = refFields.find(item => item.key === key);
     setFieldsValue({
       type: refField.type,
       format: refField.format,
+      example: refField.example,
     });
   }
 
@@ -444,6 +460,7 @@ function FieldEdit({
                 checkedChildren="是"
                 unCheckedChildren="否"
                 onChange={handleRefSwitch}
+                disabled
               />
             )}
           </Form.Item>
@@ -476,7 +493,7 @@ function FieldEdit({
                       <Option
                         value={`#/definitions/${key}`}
                         key={key}
-                        disabled={model.key === key}
+                        // disabled={model.key === key}
                       >
                         <span>{`#/definitions/${key}`}</span>
                         <span
@@ -551,7 +568,7 @@ function FieldEdit({
                           <Option
                             value={`#/definitions/${key}`}
                             key={key}
-                            disabled={model.key === key}
+                            // disabled={model.key === key}
                           >
                             <span>{`#/definitions/${key}`}</span>
                             <span
@@ -718,7 +735,7 @@ function FieldEdit({
                         <Option
                           value={`#/definitions/${key}`}
                           key={key}
-                          disabled={model.key === key}
+                          // disabled={model.key === key}
                         >
                           <span>{`#/definitions/${key}`}</span>
                           <span
@@ -792,7 +809,7 @@ function FieldEdit({
                               <Option
                                 value={`#/definitions/${key}`}
                                 key={key}
-                                disabled={model.key === key}
+                                // disabled={model.key === key}
                               >
                                 <span>{`#/definitions/${key}`}</span>
                                 <span
@@ -1031,11 +1048,15 @@ function FieldEdit({
                             <Radio value={true}>True</Radio>
                             <Radio value={false}>False</Radio>
                           </Radio.Group>
+                          // <Select placeholder="请选择" allowClear>
+                          //   <Option value={true}>True</Option>
+                          //   <Option value={false}>False</Option>
+                          // </Select>
                         )}
                       </Form.Item>
                       <Form.Item label="示例值">
                         {getFieldDecorator(`example`, {
-                          initialValue: field.example,
+                          initialValue: !!field.example,
                         })(
                           <Radio.Group>
                             <Radio value={undefined}>Null</Radio>
@@ -1072,10 +1093,7 @@ function FieldEdit({
                       </Form.Item>
                     </Fragment>
                   );
-                } else if (
-                  getFieldValue("format") === "text" ||
-                  getFieldValue("format") === "json"
-                ) {
+                } else if (getFieldValue("format") === "text") {
                   return (
                     <Fragment>
                       <Form.Item label="默认值">
@@ -1091,9 +1109,24 @@ function FieldEdit({
                     </Fragment>
                   );
                 } else if (
-                  getFieldValue("type") !== "object" &&
-                  getFieldValue("type") !== "array"
+                  getFieldValue("type") === "object" ||
+                  getFieldValue("type") === "array"
                 ) {
+                  return (
+                    <Fragment>
+                      <Form.Item label="默认值">
+                        {getFieldDecorator(`default`, {
+                          initialValue: field.default,
+                        })(<JSONEdit />)}
+                      </Form.Item>
+                      <Form.Item label="示例值">
+                        {getFieldDecorator(`example`, {
+                          initialValue: field.example,
+                        })(<JSONEdit />)}
+                      </Form.Item>
+                    </Fragment>
+                  );
+                } else {
                   return (
                     <Fragment>
                       <Form.Item label="默认值" hasFeedback>
@@ -1123,6 +1156,12 @@ function FieldEdit({
                     initialValue: field.uniqueItems,
                     valuePropName: "checked",
                   })(<Checkbox>值唯一</Checkbox>)}
+                </Form.Item>
+                <Form.Item style={{ display: "inline-block", marginRight: 12 }}>
+                  {getFieldDecorator("x-increment", {
+                    initialValue: field["x-increment"],
+                    valuePropName: "checked",
+                  })(<Checkbox>自增长</Checkbox>)}
                 </Form.Item>
                 <Form.Item style={{ display: "inline-block" }}>
                   {getFieldDecorator("isExample", {

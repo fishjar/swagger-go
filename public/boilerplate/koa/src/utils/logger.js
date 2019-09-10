@@ -13,7 +13,7 @@ const debugLogPath = path.join(LOG_PATH, `%DATE%.debug.log`);
 const { combine, timestamp, label, printf } = winston.format;
 // 自定义日志格式
 const myFormat = printf(
-  info => `${info.timestamp} [${info.level}]: ${info.message}`
+  info => `${info.timestamp} [${info.level}] ${info.message}`
 );
 
 // 日志记录器

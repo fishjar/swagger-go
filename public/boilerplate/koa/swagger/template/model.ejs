@@ -1,15 +1,19 @@
+<%
+  const modelKeyLower = modelKey.toLowerCase();
+%>
+
 import Sequelize from "sequelize";
 import sequelize from "../db";
 <% Object.entries(model.properties)
-  .filter(([_,field])=>field.$ref)
-  .forEach(([fieldKey,field])=>{
-    const refModelKey = field.$ref.replace('#/definitions/','');
+  .filter(([_,field])=>field['x-foreignKey'])
+  .forEach(([_,field])=>{
+    const refModelKey = field['x-ref'].replace('#/definitions/','');
 %>
 import <%- refModelKey -%> from "./<%- refModelKey -%>";
 <% }) %>
 
 const <%- modelKey -%> = sequelize.define(
-  "<%- modelKey -%>",
+  "<%- modelKeyLower -%>",
   {
     <% Object.entries(model.properties).forEach(([fieldKey,field])=>{ -%>
       <%- fieldKey -%>: {
@@ -22,7 +26,9 @@ const <%- modelKey -%> = sequelize.define(
         <% if(field.$ref) { %>
         type: Sequelize.<%- dataFormats['object'][0] -%>,
         <% } else if (field['x-foreignKey']) { %>
-        type: Sequelize.<%- dataFormats[field.format][0] -%>,
+        type: Sequelize.<%- dataFormats[field.format][0] -%><% 
+          if(dataFormats[field.format][0]==='STRING'&&field['x-length']){ 
+        -%>(<%- field['x-length'] -%>)<% } -%>,
         references: {
           model: <%- field['x-ref'].replace('#/definitions/','') -%>,
           key: "<%- field['x-refFieldKey'] -%>",
@@ -31,7 +37,7 @@ const <%- modelKey -%> = sequelize.define(
         type: Sequelize.<%- dataFormats[field.format][0] -%>,
         <% } -%>
 
-        <% if (field.format==='uuid') { %>
+        <% if (field.format==='uuid' && field['x-primaryKey']) { %>
         defaultValue: Sequelize.UUIDV4,
         <% } else if (field.default){ %>
         defaultValue: <%- field.default -%>,
@@ -43,6 +49,10 @@ const <%- modelKey -%> = sequelize.define(
 
         <% if (field.uniqueItems) { %>
         unique: true,
+        <% } -%>
+
+        <% if (field["x-increment"]) { %>
+        autoIncrement: true,
         <% } -%>
 
         <% if (model.required && model.required.includes(fieldKey)) { %>
@@ -60,11 +70,24 @@ const <%- modelKey -%> = sequelize.define(
 
           <% if (field.maximum) { -%>
           max: <%- field.maximum -%>,
-          <% } -%>
+          <% } %>
 
           <% if (field.enum) { -%>
           isIn: [[<% field.enum.forEach(item=>{ %> <%- item -%>,<% }) -%>]],
           <% } %>
+
+          <% if (field.format==='date' || field.format==='date-time') { -%>
+          isDate: true,
+          <% } %>
+
+          <% if (field.format==='email') { -%>
+          isEmail: true,
+          <% } %>
+
+          <% if (field.format==='uri') { -%>
+          isUrl: true,
+          <% } %>
+
         },
 
       },
@@ -73,7 +96,7 @@ const <%- modelKey -%> = sequelize.define(
   {
     underscored: true, // 下划线字段
     paranoid: true, // 软删除
-    freezeTableName: true, // 禁用修改表名
+    freezeTableName: true, // 禁用表名自动复数
     tableName: "<%- model['x-tableName'] -%>", // 定义表的名称
   }
 );

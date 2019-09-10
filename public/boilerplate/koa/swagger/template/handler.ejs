@@ -1,3 +1,7 @@
+<%
+  const modelKeyLower = modelKey.toLowerCase();
+%>
+
 import model from "../model";
 
 <% if(model['x-apis'].includes('findAndCountAll')) { %>
@@ -12,24 +16,30 @@ const findAndCountAll = async (ctx, next) => {
   } else if (sorter) {
     order = [sorter.split("__")];
   }
-  ctx.body = await model.<%- modelKey -%>.findAndCountAll({
+  const { count, rows } = await model.<%- modelKey -%>.findAndCountAll({
     where,
     offset: (page_num - 1) * page_size,
     limit: page_size,
-    order
+    order,
+    include: [],
   });
-  await next();
+  ctx.body = { count, rows };
+
+  next();
 };
 <% } %>
 
 
-<% if(model['x-apis'].includes('findById')) { %>
+<% if(model['x-apis'].includes('findByPk')) { %>
 /**
- * 根据ID查询单条信息
+ * 根据主键查询单条信息
  */
-const findById = async (ctx, next) => {
-  ctx.body = await model.<%- modelKey -%>.findById(ctx.params.id);
-  await next();
+const findByPk = async (ctx, next) => {
+  const <%- modelKeyLower -%> = await model.<%- modelKey -%>.findByPk(ctx.params.id);
+  ctx.assert(<%- modelKeyLower -%>, 404, "记录不存在");
+  ctx.body = <%- modelKeyLower -%>;
+
+  next();
 };
 <% } %>
 
@@ -40,7 +50,8 @@ const findById = async (ctx, next) => {
  */
 const singleCreate = async (ctx, next) => {
   ctx.body = await model.<%- modelKey -%>.create(ctx.request.body);
-  await next();
+
+  next();
 };
 <% } %>
 
@@ -50,8 +61,11 @@ const singleCreate = async (ctx, next) => {
  * 创建多条信息
  */
 const bulkCreate = async (ctx, next) => {
-  ctx.body = await model.<%- modelKey -%>.bulkCreate(ctx.request.body);
-  await next();
+  ctx.body = await model.<%- modelKey -%>.bulkCreate(ctx.request.body, {
+    validate: true,
+  });
+
+  next();
 };
 <% } %>
 
@@ -64,19 +78,22 @@ const bulkUpdate = async (ctx, next) => {
   ctx.body = await model.<%- modelKey -%>.update(ctx.request.body.fields, {
     where: ctx.request.body.filter
   });
-  await next();
+
+  next();
 };
 <% } %>
 
 
-<% if(model['x-apis'].includes('updateById')) { %>
+<% if(model['x-apis'].includes('updateByPk')) { %>
 /**
  * 更新单条信息
  */
-const updateById = async (ctx, next) => {
-  const obj = await model.<%- modelKey -%>.findById(ctx.params.id);
-  ctx.body = await obj.update(ctx.request.body);
-  await next();
+const updateByPk = async (ctx, next) => {
+  const <%- modelKeyLower -%> = await model.<%- modelKey -%>.findByPk(ctx.params.id);
+  ctx.assert(<%- modelKeyLower -%>, 404, "记录不存在");
+  ctx.body = await <%- modelKeyLower -%>.update(ctx.request.body);
+
+  next();
 };
 <% } %>
 
@@ -89,19 +106,22 @@ const bulkDestroy = async (ctx, next) => {
   ctx.body = await model.<%- modelKey -%>.destroy({
     where: ctx.request.body
   });
-  await next();
+
+  next();
 };
 <% } %>
 
 
-<% if(model['x-apis'].includes('destroyById')) { %>
+<% if(model['x-apis'].includes('destroyByPk')) { %>
 /**
  * 删除单条信息
  */
-const destroyById = async (ctx, next) => {
-  const obj = await model.<%- modelKey -%>.findById(ctx.params.id);
-  ctx.body = await obj.destroy();
-  await next();
+const destroyByPk = async (ctx, next) => {
+  const <%- modelKeyLower -%> = await model.<%- modelKey -%>.findByPk(ctx.params.id);
+  ctx.assert(<%- modelKeyLower -%>, 404, "记录不存在");
+  ctx.body = await <%- modelKeyLower -%>.destroy();
+
+  next();
 };
 <% } %>
 
@@ -111,8 +131,11 @@ const destroyById = async (ctx, next) => {
  * 查询单条信息
  */
 const findOne = async (ctx, next) => {
-  ctx.body = await model.<%- modelKey -%>.findOne({ where: ctx.query });
-  await next();
+  const <%- modelKeyLower -%> = await model.<%- modelKey -%>.findOne({ where: ctx.query });
+  ctx.assert(<%- modelKeyLower -%>, 404, "记录不存在");
+  ctx.body = <%- modelKeyLower -%>;
+
+  next();
 };
 <% } %>
 
@@ -122,15 +145,16 @@ const findOne = async (ctx, next) => {
  * 查询或创建单条信息
  */
 const findOrCreate = async (ctx, next) => {
-  const [data, is_new_record] = await model.<%- modelKey -%>.findOrCreate({
-    where: ctx.request.body
+  const [<%- modelKeyLower -%>, created] = await model.<%- modelKey -%>.findOrCreate({
+    where: ctx.request.body,
   });
   ctx.body = {
-    // ...data.toJSON(),
-    ...data.get({ plain: true }),
-    is_new_record
+    // ...<%- modelKeyLower -%>.toJSON(),
+    ...<%- modelKeyLower -%>.get({ plain: true }),
+    created,
   };
-  await next();
+
+  next();
 };
 <% } %>
 

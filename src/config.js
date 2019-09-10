@@ -56,21 +56,21 @@ export const apiOptions = [
     method: "get",
     path: "/:id",
     plural: true,
-    key: "findById",
+    key: "findByPk",
     notice: "根据ID查找单条",
   },
   {
     method: "patch",
     path: "/:id",
     plural: true,
-    key: "updateById",
+    key: "updateByPk",
     notice: "更新单条",
   },
   {
     method: "delete",
     path: "/:id",
     plural: true,
-    key: "destroyById",
+    key: "destroyByPk",
     notice: "删除单条",
   },
   {
@@ -114,7 +114,7 @@ export const dataTypes = {
     binary: ["STRING.BINARY", "binary"],
     password: ["STRING", "VARCHAR"],
     uuid: ["UUID", "UUID"],
-    json: ["JSON", "JSON"],
+    // json: ["JSON", "JSON"],
   },
   object: {
     object: ["JSON", "JSON"],

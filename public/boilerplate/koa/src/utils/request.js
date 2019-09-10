@@ -1,19 +1,14 @@
 import rp from "request-promise";
 import logger from "./logger";
 
+/**
+ * request封装
+ */
 export default async options => {
-  let res;
   try {
-    res =
-      (await rp({
-        json: true,
-        ...options
-      })) || "ok";
+    return await rp({ json: true, ...options });
   } catch ({ name, statusCode, message, options }) {
-    logger.error(`${name} ${statusCode} ${message} ${JSON.stringify(options)}`);
-    // const err = new Error('服务请求错误');
-    // err.status = err.statusCode;
-    // throw err;
+    logger.error(`[request请求错误] ${JSON.stringify({ name, statusCode, message, options })}`);
+    return;
   }
-  return res;
 };

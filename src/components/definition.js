@@ -49,6 +49,12 @@ export default function Definition({ models, model, dispatch }) {
       field.$ref || field["x-ref"]
     );
 
+    // 示例
+    const example =
+      field.example === undefined
+        ? model.example && model.example[key]
+        : field.example;
+
     // 对象类型
     const subFields = getModelProps(field);
 
@@ -73,10 +79,7 @@ export default function Definition({ models, model, dispatch }) {
 
     return {
       ...field,
-      example:
-        field.example === undefined
-          ? model.example && model.example[key]
-          : field.example,
+      example,
       refModel,
       refFields,
       arrayType,
@@ -316,12 +319,7 @@ export default function Definition({ models, model, dispatch }) {
       render: (text, record) => (
         <Badge
           status={record.isExample ? "success" : "default"}
-          text={
-            text ||
-            (model.example &&
-              model.example[record.key] &&
-              model.example[record.key].toString())
-          }
+          text={JSON.stringify(text)}
         />
       ),
     },

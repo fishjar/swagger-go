@@ -1,37 +1,32 @@
 import app from "./app";
 import sequelize from "./db";
-import model from "./model";
 import config from "./config";
-import sign from "./utils/sign";
+import initData from "./utils/initData";
 
-const {
-  NODE_PORT,
-  DEFAULT_USERNAME,
-  DEFAULT_USERTYPE,
-  DEFAULT_PASSWORD
-} = config;
+const { NODE_ENV, NODE_PORT } = config;
 
-sequelize
-  .sync() // 带上{force: true}参数会强制删除已存在的表
-  .then(() => {
-    // 创建默认用户
-    const password = sign.signPwd({
-      userName: DEFAULT_USERNAME,
-      password: DEFAULT_PASSWORD
-    });
-    return model.User.findOrCreate({
-      where: {
-        userName: DEFAULT_USERNAME,
-        userType: DEFAULT_USERTYPE,
-        password
-      }
-    });
-  })
-  .then(() => {
+(async () => {
+  try {
+    // 测试数据库连接
+    await sequelize.authenticate();
+    console.log("\n连接数据库成功\n");
+
+    // 同步数据库
+    // 带上{force: true}参数会强制删除已存在的表
+    // await sequelize.sync();
+    await sequelize.sync({ force: true });
+    console.log("\n同步数据库表成功\n");
+
+    // 插入初始数据
+    if (NODE_ENV === "development") {
+      await initData();
+    }
+
     // 启动服务
     app.listen(NODE_PORT);
     console.log(`\n>>> app run at port: ${NODE_PORT} <<<\n`);
-  })
-  .catch(err => {
+  } catch (err) {
     console.log(err);
-  });
+    console.log("\n程序启动出错\n");
+  }
+})();

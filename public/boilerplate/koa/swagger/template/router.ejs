@@ -3,10 +3,29 @@ import handler from "../handler";
 
 const router = new Router();
 
+/**
+ * 角色权限中间件
+ * @param {Array} roles 
+ */
+const roleAuth = (roles = []) => (ctx, next) => {
+  roles.forEach(role => {
+    ctx.assert(
+      ctx.state &&
+        ctx.state.user &&
+        ctx.state.user.roles &&
+        Array.isArray(ctx.state.user.roles) &&
+        ctx.state.user.roles.includes(role),
+      401,
+      "缺少角色权限"
+    );
+  });
+  return next();
+};
+
 router
   <% Object.entries(definitions)
     .filter(([_,model])=>model['x-isModel'])
-    .forEach(([modelKey,model]) => { 
+    .forEach(([modelKey,model]) => {
     const modelKeyLower = modelKey.toLowerCase();
     const modelKeyPlural = model["x-plural"].toLowerCase();
   -%>
@@ -35,16 +54,16 @@ router
     .delete("/<%- modelKeyPlural -%>", handler.<%- modelKey -%>.bulkDestroy)         // 删除多条
   <% } %>
   
-  <% if(model['x-apis'].includes('findById')) { %>
-    .get("/<%- modelKeyPlural -%>/:id", handler.<%- modelKey -%>.findById)           // 根据ID查找单条
+  <% if(model['x-apis'].includes('findByPk')) { %>
+    .get("/<%- modelKeyPlural -%>/:id", handler.<%- modelKey -%>.findByPk)           // 根据主键查找单条
   <% } %>
   
-  <% if(model['x-apis'].includes('updateById')) { %>
-    .patch("/<%- modelKeyPlural -%>/:id", handler.<%- modelKey -%>.updateById)       // 更新单条
+  <% if(model['x-apis'].includes('updateByPk')) { %>
+    .patch("/<%- modelKeyPlural -%>/:id", handler.<%- modelKey -%>.updateByPk)       // 更新单条
   <% } %>
   
-  <% if(model['x-apis'].includes('destroyById')) { %>
-    .delete("/<%- modelKeyPlural -%>/:id", handler.<%- modelKey -%>.destroyById)     // 删除单条
+  <% if(model['x-apis'].includes('destroyByPk')) { %>
+    .delete("/<%- modelKeyPlural -%>/:id", handler.<%- modelKey -%>.destroyByPk)     // 删除单条
   <% } %>
   
   <% if(model['x-apis'].includes('bulkCreate')) { %>
@@ -53,6 +72,6 @@ router
 
   <% }) -%>
 
-  .post("/account/login", handler.Account.login);
+  .post("/login/account", handler.Login.account);      // 帐号密码登录
 
 export default router;

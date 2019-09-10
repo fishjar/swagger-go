@@ -3,14 +3,14 @@ import config from "../config";
 
 /**
  * 加密用户密码
- * @param {string} userName 用户名
+ * @param {string} username 用户名
  * @param {string} password 密码
  */
-const signPwd = ({ userName, password }) => {
+const signPwd = (username, password) => {
   const { PWD_SALT } = config;
   const sign = crypto
     .createHash("md5")
-    .update(userName)
+    .update(username)
     .update(password)
     .update(password)
     .update(PWD_SALT)
@@ -21,5 +21,5 @@ const signPwd = ({ userName, password }) => {
 };
 
 export default {
-  signPwd
+  signPwd,
 };

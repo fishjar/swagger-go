@@ -76,7 +76,7 @@ function SubField({ value: subFields = [], onChange }, ref) {
           <InputGroup compact>
             <Select
               placeholder="Type"
-              value={item.type}
+              defaultValue={item.type}
               style={{ width: "20%" }}
               onChange={value => {
                 handleItemChange(index, "type", value);
@@ -89,26 +89,26 @@ function SubField({ value: subFields = [], onChange }, ref) {
               ))}
             </Select>
             <Input
-              style={{ width: "20%" }}
+              style={{ width: "40%" }}
               placeholder="Key"
-              value={item.key}
+              defaultValue={item.key}
               onChange={e => {
                 handleItemChange(index, "key", e.target.value);
               }}
             />
             <Input
-              style={{ width: "20%" }}
+              style={{ width: "40%" }}
               placeholder="Description"
-              value={item.description}
+              defaultValue={item.description}
               onChange={e => {
                 handleItemChange(index, "description", e.target.value);
               }}
             />
-            {item.type === "integer" || item.type === "number" ? (
+            {/* {item.type === "integer" || item.type === "number" ? (
               <InputNumber
                 style={{ width: "40%" }}
                 placeholder="Example"
-                value={item.example}
+                defaultValue={item.example}
                 onChange={value => {
                   handleItemChange(index, "example", value);
                 }}
@@ -117,12 +117,12 @@ function SubField({ value: subFields = [], onChange }, ref) {
               <Input
                 style={{ width: "40%" }}
                 placeholder="Example"
-                value={item.example}
+                defaultValue={item.example}
                 onChange={e => {
                   handleItemChange(index, "example", e.target.value);
                 }}
               />
-            )}
+            )} */}
           </InputGroup>
           <Icon
             style={{

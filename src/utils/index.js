@@ -287,8 +287,7 @@ export const getModelProps = model => {
     type: model.properties[key].type,
     description: model.properties[key].description,
     example:
-      model.properties[key].example ||
-      (model.example && model.example[key] && model.example[key].toString()),
+      model.properties[key].example || (model.example && model.example[key]),
   }));
 };
 
@@ -298,7 +297,7 @@ export const getModelProps = model => {
  * @param {String} ref
  */
 export const parseRef = (models, ref) => {
-  if (!ref || models.length < 1) {
+  if (!ref || models.length === 0) {
     return [{}, []];
   }
   const refModel =

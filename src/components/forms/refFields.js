@@ -73,7 +73,7 @@ function RefFields({ value, refFields = [], onChange }, ref) {
                 wordBreak: "break-all",
               }}
             >
-              {text}
+              {text === undefined ? "" : JSON.stringify(text)}
             </div>
           ),
         },

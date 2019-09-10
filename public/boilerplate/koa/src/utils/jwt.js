@@ -5,17 +5,21 @@ const { JWT_SECRET, JWT_EXPIRES_IN } = config;
 
 /**
  * 加密令牌
- * @param {string} userName 用户名
- * @param {string} userType 用户类型
+ * @param {string} authType 鉴权类型
+ * @param {string} authName 鉴权名称
+ * @param {UUID} authName 用户ID
+ * @param {Array} roles 用户角色
  */
-const makeToken = ({ userName, userType }) => {
-  if (!userName || !userType) {
+const makeToken = ({ authType, authName, userId, roles = [] }) => {
+  if (!authType || !authName || !userId) {
     return "";
   }
   return jwt.sign(
     {
-      userName,
-      userType
+      authType,
+      authName,
+      userId,
+      roles,
     },
     JWT_SECRET,
     { expiresIn: JWT_EXPIRES_IN }
@@ -24,18 +28,23 @@ const makeToken = ({ userName, userType }) => {
 
 /**
  * 解密令牌
- * @param {string} token 认证令牌
+ * @param {string} authToken 认证令牌
  */
-const parseToken = token => {
+const parseToken = authToken => {
   try {
-    return jwt.verify(token.split(" ")[1], JWT_SECRET);
+    return jwt.verify(authToken.split(" ")[1], JWT_SECRET);
   } catch (err) {
-    logger.error(`解析token出错：${JSON.stringify(err)}`);
+    logger.error(
+      `[解析token出错] ${JSON.stringify({
+        authToken,
+        err,
+      })}`
+    );
     return {};
   }
 };
 
 export default {
   makeToken,
-  parseToken
+  parseToken,
 };
