@@ -179,7 +179,13 @@ ipcMain.on(
   (
     event,
     boilerplateName,
-    { definitions, dataFormats, sourceType = "defaultLocal", sourceDir }
+    {
+      definitions,
+      dataFormats,
+      sourceType = "defaultLocal",
+      sourceDir,
+      yamlData,
+    }
   ) => {
     const modelKeys = Object.keys(definitions).filter(
       key => definitions[key]["x-isModel"]
@@ -259,6 +265,13 @@ ipcMain.on(
       })
       .then(() => {
         console.log("拷贝成功");
+        return fse.outputFile(
+          path.join(tmpDir, "swagger", "swagger.yaml"),
+          yamlData
+        );
+      })
+      .then(() => {
+        console.log("生成swagger文件成功");
         return Promise.all(
           globalEjs.map(item => {
             const ejsFile = path.join(tmpDir, item.ejsFile);

@@ -1,4 +1,5 @@
 import React, { Fragment, useState, useEffect } from "react";
+import yaml from "js-yaml";
 import {
   formItemLayout,
   apiOptions,
@@ -125,6 +126,7 @@ function BoilerplateGenerator({
         dataFormats,
         sourceType,
         sourceDir,
+        yamlData: yaml.dump(state),
       });
       if (ifArchiver) {
         setTip("打包文件...");

@@ -209,7 +209,7 @@ export default function definitionsToPaths(definitions) {
       }
 
       // 根据ID查找单条
-      if (apis.includes("findById")) {
+      if (apis.includes("findByPk")) {
         if (!paths[`/${_plural}/:id`]) {
           paths[`/${_plural}/:id`] = {};
         }
@@ -237,7 +237,7 @@ export default function definitionsToPaths(definitions) {
       }
 
       // 更新单条
-      if (apis.includes("updateById")) {
+      if (apis.includes("updateByPk")) {
         if (!paths[`/${_plural}/:id`]) {
           paths[`/${_plural}/:id`] = {};
         }
@@ -271,7 +271,7 @@ export default function definitionsToPaths(definitions) {
       }
 
       // 删除单条
-      if (apis.includes("destroyById")) {
+      if (apis.includes("destroyByPk")) {
         if (!paths[`/${_plural}/:id`]) {
           paths[`/${_plural}/:id`] = {};
         }

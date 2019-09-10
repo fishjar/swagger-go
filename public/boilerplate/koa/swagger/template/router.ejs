@@ -30,46 +30,36 @@ router
     const modelKeyPlural = model["x-plural"].toLowerCase();
   -%>
 
-  <% if(model['x-apis'].includes('findOne')) { %>
+  <% if(model['x-apis'].includes('findOne')) { -%>
     .get("/<%- modelKeyLower -%>", handler.<%- modelKey -%>.findOne)                 // 根据条件查找单条
-  <% } %>
-
-  <% if(model['x-apis'].includes('findOrCreate')) { %>
+  <% } -%>
+  <% if(model['x-apis'].includes('findOrCreate')) { -%>
     .post("/<%- modelKeyLower -%>", handler.<%- modelKey -%>.findOrCreate)           // 查找或创建单条
-  <% } %>
-  
-  <% if(model['x-apis'].includes('findAndCountAll')) { %>
+  <% } -%>
+  <% if(model['x-apis'].includes('findAndCountAll')) { -%>
     .get("/<%- modelKeyPlural -%>", handler.<%- modelKey -%>.findAndCountAll)        // 获取多条
-  <% } %>
-  
-  <% if(model['x-apis'].includes('singleCreate')) { %>
+  <% } -%>
+  <% if(model['x-apis'].includes('singleCreate')) { -%>
     .post("/<%- modelKeyPlural -%>", handler.<%- modelKey -%>.singleCreate)          // 创建单条
-  <% } %>
-  
-  <% if(model['x-apis'].includes('bulkUpdate')) { %>
+  <% } -%>
+  <% if(model['x-apis'].includes('bulkUpdate')) { -%>
     .patch("/<%- modelKeyPlural -%>", handler.<%- modelKey -%>.bulkUpdate)           // 更新多条
-  <% } %>
-  
-  <% if(model['x-apis'].includes('bulkDestroy')) { %>
+  <% } -%>
+  <% if(model['x-apis'].includes('bulkDestroy')) { -%>
     .delete("/<%- modelKeyPlural -%>", handler.<%- modelKey -%>.bulkDestroy)         // 删除多条
-  <% } %>
-  
-  <% if(model['x-apis'].includes('findByPk')) { %>
+  <% } -%>
+  <% if(model['x-apis'].includes('findByPk')) { -%>
     .get("/<%- modelKeyPlural -%>/:id", handler.<%- modelKey -%>.findByPk)           // 根据主键查找单条
-  <% } %>
-  
-  <% if(model['x-apis'].includes('updateByPk')) { %>
+  <% } -%>
+  <% if(model['x-apis'].includes('updateByPk')) { -%>
     .patch("/<%- modelKeyPlural -%>/:id", handler.<%- modelKey -%>.updateByPk)       // 更新单条
-  <% } %>
-  
-  <% if(model['x-apis'].includes('destroyByPk')) { %>
+  <% } -%>
+  <% if(model['x-apis'].includes('destroyByPk')) { -%>
     .delete("/<%- modelKeyPlural -%>/:id", handler.<%- modelKey -%>.destroyByPk)     // 删除单条
-  <% } %>
-  
-  <% if(model['x-apis'].includes('bulkCreate')) { %>
+  <% } -%>
+  <% if(model['x-apis'].includes('bulkCreate')) { -%>
     .post("/<%- modelKeyPlural -%>/multiple", handler.<%- modelKey -%>.bulkCreate)   // 创建多条
-  <% } %>
-
+  <% } -%>
   <% }) -%>
 
   .post("/login/account", handler.Login.account);      // 帐号密码登录

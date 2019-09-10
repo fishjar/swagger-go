@@ -2,6 +2,9 @@ import Sequelize from "sequelize";
 import sequelize from "../db";
 import User from "./User";
 
+/**
+ * 鉴权
+ */
 const Auth = sequelize.define(
   "auth",
   {
