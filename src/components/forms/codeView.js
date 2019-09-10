@@ -2,6 +2,7 @@ import React, { Fragment, useState, useEffect } from "react";
 import yaml from "js-yaml";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { a11yDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
+import { clipboardWrite } from "../../utils";
 import {
   Form,
   Input,
@@ -25,12 +26,28 @@ import {
   Col,
 } from "antd";
 
-export default function CodeView({
-  state,
-  showCode,
-  setShowCode,
-}) {
+export default function CodeView({ state, showCode, setShowCode }) {
   const [codeFormat, setCodeFormat] = useState("yaml");
+  const [source, setSource] = useState("");
+
+  useEffect(() => {
+    switch (codeFormat) {
+      case "yaml":
+        setSource(yaml.dump(state));
+        break;
+      case "json":
+        setSource(JSON.stringify(state, null, "  "));
+        break;
+      default:
+        setSource("");
+    }
+  }, [codeFormat, state]);
+
+  function handleCopy() {
+    clipboardWrite(source);
+    message.success("复制成功");
+  }
+
   return (
     <Drawer
       title="Code Preview"
@@ -57,21 +74,16 @@ export default function CodeView({
           </Radio.Group>
         </Col>
         <Col>
-          <Button icon="copy">Copy</Button>
+          <Button icon="copy" onClick={handleCopy}>
+            Copy
+          </Button>
         </Col>
       </Row>
       <Row>
         <Col>
-          {codeFormat === "yaml" && (
-            <SyntaxHighlighter language="yaml" style={a11yDark} showLineNumbers>
-              {yaml.dump(state)}
-            </SyntaxHighlighter>
-          )}
-          {codeFormat === "json" && (
-            <SyntaxHighlighter language="json" style={a11yDark} showLineNumbers>
-              {JSON.stringify(state, null, "  ")}
-            </SyntaxHighlighter>
-          )}
+          <SyntaxHighlighter language="yaml" style={a11yDark} showLineNumbers>
+            {source}
+          </SyntaxHighlighter>
         </Col>
       </Row>
     </Drawer>

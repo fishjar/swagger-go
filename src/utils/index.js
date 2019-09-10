@@ -1,6 +1,6 @@
 import yaml from "js-yaml";
 
-const { ipcRenderer } = window.electron;
+const { ipcRenderer, clipboard } = window.electron;
 
 /**
  * 文件解析
@@ -168,6 +168,22 @@ export const readDefaultData = () => {
     ipcRenderer.on("read-default-data-err", (event, err) => {
       console.log(err);
       reject(new Error("读取默认数据错误"));
+    });
+  });
+};
+
+/**
+ * 读取README
+ */
+export const readReadme = () => {
+  return new Promise((resolve, reject) => {
+    ipcRenderer.send("read-readme");
+    ipcRenderer.on("read-readme-ok", (event, data) => {
+      resolve(data);
+    });
+    ipcRenderer.on("read-readme-err", (event, err) => {
+      console.log(err);
+      reject(new Error("读取README错误"));
     });
   });
 };
@@ -456,4 +472,21 @@ export const checkPath = pathStrs => {
       reject(new Error("判断文件出错了"));
     });
   });
+};
+
+export const clearCachePath = () => {
+  return new Promise((resolve, reject) => {
+    ipcRenderer.send("clear-cache-path");
+    ipcRenderer.on("clear-cache-path-ok", event => {
+      resolve();
+    });
+    ipcRenderer.on("clear-cache-path-err", (event, err) => {
+      console.log(err);
+      reject(new Error("清空临时文件夹出错"));
+    });
+  });
+};
+
+export const clipboardWrite = text => {
+  clipboard.writeText(text);
 };

@@ -1,39 +1,7 @@
-import React, { Fragment, useState, useEffect } from "react";
-import moment from "moment";
-import {
-  formItemLayout,
-  dataFormats,
-  numTypes,
-  standDataTypes,
-} from "../../config";
-import { getModelProps, deepClone, filterObjectItems } from "../../utils";
-import {
-  Form,
-  Input,
-  Checkbox,
-  Card,
-  Icon,
-  Button,
-  Radio,
-  Modal,
-  Collapse,
-  Table,
-  Divider,
-  Popconfirm,
-  Badge,
-  Drawer,
-  Select,
-  InputNumber,
-  DatePicker,
-  message,
-  Row,
-  Col,
-} from "antd";
-const { Panel } = Collapse;
-const { Option } = Select;
-const CheckboxGroup = Checkbox.Group;
-const InputGroup = Input.Group;
-const { TextArea } = Input;
+import React, { useState } from "react";
+import { formItemLayout } from "../../config";
+import { deepClone } from "../../utils";
+import { Form, Input, Icon, Button, Drawer, Row, Col } from "antd";
 
 function FieldCopy({
   children,
@@ -46,7 +14,7 @@ function FieldCopy({
   field,
   form,
 }) {
-  const { getFieldDecorator, getFieldValue, resetFields } = form;
+  const { getFieldDecorator, resetFields } = form;
 
   /**
    * 设置state hooks
