@@ -667,6 +667,6 @@ x-associations:
     type: "belongsToMany"
     as: "friends"
     throughModel: false
-    through: "UserGroup"
+    through: "userfriend"
     foreignKey: "userId"
     otherKey: "friendId"

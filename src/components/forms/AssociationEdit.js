@@ -1,8 +1,5 @@
 import React, { Fragment, useState } from "react";
-import {
-  formItemLayout,
-  associationTypes,
-} from "../../config";
+import { formItemLayout, associationTypes } from "../../config";
 import {
   Form,
   Input,
@@ -23,6 +20,7 @@ function AssociationEdit({
   dispatch,
   state,
   association,
+  dataIndex,
   form,
 }) {
   const {
@@ -75,21 +73,24 @@ function AssociationEdit({
         return;
       }
       console.log(values);
-      // updateData(values);
-      // setVisible(false);
+      updateData(values);
+      setVisible(false);
     });
   }
 
-  function updateData({ key, ...newData }) {
-    // dispatch({
-    //   type: "DATA_UPDATE",
-    //   payload: {
-    //     securityDefinitions: {
-    //       ...state.securityDefinitions,
-    //       [key]: newData,
-    //     },
-    //   },
-    // });
+  function updateData(values) {
+    const associations = state["x-associations"];
+    if (formMode === "edit") {
+      associations[dataIndex] = values;
+    } else if (formMode === "create") {
+      associations.push(values);
+    }
+    dispatch({
+      type: "DATA_UPDATE",
+      payload: {
+        "x-associations": [...associations],
+      },
+    });
   }
 
   return (

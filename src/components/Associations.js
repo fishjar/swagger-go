@@ -1,15 +1,7 @@
 import React, { Fragment } from "react";
 import AssociationEdit from "./forms/AssociationEdit";
-import {
-  associationTypes,
-} from "../config";
-import {
-  Icon,
-  Button,
-  Table,
-  Divider,
-  Badge,
-} from "antd";
+import { associationTypes } from "../config";
+import { Icon, Button, Table, Divider, Badge } from "antd";
 
 export default function Associations({ state, dispatch }) {
   /**
@@ -26,14 +18,14 @@ export default function Associations({ state, dispatch }) {
    */
   function handleAssociationRemove(index) {
     console.log(index);
-    // const securityDefinitions = { ...state.securityDefinitions };
-    // delete securityDefinitions[securityKey];
-    // dispatch({
-    //   type: "DATA_UPDATE",
-    //   payload: {
-    //     securityDefinitions,
-    //   },
-    // });
+    const associations = state["x-associations"];
+    associations.splice(index);
+    dispatch({
+      type: "DATA_UPDATE",
+      payload: {
+        "x-associations": [...associations],
+      },
+    });
   }
 
   const columns = [
@@ -65,21 +57,20 @@ export default function Associations({ state, dispatch }) {
         ),
     },
     {
-      title: "Keys",
-      dataIndex: "keys",
-      render: (_, record) => (
-        <div>
-          <div>foreignKey: {record.foreignKey}</div>
-          <div>
-            {associationTypes[record.type]}:{" "}
-            {record[associationTypes[record.type]]}
-          </div>
-        </div>
-      ),
+      title: "ForeignKey",
+      dataIndex: "foreignKey",
+    },
+    {
+      title: "OtherKey",
+      dataIndex: "otherKey",
+      render: (_, record) =>
+        `${associationTypes[record.type]}: ${
+          record[associationTypes[record.type]]
+        }`,
     },
     {
       title: "操作",
-      render: (_, record) => (
+      render: (_, record, index) => (
         <span>
           <AssociationEdit
             title="编辑"
@@ -87,6 +78,7 @@ export default function Associations({ state, dispatch }) {
             dispatch={dispatch}
             state={state}
             association={record}
+            dataIndex={index}
           >
             <Icon type="edit" />
           </AssociationEdit>

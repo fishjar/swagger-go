@@ -52,7 +52,7 @@ function createWindow() {
 
     // 参考：https://electronjs.org/devtron
     // devtron
-    // require("devtron").install();
+    require("devtron").install();
 
     // 参考：https://github.com/MarshallOfSound/electron-devtools-installer
     // 可能网络问题，此方法未能安装成功
@@ -106,22 +106,25 @@ app.on("activate", function() {
 });
 
 // https://electronjs.org/docs/tutorial/security#12-disable-or-limit-navigation
-app.on("web-contents-created", (event, contents) => {
-  // 禁用或限制网页跳转
-  contents.on("will-navigate", (event, navigationUrl) => {
-    const parsedUrl = new URL(navigationUrl);
-    if (parsedUrl.origin !== "https://example.com") {
+// 开发环境会阻断react的热重载
+if (!isDev) {
+  app.on("web-contents-created", (event, contents) => {
+    // 禁用或限制网页跳转
+    contents.on("will-navigate", (event, navigationUrl) => {
+      const parsedUrl = new URL(navigationUrl);
+      if (parsedUrl.origin !== "https://example.com") {
+        event.preventDefault();
+      }
+    });
+    // 禁用或限制新窗口的创建
+    contents.on("new-window", async (event, navigationUrl) => {
+      // In this example, we'll ask the operating system
+      // to open this event's url in the default browser.
       event.preventDefault();
-    }
+      await shell.openExternal(navigationUrl);
+    });
   });
-  // 禁用或限制新窗口的创建
-  contents.on("new-window", async (event, navigationUrl) => {
-    // In this example, we'll ask the operating system
-    // to open this event's url in the default browser.
-    event.preventDefault();
-    await shell.openExternal(navigationUrl);
-  });
-});
+}
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
