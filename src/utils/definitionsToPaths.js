@@ -19,15 +19,14 @@ export default function definitionsToPaths(definitions) {
           paths[`/${_name}`] = {};
         }
         paths[`/${_name}`].get = {
-          summary: `查询单个${modelName}`,
-          description: `查询单个${modelName}...`,
+          summary: `根据条件查找单个${modelName}`,
+          description: `根据条件查找单个${modelName}...`,
           parameters: [
             {
               in: "query",
               name: "id",
               type: "string",
               description: "不限于id，可以是任意参数",
-              required: true,
             },
           ],
           responses: {

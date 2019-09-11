@@ -10,7 +10,7 @@ const NODE_ENV = process.env.NODE_ENV || "development";
 const defaultConfig = {
   BASE_PATH: path.resolve(__dirname, "../"), // 项目所在目录
   NODE_ENV,
-  NODE_PORT: process.env.NODE_PORT || "3000", // 运行端口
+  NODE_PORT: process.env.NODE_PORT || "8000", // 运行端口
   DEFAULT_USERNAME: process.env.DEFAULT_USERNAME || "gabe", // 默认用户名
   DEFAULT_PASSWORD: process.env.DEFAULT_PASSWORD || "123456", // 默认用户密码
   JWT_SECRET: process.env.JWT_SECRET || "123456", // JWT加密密钥

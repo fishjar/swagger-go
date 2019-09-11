@@ -4,7 +4,7 @@ import model from "../model";
  * 查询多条信息
  */
 const findAndCountAll = async (ctx, next) => {
-  const { page_num = 1, page_size = 10, sorter, ...where } = ctx.query;
+  const { pageNum = 1, pageSize = 10, sorter, ...where } = ctx.query;
   let order = [];
   if (Array.isArray(sorter)) {
     order = [...sorter.map(item => item.split("__"))];
@@ -13,8 +13,8 @@ const findAndCountAll = async (ctx, next) => {
   }
   const { count, rows } = await model.User.findAndCountAll({
     where,
-    offset: (page_num - 1) * page_size,
-    limit: page_size,
+    offset: (pageNum - 1) * pageSize,
+    limit: pageSize,
     order,
     include: [
       {

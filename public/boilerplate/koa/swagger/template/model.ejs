@@ -65,7 +65,7 @@ const <%- modelKey -%> = sequelize.define(
           max: <%- field.maximum -%>,
           <% } -%>
           <% if (field.enum) { -%>
-          isIn: [[<% field.enum.forEach(item=>{ -%> <%- item -%>,<% }) -%>]],
+          isIn: [[<% field.enum.forEach(item=>{ -%> <%- JSON.stringify(item) -%>,<% }) -%>]],
           <% } -%>
           <% if (field.format==='date' || field.format==='date-time') { -%>
           isDate: true,

@@ -115,14 +115,14 @@
 				"parameters": [
 					{
 						"in": "query",
-						"name": "page_num",
+						"name": "pageNum",
 						"type": "integer",
 						"description": "页码",
 						"default": 1
 					},
 					{
 						"in": "query",
-						"name": "page_size",
+						"name": "pageSize",
 						"type": "integer",
 						"description": "分页大小",
 						"default": 10

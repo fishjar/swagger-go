@@ -27,25 +27,15 @@ const account = async (ctx, next) => {
     "此帐号已过期"
   );
 
-  const user = await auth.getUser();
-  ctx.assert(user, 401, "帐号异常");
-
-  const roles = await user.getRoles();
-
   const { userId } = auth;
   const authToken = jwt.makeToken({
     authType,
     authName,
     userId,
-    roles: roles.map(role => role.name),
   });
   ctx.body = {
     message: "登录成功",
     authToken,
-    user: {
-      name: user.name,
-    },
-    roles: roles.map(role => role.name),
   };
 
   next();

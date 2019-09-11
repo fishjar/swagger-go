@@ -45,3 +45,30 @@ yarn dev
 # https://www.electron.build/
 yarn dist
 ```
+
+## 存在问题
+
+```sh
+[0] ./node_modules/handlebars/lib/index.js
+[0] require.extensions is not supported by webpack. Use a loader instead.
+[0] 
+[0] ./node_modules/handlebars/lib/index.js
+[0] require.extensions is not supported by webpack. Use a loader instead.
+[0] 
+[0] ./node_modules/handlebars/lib/index.js
+[0] require.extensions is not supported by webpack. Use a loader instead.
+```
+
+https://github.com/wycats/handlebars.js/issues/953
+
+```js
+resolve:  {
+   alias: {
+       'handlebars' : 'handlebars/dist/handlebars.js'
+   }
+}
+```
+
+https://github.com/facebook/create-react-app/issues/6953
+https://github.com/timarney/react-app-rewired
+https://github.com/timarney/react-app-rewired/issues/167

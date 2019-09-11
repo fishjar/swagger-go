@@ -1,4 +1,4 @@
-import Account from "./Account";
+import Login from "./Login";
 <% Object.entries(definitions)
   .filter(([_,model])=>model['x-isModel'])
   .forEach(([modelKey]) => { -%>
@@ -6,7 +6,7 @@ import <%- modelKey -%> from "./<%- modelKey -%>";
 <% }) -%>
 
 export default {
-  Account,
+  Login,
 <% Object.entries(definitions)
   .filter(([_,model])=>model['x-isModel'])
   .forEach(([modelKey]) => { -%>
