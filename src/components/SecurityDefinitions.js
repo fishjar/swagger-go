@@ -1,39 +1,11 @@
-import React, { Fragment, useState, useEffect } from "react";
-import moment from "moment";
+import React, { Fragment } from "react";
 import SecurityEdit from "./forms/SecurityEdit";
-import { getModelProps, parseRef } from "../utils";
 import {
-  formItemLayout,
-  dataFormats,
-  numTypes,
-  isObj,
-  standDataTypes,
-} from "../config";
-import {
-  Form,
-  Input,
-  Checkbox,
-  Card,
   Icon,
   Button,
-  Radio,
-  Modal,
-  Collapse,
   Table,
   Divider,
-  Popconfirm,
-  Badge,
-  Drawer,
-  Select,
-  InputNumber,
-  DatePicker,
-  message,
 } from "antd";
-const { Panel } = Collapse;
-const { Option } = Select;
-const CheckboxGroup = Checkbox.Group;
-const InputGroup = Input.Group;
-const { TextArea } = Input;
 
 export default function SecurityDefinitions({ state, dispatch }) {
   /**

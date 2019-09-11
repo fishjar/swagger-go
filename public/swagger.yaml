@@ -38,6 +38,10 @@ paths:
           description: "登录成功"
           schema:
             $ref: "#/definitions/LoginResponse"
+        "401":
+          description: "登录失败"
+          schema:
+            $ref: '#/definitions/Error'
 definitions:
   User:
     type: "object"
@@ -564,27 +568,9 @@ definitions:
       authtoken:
         type: "string"
         description: "token"
-      user:
-        type: "object"
-        description: "用户信息"
-        properties:
-          name:
-            type: "string"
-            description: "用户名"
-      roles:
-        type: "array"
-        description: "角色"
-        items:
-          type: "string"
     example:
       message: "登录成功"
       authToken: "abc..."
-      user:
-        name: "gabe"
-      roles:
-        - "user"
-        - "admin"
-        - "guest"
   Error:
     type: "object"
     description: "错误模型"
@@ -619,3 +605,68 @@ definitions:
       y:
         type: "number"
         description: "y坐标"
+x-associations:
+  - source: "User"
+    target: "Auth"
+    type: "hasMany"
+    as: "auths"
+    foreignKey: "userId"
+    sourceKey: "id"
+  - source: "Auth"
+    target: "User"
+    type: "belongsTo"
+    as: "user"
+    foreignKey: "userId"
+    targetKey: "id"
+  - source: "Role"
+    target: "Role"
+    type: "hasOne"
+    as: "child"
+    foreignKey: "parentId"
+    sourceKey: "id"
+  - source: "Role"
+    target: "Role"
+    type: "belongsTo"
+    as: "parent"
+    foreignKey: "parentId"
+    targetKey: "id"
+  - source: "User"
+    target: "Role"
+    type: "belongsToMany"
+    as: "roles"
+    throughModel: false
+    through: "userrole"
+    foreignKey: "userId"
+    otherKey: "roleId"
+  - source: "Role"
+    target: "User"
+    type: "belongsToMany"
+    as: "users"
+    throughModel: false
+    through: "userrole"
+    foreignKey: "roleId"
+    otherKey: "userId"
+  - source: "User"
+    target: "Group"
+    type: "belongsToMany"
+    as: "groups"
+    throughModel: true
+    through: "UserGroup"
+    foreignKey: "userId"
+    otherKey: "groupId"
+  - source: "Group"
+    target: "User"
+    type: "belongsToMany"
+    as: "users"
+    throughModel: true
+    through: "UserGroup"
+    foreignKey: "groupId"
+    otherKey: "userId"
+  - source: "User"
+    target: "User"
+    type: "belongsToMany"
+    as: "friends"
+    throughModel: false
+    through: "UserGroup"
+    foreignKey: "userId"
+    otherKey: "friendId"

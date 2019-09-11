@@ -1,14 +1,10 @@
-import React, { Fragment, useState, useEffect, forwardRef } from "react";
-import moment from "moment";
+import React, { Fragment, useState } from "react";
 import {
   formItemLayout,
-  dataFormats,
   dataTypes,
-  numTypes,
   standDataTypes,
 } from "../../config";
 import {
-  getModelProps,
   parseRef,
   hasDuplication,
   parseArrayToObject,
@@ -17,38 +13,25 @@ import {
   getType,
   deepClone,
 } from "../../utils";
-import SubFields from "./subFields";
-import EnumItems from "./enumItems";
-import DateSelect from "./dateSelect";
-import RefFields from "./refFields";
-import JSONEdit from "./jsonEdit";
+import SubFields from "./SubFields";
+import EnumItems from "./EnumItems";
+import DateSelect from "./DateSelect";
+import RefFields from "./RefFields";
+import JSONEdit from "./JSONEdit";
 import {
   Form,
   Input,
   Checkbox,
-  Card,
-  Icon,
   Button,
   Radio,
-  Modal,
-  Collapse,
   Table,
-  Divider,
-  Popconfirm,
-  Badge,
   Drawer,
   Select,
   InputNumber,
-  DatePicker,
-  message,
   Switch,
 } from "antd";
 import { setTimeout } from "timers";
-import { Utils } from "handlebars";
-const { Panel } = Collapse;
 const { Option } = Select;
-const CheckboxGroup = Checkbox.Group;
-const InputGroup = Input.Group;
 const { TextArea } = Input;
 
 function FieldEdit({

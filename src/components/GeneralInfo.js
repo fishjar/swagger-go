@@ -1,20 +1,12 @@
-import React, { Fragment, useState, useEffect } from "react";
-// import SecurityAddModal from "./securityAddModal";
+import React, { Fragment } from "react";
 import { formItemLayout } from "../config";
 import {
   Form,
-  Input,
   Checkbox,
-  Card,
-  Icon,
-  Button,
-  Radio,
-  Modal,
-  Table,
 } from "antd";
 const CheckboxGroup = Checkbox.Group;
 
-export default function GeneralInfo({ state, dispatch }) {
+export default function GeneralInfo({ state }) {
   return (
     <Fragment>
       <Form {...formItemLayout}>

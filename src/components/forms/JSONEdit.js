@@ -1,37 +1,7 @@
-import React, { Fragment, useState, useEffect, forwardRef } from "react";
-import moment from "moment";
+import React, { useState, forwardRef } from "react";
 import {
-  formItemLayout,
-  dataFormats,
-  numTypes,
-  standDataTypes,
-} from "../../config";
-import { getModelProps } from "../../utils";
-import {
-  Form,
   Input,
-  Checkbox,
-  Card,
-  Icon,
-  Button,
-  Radio,
-  Modal,
-  Collapse,
-  Table,
-  Divider,
-  Popconfirm,
-  Badge,
-  Drawer,
-  Select,
-  InputNumber,
-  DatePicker,
-  message,
-  Switch,
 } from "antd";
-const { Panel } = Collapse;
-const { Option } = Select;
-const CheckboxGroup = Checkbox.Group;
-const InputGroup = Input.Group;
 const { TextArea } = Input;
 
 function JSONEdit({ value, onChange }, ref) {

@@ -52,7 +52,7 @@ function createWindow() {
 
     // 参考：https://electronjs.org/devtron
     // devtron
-    require("devtron").install();
+    // require("devtron").install();
 
     // 参考：https://github.com/MarshallOfSound/electron-devtools-installer
     // 可能网络问题，此方法未能安装成功

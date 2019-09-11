@@ -1,28 +1,17 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React, { Fragment } from "react";
 
 import { apiOptions } from "../config";
-import Definition from "./definition";
-import ModelEdit from "./forms/modelEdit";
-import ModelCopy from "./forms/modelCopy";
+import Definition from "./Definition";
+import ModelEdit from "./forms/ModelEdit";
+import ModelCopy from "./forms/ModelCopy";
 
 import {
-  Form,
-  Input,
-  Checkbox,
-  Card,
   Icon,
   Button,
-  Radio,
-  Modal,
   Collapse,
-  Table,
-  Divider,
-  Popconfirm,
-  Tag,
   Badge,
 } from "antd";
 const { Panel } = Collapse;
-const CheckboxGroup = Checkbox.Group;
 
 export default function Definitions({ state, dispatch }) {
   /**

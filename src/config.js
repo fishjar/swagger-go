@@ -154,3 +154,10 @@ export const defaultBoilerplates = {
     disabled: true,
   },
 };
+
+export const associationTypes = {
+  hasOne: "sourceKey",
+  hasMany: "sourceKey",
+  belongsTo: "targetKey",
+  belongsToMany: "otherKey",
+};

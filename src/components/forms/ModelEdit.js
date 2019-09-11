@@ -1,41 +1,17 @@
-import React, { Fragment, useState, useEffect } from "react";
-import moment from "moment";
+import React, { Fragment, useState } from "react";
 import {
   formItemLayout,
   apiOptions,
-  dataFormats,
-  numTypes,
-  standDataTypes,
 } from "../../config";
-import { getModelProps } from "../../utils";
 import {
   Form,
   Input,
   Checkbox,
-  Card,
-  Icon,
   Button,
-  Radio,
-  Modal,
-  Collapse,
-  Table,
-  Divider,
-  Popconfirm,
-  Badge,
   Drawer,
-  Select,
-  InputNumber,
-  DatePicker,
-  message,
   Switch,
   Row,
-  Col,
 } from "antd";
-const { Panel } = Collapse;
-const { Option } = Select;
-const CheckboxGroup = Checkbox.Group;
-const InputGroup = Input.Group;
-const { TextArea } = Input;
 
 function ModelEdit({
   children,

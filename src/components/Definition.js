@@ -1,40 +1,14 @@
-import React, { Fragment, useState, useEffect } from "react";
-import moment from "moment";
-import FieldEdit from "./forms/fieldEdit";
-import FieldCopy from "./forms/fieldCopy";
+import React, { Fragment } from "react";
+import FieldEdit from "./forms/FieldEdit";
+import FieldCopy from "./forms/FieldCopy";
 import { getModelProps, parseRef } from "../utils";
 import {
-  formItemLayout,
-  dataFormats,
-  numTypes,
-  isObj,
-  standDataTypes,
-} from "../config";
-import {
-  Form,
-  Input,
-  Checkbox,
-  Card,
   Icon,
   Button,
-  Radio,
-  Modal,
-  Collapse,
   Table,
   Divider,
-  Popconfirm,
   Badge,
-  Drawer,
-  Select,
-  InputNumber,
-  DatePicker,
-  message,
 } from "antd";
-const { Panel } = Collapse;
-const { Option } = Select;
-const CheckboxGroup = Checkbox.Group;
-const InputGroup = Input.Group;
-const { TextArea } = Input;
 
 // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#schemaObject
 export default function Definition({ models, model, dispatch }) {

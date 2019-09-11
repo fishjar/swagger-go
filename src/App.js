@@ -1,26 +1,21 @@
-import React, { useState } from "react";
+import React from "react";
 import "./App.css";
 import "antd/dist/antd.css";
 
 import { useData } from "./hooks";
-import GeneralInfo from "./components/generalInfo";
-import Definitions from "./components/definitions";
-import Preview from "./components/preview";
-import Readme from "./components/readme";
-import SecurityDefinitions from "./components/securityDefinitions";
-import GeneralInfoEdit from "./components/forms/generalInfoEdit";
+import GeneralInfo from "./components/GeneralInfo";
+import Definitions from "./components/Definitions";
+import Preview from "./components/Preview";
+import Readme from "./components/Readme";
+import SecurityDefinitions from "./components/SecurityDefinitions";
+import Associations from "./components/Associations";
+import GeneralInfoEdit from "./components/forms/GeneralInfoEdit";
 
 import {
   Layout,
   Button,
   Collapse,
   Icon,
-  Input,
-  Divider,
-  Popconfirm,
-  Table,
-  Card,
-  Radio,
   Menu,
   Alert,
   Row,
@@ -34,7 +29,6 @@ const { Panel } = Collapse;
 const ButtonGroup = Button.Group;
 
 function App() {
-  const [size, setSize] = useState("large");
   const {
     state,
     isLoading,
@@ -264,6 +258,9 @@ function App() {
                 </Panel>
                 <Panel header="Definitions" key="definitions">
                   <Definitions state={state} dispatch={dispatch} />
+                </Panel>
+                <Panel header="Associations" key="associations">
+                  <Associations state={state} dispatch={dispatch} />
                 </Panel>
                 <Panel header="Paths" key="paths">
                   <p>开发中...</p>

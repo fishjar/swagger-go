@@ -4,23 +4,9 @@ import SyntaxHighlighter from "react-syntax-highlighter";
 import { a11yDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import { clipboardWrite } from "../../utils";
 import {
-  Form,
-  Input,
-  Checkbox,
-  Card,
-  Icon,
   Button,
   Radio,
-  Modal,
-  Collapse,
-  Table,
-  Divider,
-  Popconfirm,
-  Badge,
   Drawer,
-  Select,
-  InputNumber,
-  DatePicker,
   message,
   Row,
   Col,

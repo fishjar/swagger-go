@@ -1,39 +1,23 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React, { Fragment, useState } from "react";
 import yaml from "js-yaml";
 import {
   formItemLayout,
-  apiOptions,
   dataFormats,
-  numTypes,
-  standDataTypes,
   defaultBoilerplates,
 } from "../../config";
 import {
   Form,
   Input,
-  Checkbox,
-  Card,
   Icon,
   Button,
   Radio,
-  Modal,
-  Collapse,
-  Table,
-  Divider,
-  Popconfirm,
-  Badge,
   Drawer,
-  Select,
-  InputNumber,
-  DatePicker,
   message,
-  Row,
-  Col,
   Switch,
   Spin,
   Tooltip,
 } from "antd";
-import PathSelect from "./pathSelect";
+import PathSelect from "./PathSelect";
 
 import {
   copyBoilerplate,
