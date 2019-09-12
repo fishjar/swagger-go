@@ -167,13 +167,24 @@ ipcMain.on(
     targetDir = "download"
   ) => {
     const localDir = path.join(__dirname, targetDir, boilerplateName);
-    downloadRepo(`${repoUrl}#${repoBranch}`, localDir, err => {
-      if (err) {
-        event.sender.send("download-boilerplate-err", err);
-      } else {
-        event.sender.send("download-boilerplate-ok");
-      }
-    });
+    fse
+      .emptyDir(localDir)
+      .then(() => {
+        downloadRepo(`${repoUrl}#${repoBranch}`, localDir, err => {
+          if (err) {
+            event.sender.send("download-boilerplate-err", err);
+          } else {
+            event.sender.send("download-boilerplate-ok");
+          }
+        });
+      })
+      .catch(err => {
+        console.log(err);
+        event.sender.send(
+          "download-boilerplate-err",
+          new Error("清空文件夹出错")
+        );
+      });
   }
 );
 
