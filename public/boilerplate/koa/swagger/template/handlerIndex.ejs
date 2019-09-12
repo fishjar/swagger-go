@@ -3,7 +3,7 @@ import Login from "./Login";
   .filter(([_,model])=>model['x-isModel'])
   .forEach(([modelKey]) => { -%>
 import <%- modelKey -%> from "./<%- modelKey -%>";
-<% }) -%>
+<% }); -%>
 
 export default {
   Login,
@@ -11,5 +11,5 @@ export default {
   .filter(([_,model])=>model['x-isModel'])
   .forEach(([modelKey]) => { -%>
   <%- modelKey -%>,
-<% }) -%>
+<% }); -%>
 };

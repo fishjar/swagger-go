@@ -2,12 +2,37 @@
   .filter(([_,model])=>model['x-isModel'])
   .forEach(([modelKey]) => { -%>
 import <%- modelKey -%> from "./<%- modelKey -%>";
-<% }) -%>
+<% }); %>
+
+<% associations.forEach(item=>{ %>
+
+<% if(item.type==="hasOne"){ %>
+<%- item.source -%>.hasOne(<%- item.target -%>, { as: "<%- item.as -%>", foreignKey: "<%- item.foreignKey -%>", sourceKey: "<%- item.sourceKey -%>" });
+<% } %>
+
+<% if(item.type==="hasMany"){ %>
+<%- item.source -%>.hasMany(<%- item.target -%>, { as: "<%- item.as -%>", foreignKey: "<%- item.foreignKey -%>", sourceKey: "<%- item.sourceKey -%>" });
+<% } %>
+
+<% if(item.type==="belongsTo"){ %>
+<%- item.source -%>.belongsTo(<%- item.target -%>, { as: "<%- item.as -%>", foreignKey: "<%- item.foreignKey -%>", targetKey: "<%- item.targetKey -%>" });
+<% } %>
+
+<% if(item.type==="belongsToMany"){ %>
+<%- item.source -%>.belongsToMany(<%- item.target -%>, {
+  as: "<%- item.as -%>",
+  through: <%- item.throughModel?item.through:`"${item.through}"` -%>,
+  foreignKey: "<%- item.foreignKey -%>",
+  otherKey: "<%- item.otherKey -%>",
+});
+<% } %>
+
+<% }); %>
 
 export default {
 <% Object.entries(definitions)
   .filter(([_,model])=>model['x-isModel'])
   .forEach(([modelKey,model]) => { -%>
   <%- modelKey %>, // <%- model.description %>
-<% }) -%>
+<% }); -%>
 };

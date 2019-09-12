@@ -159,8 +159,14 @@ ipcMain.on("write-cache", (event, data) => {
  */
 ipcMain.on(
   "download-boilerplate",
-  (event, boilerplateName, repoUrl, repoBranch = "master") => {
-    const localDir = path.join(__dirname, "download", boilerplateName);
+  (
+    event,
+    boilerplateName,
+    repoUrl,
+    repoBranch = "master",
+    targetDir = "download"
+  ) => {
+    const localDir = path.join(__dirname, targetDir, boilerplateName);
     downloadRepo(`${repoUrl}#${repoBranch}`, localDir, err => {
       if (err) {
         event.sender.send("download-boilerplate-err", err);
@@ -185,6 +191,7 @@ ipcMain.on(
       sourceType = "defaultLocal",
       sourceDir,
       yamlData,
+      associations,
     }
   ) => {
     const modelKeys = Object.keys(definitions).filter(
@@ -276,7 +283,11 @@ ipcMain.on(
           globalEjs.map(item => {
             const ejsFile = path.join(tmpDir, item.ejsFile);
             const outFile = path.join(tmpDir, item.outFile);
-            return doPromise(ejsFile, outFile, { definitions, dataFormats });
+            return doPromise(ejsFile, outFile, {
+              definitions,
+              dataFormats,
+              associations,
+            });
           })
         );
       })

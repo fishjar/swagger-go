@@ -1,10 +1,6 @@
 import React, { Fragment, useState } from "react";
 import yaml from "js-yaml";
-import {
-  formItemLayout,
-  dataFormats,
-  defaultBoilerplates,
-} from "../../config";
+import { formItemLayout, dataFormats, defaultBoilerplates } from "../../config";
 import {
   Form,
   Input,
@@ -18,6 +14,7 @@ import {
   Tooltip,
 } from "antd";
 import PathSelect from "./PathSelect";
+import BoilerplateUpdate from "./BoilerplateUpdate";
 
 import {
   copyBoilerplate,
@@ -37,6 +34,7 @@ function BoilerplateGenerator({
 }) {
   const [spinning, setSpinning] = useState(false);
   const [tip, setTip] = useState("");
+  const [showUpdate, setShowUpdate] = useState(false);
   const {
     getFieldDecorator,
     getFieldValue,
@@ -84,7 +82,7 @@ function BoilerplateGenerator({
     ifArchiver,
     outDir,
   }) {
-    const { definitions } = state;
+    const { definitions, "x-associations": associations = [] } = state;
 
     try {
       setSpinning(true);
@@ -111,6 +109,7 @@ function BoilerplateGenerator({
         sourceType,
         sourceDir,
         yamlData: yaml.dump(state),
+        associations,
       });
       if (ifArchiver) {
         setTip("打包文件...");
@@ -374,6 +373,15 @@ function BoilerplateGenerator({
           textAlign: "right",
         }}
       >
+        <Button
+          onClick={() => {
+            setShowUpdate(true);
+          }}
+          style={{ marginRight: 8 }}
+          type="dashed"
+        >
+          Local Bolierplate Update
+        </Button>
         <Button onClick={handleHide} style={{ marginRight: 8 }}>
           Cancel
         </Button>
@@ -393,6 +401,10 @@ function BoilerplateGenerator({
           Ok
         </Button>
       </div>
+      <BoilerplateUpdate
+        showUpdate={showUpdate}
+        setShowUpdate={setShowUpdate}
+      />
     </Drawer>
   );
 }

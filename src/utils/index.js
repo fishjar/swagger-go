@@ -385,13 +385,19 @@ export const parseArrayToObject = (a, key = "key") => {
  * @param {String} boilerplateName
  * @param {String} repoUrl
  */
-export const downloadBoilerplate = (boilerplateName, repoUrl, repoBranch) => {
+export const downloadBoilerplate = (
+  boilerplateName,
+  repoUrl,
+  repoBranch,
+  targetDir
+) => {
   return new Promise((resolve, reject) => {
     ipcRenderer.send(
       "download-boilerplate",
       boilerplateName,
       repoUrl,
-      repoBranch
+      repoBranch,
+      targetDir
     );
     ipcRenderer.on("download-boilerplate-ok", event => {
       resolve("下载样板文件成功");
