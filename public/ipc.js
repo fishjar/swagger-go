@@ -213,8 +213,13 @@ ipcMain.on(
       return;
     }
     const tmpDir = path.join(__dirname, "tmp", boilerplateName);
-    const swaggerEjs = require(path.join(sourceDir, "swagger", "ejs.json"));
-    const { globalEjs = [], modelEjs = [], boilerplateLanguage } = swaggerEjs;
+    const swaggerEjs = require(path.join(sourceDir, "swagger", "config.json"));
+    const {
+      globalEjs = [],
+      modelEjs = [],
+      replaceFiles = [],
+      boilerplateLanguage,
+    } = swaggerEjs;
 
     const renderPromise = (ejsFile, data) => {
       return new Promise((resolve, reject) => {
@@ -271,7 +276,17 @@ ipcMain.on(
         return fse.copy(sourceDir, tmpDir);
       })
       .then(() => {
-        console.log("拷贝成功");
+        console.log("拷贝文件夹成功");
+        return Promise.all(
+          replaceFiles.map(item => {
+            const placeFile = path.join(tmpDir, item.placeFile);
+            const outFile = path.join(tmpDir, item.outFile);
+            return fse.copy(placeFile, outFile);
+          })
+        );
+      })
+      .then(() => {
+        console.log("拷贝替换文件成功");
         return fse.outputFile(
           path.join(tmpDir, "swagger", "swagger.yaml"),
           yamlData

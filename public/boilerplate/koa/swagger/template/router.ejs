@@ -1,26 +1,8 @@
 import Router from "koa-router";
 import handler from "../handler";
+import roleAuth from "../middleware/roleAuth";
 
 const router = new Router();
-
-/**
- * 角色权限中间件
- * @param {Array} roles 
- */
-const roleAuth = (roles = []) => (ctx, next) => {
-  roles.forEach(role => {
-    ctx.assert(
-      ctx.state &&
-        ctx.state.user &&
-        ctx.state.user.roles &&
-        Array.isArray(ctx.state.user.roles) &&
-        ctx.state.user.roles.includes(role),
-      401,
-      "缺少角色权限"
-    );
-  });
-  return next();
-};
 
 router
   <% Object.entries(definitions)
@@ -31,34 +13,34 @@ router
   -%>
 
   <% if(model['x-apis'].includes('findOne')) { -%>
-    .get("/<%- modelKeyLower -%>", handler.<%- modelKey -%>.findOne)                 // 根据条件查找单条
+    .get("/<%- modelKeyLower -%>", roleAuth(["guest"]), handler.<%- modelKey -%>.findOne)                 // 根据条件查找单条
   <% } -%>
   <% if(model['x-apis'].includes('findOrCreate')) { -%>
-    .post("/<%- modelKeyLower -%>", handler.<%- modelKey -%>.findOrCreate)           // 查找或创建单条
+    .post("/<%- modelKeyLower -%>", roleAuth(["guest"]), handler.<%- modelKey -%>.findOrCreate)           // 查找或创建单条
   <% } -%>
   <% if(model['x-apis'].includes('findAndCountAll')) { -%>
-    .get("/<%- modelKeyPlural -%>", handler.<%- modelKey -%>.findAndCountAll)        // 获取多条
+    .get("/<%- modelKeyPlural -%>", roleAuth(["guest"]), handler.<%- modelKey -%>.findAndCountAll)        // 获取多条
   <% } -%>
   <% if(model['x-apis'].includes('singleCreate')) { -%>
-    .post("/<%- modelKeyPlural -%>", handler.<%- modelKey -%>.singleCreate)          // 创建单条
+    .post("/<%- modelKeyPlural -%>", roleAuth(["guest"]), handler.<%- modelKey -%>.singleCreate)          // 创建单条
   <% } -%>
   <% if(model['x-apis'].includes('bulkUpdate')) { -%>
-    .patch("/<%- modelKeyPlural -%>", handler.<%- modelKey -%>.bulkUpdate)           // 更新多条
+    .patch("/<%- modelKeyPlural -%>", roleAuth(["guest"]), handler.<%- modelKey -%>.bulkUpdate)           // 更新多条
   <% } -%>
   <% if(model['x-apis'].includes('bulkDestroy')) { -%>
-    .delete("/<%- modelKeyPlural -%>", handler.<%- modelKey -%>.bulkDestroy)         // 删除多条
+    .delete("/<%- modelKeyPlural -%>", roleAuth(["guest"]), handler.<%- modelKey -%>.bulkDestroy)         // 删除多条
   <% } -%>
   <% if(model['x-apis'].includes('findByPk')) { -%>
-    .get("/<%- modelKeyPlural -%>/:id", handler.<%- modelKey -%>.findByPk)           // 根据主键查找单条
+    .get("/<%- modelKeyPlural -%>/:id", roleAuth(["guest"]), handler.<%- modelKey -%>.findByPk)           // 根据主键查找单条
   <% } -%>
   <% if(model['x-apis'].includes('updateByPk')) { -%>
-    .patch("/<%- modelKeyPlural -%>/:id", handler.<%- modelKey -%>.updateByPk)       // 更新单条
+    .patch("/<%- modelKeyPlural -%>/:id", roleAuth(["guest"]), handler.<%- modelKey -%>.updateByPk)       // 更新单条
   <% } -%>
   <% if(model['x-apis'].includes('destroyByPk')) { -%>
-    .delete("/<%- modelKeyPlural -%>/:id", handler.<%- modelKey -%>.destroyByPk)     // 删除单条
+    .delete("/<%- modelKeyPlural -%>/:id", roleAuth(["guest"]), handler.<%- modelKey -%>.destroyByPk)     // 删除单条
   <% } -%>
   <% if(model['x-apis'].includes('bulkCreate')) { -%>
-    .post("/<%- modelKeyPlural -%>/multiple", handler.<%- modelKey -%>.bulkCreate)   // 创建多条
+    .post("/<%- modelKeyPlural -%>/multiple", roleAuth(["guest"]), handler.<%- modelKey -%>.bulkCreate)   // 创建多条
   <% } -%>
   <% }) -%>
 

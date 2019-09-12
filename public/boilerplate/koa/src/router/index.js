@@ -1,26 +1,8 @@
 import Router from "koa-router";
 import handler from "../handler";
+import roleAuth from "../middleware/roleAuth";
 
 const router = new Router();
-
-/**
- * 角色权限中间件
- * @param {Array} roles 
- */
-const roleAuth = (roles = []) => (ctx, next) => {
-  roles.forEach(role => {
-    ctx.assert(
-      ctx.state &&
-        ctx.state.user &&
-        ctx.state.user.roles &&
-        Array.isArray(ctx.state.user.roles) &&
-        ctx.state.user.roles.includes(role),
-      401,
-      "角色缺少权限"
-    );
-  });
-  return next();
-};
 
 router
   .get("/test/fetch", handler.Test.fetch)
