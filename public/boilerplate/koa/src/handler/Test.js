@@ -12,7 +12,7 @@ const fetch = async (ctx, next) => {
   ctx.assert(res, 500, "未获取到数据");
   ctx.body = res;
 
-  next();
+  await next();
 };
 
 /**
@@ -36,7 +36,7 @@ const createAuth = async (ctx, next) => {
   );
   ctx.body = auth;
 
-  next();
+  await next();
 };
 
 const queryRaw = async (ctx, next) => {
@@ -47,7 +47,7 @@ const queryRaw = async (ctx, next) => {
   });
   ctx.body = res;
 
-  next();
+  await next();
 };
 
 export default {

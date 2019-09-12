@@ -1,9 +1,9 @@
 swagger: '2.0'
 info:
-  title: koa rest app
   version: 0.1.0
+  title: koa rest app
   description: koa rest boilerplate
-host: 'localhost:3000'
+host: 'localhost:8000'
 basePath: /
 schemes:
   - http
@@ -38,16 +38,19 @@ paths:
           description: 登录成功
           schema:
             $ref: '#/definitions/LoginResponse'
+        '401':
+          description: 登录失败
+          schema:
+            $ref: '#/definitions/Error'
   /user:
     get:
-      summary: 查询单个用户模型
-      description: 查询单个用户模型...
+      summary: 根据条件查找单个用户模型
+      description: 根据条件查找单个用户模型...
       parameters:
         - in: query
           name: id
           type: string
           description: 不限于id，可以是任意参数
-          required: true
       responses:
         '200':
           description: 查询成功
@@ -142,6 +145,51 @@ paths:
       responses:
         '200':
           description: 更新成功
+  '/users/:id':
+    get:
+      summary: 查询单个用户模型
+      description: 查询单个用户模型..
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: ID
+      responses:
+        '200':
+          description: 查询成功
+          schema:
+            $ref: '#/definitions/User'
+    patch:
+      summary: 修改单个用户模型
+      description: 修改单个用户模型..
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: ID
+        - in: body
+          name: body
+          description: 模型参数
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        '200':
+          description: 修改成功
+    delete:
+      summary: 删除单个用户模型
+      description: 删除单个用户模型..
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: ID
+      responses:
+        '200':
+          description: 删除成功
   /users/multiple:
     post:
       summary: 创建多个用户模型
@@ -159,14 +207,13 @@ paths:
           description: 创建成功
   /auth:
     get:
-      summary: 查询单个鉴权模型
-      description: 查询单个鉴权模型...
+      summary: 根据条件查找单个鉴权模型
+      description: 根据条件查找单个鉴权模型...
       parameters:
         - in: query
           name: id
           type: string
           description: 不限于id，可以是任意参数
-          required: true
       responses:
         '200':
           description: 查询成功
@@ -261,6 +308,51 @@ paths:
       responses:
         '200':
           description: 更新成功
+  '/auths/:id':
+    get:
+      summary: 查询单个鉴权模型
+      description: 查询单个鉴权模型..
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: ID
+      responses:
+        '200':
+          description: 查询成功
+          schema:
+            $ref: '#/definitions/Auth'
+    patch:
+      summary: 修改单个鉴权模型
+      description: 修改单个鉴权模型..
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: ID
+        - in: body
+          name: body
+          description: 模型参数
+          required: true
+          schema:
+            $ref: '#/definitions/Auth'
+      responses:
+        '200':
+          description: 修改成功
+    delete:
+      summary: 删除单个鉴权模型
+      description: 删除单个鉴权模型..
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: ID
+      responses:
+        '200':
+          description: 删除成功
   /auths/multiple:
     post:
       summary: 创建多个鉴权模型
@@ -278,14 +370,13 @@ paths:
           description: 创建成功
   /role:
     get:
-      summary: 查询单个角色模型
-      description: 查询单个角色模型...
+      summary: 根据条件查找单个角色模型
+      description: 根据条件查找单个角色模型...
       parameters:
         - in: query
           name: id
           type: string
           description: 不限于id，可以是任意参数
-          required: true
       responses:
         '200':
           description: 查询成功
@@ -380,6 +471,51 @@ paths:
       responses:
         '200':
           description: 更新成功
+  '/roles/:id':
+    get:
+      summary: 查询单个角色模型
+      description: 查询单个角色模型..
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: ID
+      responses:
+        '200':
+          description: 查询成功
+          schema:
+            $ref: '#/definitions/Role'
+    patch:
+      summary: 修改单个角色模型
+      description: 修改单个角色模型..
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: ID
+        - in: body
+          name: body
+          description: 模型参数
+          required: true
+          schema:
+            $ref: '#/definitions/Role'
+      responses:
+        '200':
+          description: 修改成功
+    delete:
+      summary: 删除单个角色模型
+      description: 删除单个角色模型..
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: ID
+      responses:
+        '200':
+          description: 删除成功
   /roles/multiple:
     post:
       summary: 创建多个角色模型
@@ -397,14 +533,13 @@ paths:
           description: 创建成功
   /group:
     get:
-      summary: 查询单个组模型
-      description: 查询单个组模型...
+      summary: 根据条件查找单个组模型
+      description: 根据条件查找单个组模型...
       parameters:
         - in: query
           name: id
           type: string
           description: 不限于id，可以是任意参数
-          required: true
       responses:
         '200':
           description: 查询成功
@@ -499,6 +634,51 @@ paths:
       responses:
         '200':
           description: 更新成功
+  '/groups/:id':
+    get:
+      summary: 查询单个组模型
+      description: 查询单个组模型..
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: ID
+      responses:
+        '200':
+          description: 查询成功
+          schema:
+            $ref: '#/definitions/Group'
+    patch:
+      summary: 修改单个组模型
+      description: 修改单个组模型..
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: ID
+        - in: body
+          name: body
+          description: 模型参数
+          required: true
+          schema:
+            $ref: '#/definitions/Group'
+      responses:
+        '200':
+          description: 修改成功
+    delete:
+      summary: 删除单个组模型
+      description: 删除单个组模型..
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: ID
+      responses:
+        '200':
+          description: 删除成功
   /groups/multiple:
     post:
       summary: 创建多个组模型
@@ -545,186 +725,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/definitions/UserGroup'
-  '/users/:id':
-    get:
-      summary: 查询单个用户模型
-      description: 查询单个用户模型..
-      parameters:
-        - in: path
-          name: id
-          type: string
-          required: true
-          description: ID
-      responses:
-        '200':
-          description: 查询成功
-          schema:
-            $ref: '#/definitions/User'
-    patch:
-      summary: 修改单个用户模型
-      description: 修改单个用户模型..
-      parameters:
-        - in: path
-          name: id
-          type: string
-          required: true
-          description: ID
-        - in: body
-          name: body
-          description: 模型参数
-          required: true
-          schema:
-            $ref: '#/definitions/User'
-      responses:
-        '200':
-          description: 修改成功
-    delete:
-      summary: 删除单个用户模型
-      description: 删除单个用户模型..
-      parameters:
-        - in: path
-          name: id
-          type: string
-          required: true
-          description: ID
-      responses:
-        '200':
-          description: 删除成功
-  '/auths/:id':
-    get:
-      summary: 查询单个鉴权模型
-      description: 查询单个鉴权模型..
-      parameters:
-        - in: path
-          name: id
-          type: string
-          required: true
-          description: ID
-      responses:
-        '200':
-          description: 查询成功
-          schema:
-            $ref: '#/definitions/Auth'
-    patch:
-      summary: 修改单个鉴权模型
-      description: 修改单个鉴权模型..
-      parameters:
-        - in: path
-          name: id
-          type: string
-          required: true
-          description: ID
-        - in: body
-          name: body
-          description: 模型参数
-          required: true
-          schema:
-            $ref: '#/definitions/Auth'
-      responses:
-        '200':
-          description: 修改成功
-    delete:
-      summary: 删除单个鉴权模型
-      description: 删除单个鉴权模型..
-      parameters:
-        - in: path
-          name: id
-          type: string
-          required: true
-          description: ID
-      responses:
-        '200':
-          description: 删除成功
-  '/roles/:id':
-    get:
-      summary: 查询单个角色模型
-      description: 查询单个角色模型..
-      parameters:
-        - in: path
-          name: id
-          type: string
-          required: true
-          description: ID
-      responses:
-        '200':
-          description: 查询成功
-          schema:
-            $ref: '#/definitions/Role'
-    patch:
-      summary: 修改单个角色模型
-      description: 修改单个角色模型..
-      parameters:
-        - in: path
-          name: id
-          type: string
-          required: true
-          description: ID
-        - in: body
-          name: body
-          description: 模型参数
-          required: true
-          schema:
-            $ref: '#/definitions/Role'
-      responses:
-        '200':
-          description: 修改成功
-    delete:
-      summary: 删除单个角色模型
-      description: 删除单个角色模型..
-      parameters:
-        - in: path
-          name: id
-          type: string
-          required: true
-          description: ID
-      responses:
-        '200':
-          description: 删除成功
-  '/groups/:id':
-    get:
-      summary: 查询单个组模型
-      description: 查询单个组模型..
-      parameters:
-        - in: path
-          name: id
-          type: string
-          required: true
-          description: ID
-      responses:
-        '200':
-          description: 查询成功
-          schema:
-            $ref: '#/definitions/Group'
-    patch:
-      summary: 修改单个组模型
-      description: 修改单个组模型..
-      parameters:
-        - in: path
-          name: id
-          type: string
-          required: true
-          description: ID
-        - in: body
-          name: body
-          description: 模型参数
-          required: true
-          schema:
-            $ref: '#/definitions/Group'
-      responses:
-        '200':
-          description: 修改成功
-    delete:
-      summary: 删除单个组模型
-      description: 删除单个组模型..
-      parameters:
-        - in: path
-          name: id
-          type: string
-          required: true
-          description: ID
-      responses:
-        '200':
-          description: 删除成功
 definitions:
   User:
     type: object
@@ -1248,27 +1248,9 @@ definitions:
       authtoken:
         type: string
         description: token
-      user:
-        type: object
-        description: 用户信息
-        properties:
-          name:
-            type: string
-            description: 用户名
-      roles:
-        type: array
-        description: 角色
-        items:
-          type: string
     example:
       message: 登录成功
       authToken: abc...
-      user:
-        name: gabe
-      roles:
-        - user
-        - admin
-        - guest
   Error:
     type: object
     description: 错误模型
@@ -1303,3 +1285,68 @@ definitions:
       'y':
         type: number
         description: y坐标
+x-associations:
+  - source: User
+    target: Auth
+    type: hasMany
+    as: auths
+    foreignKey: userId
+    sourceKey: id
+  - source: Auth
+    target: User
+    type: belongsTo
+    as: user
+    foreignKey: userId
+    targetKey: id
+  - source: Role
+    target: Role
+    type: hasOne
+    as: child
+    foreignKey: parentId
+    sourceKey: id
+  - source: Role
+    target: Role
+    type: belongsTo
+    as: parent
+    foreignKey: parentId
+    targetKey: id
+  - source: User
+    target: Role
+    type: belongsToMany
+    as: roles
+    throughModel: false
+    through: userrole
+    foreignKey: userId
+    otherKey: roleId
+  - source: Role
+    target: User
+    type: belongsToMany
+    as: users
+    throughModel: false
+    through: userrole
+    foreignKey: roleId
+    otherKey: userId
+  - source: User
+    target: Group
+    type: belongsToMany
+    as: groups
+    throughModel: true
+    through: UserGroup
+    foreignKey: userId
+    otherKey: groupId
+  - source: Group
+    target: User
+    type: belongsToMany
+    as: users
+    throughModel: true
+    through: UserGroup
+    foreignKey: groupId
+    otherKey: userId
+  - source: User
+    target: User
+    type: belongsToMany
+    as: friends
+    throughModel: false
+    through: userfriend
+    foreignKey: userId
+    otherKey: friendId

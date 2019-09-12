@@ -34,7 +34,7 @@ const findAndCountAll = async (ctx, next) => {
   });
   ctx.body = { count, rows };
 
-  next();
+  await next();
 };
 
 /**
@@ -48,7 +48,7 @@ const findByPk = async (ctx, next) => {
 
   ctx.body = { ...role.get({ plain: true }), parent, child };
 
-  next();
+  await next();
 };
 
 /**
@@ -57,7 +57,7 @@ const findByPk = async (ctx, next) => {
 const singleCreate = async (ctx, next) => {
   ctx.body = await model.Role.create(ctx.request.body);
 
-  next();
+  await next();
 };
 
 /**
@@ -68,7 +68,7 @@ const bulkCreate = async (ctx, next) => {
     validate: true,
   });
 
-  next();
+  await next();
 };
 
 /**
@@ -79,7 +79,7 @@ const bulkUpdate = async (ctx, next) => {
     where: ctx.request.body.filter,
   });
 
-  next();
+  await next();
 };
 
 /**
@@ -90,7 +90,7 @@ const updateByPk = async (ctx, next) => {
   ctx.assert(role, 404, "记录不存在");
   ctx.body = await role.update(ctx.request.body);
 
-  next();
+  await next();
 };
 
 /**
@@ -101,7 +101,7 @@ const bulkDestroy = async (ctx, next) => {
     where: ctx.request.body,
   });
 
-  next();
+  await next();
 };
 
 /**
@@ -112,7 +112,7 @@ const destroyByPk = async (ctx, next) => {
   ctx.assert(role, 404, "记录不存在");
   ctx.body = await role.destroy();
 
-  next();
+  await next();
 };
 
 /**
@@ -126,7 +126,7 @@ const findOne = async (ctx, next) => {
 
   ctx.body = { ...role.get({ plain: true }), parent, child };
 
-  next();
+  await next();
 };
 
 /**
@@ -142,7 +142,7 @@ const findOrCreate = async (ctx, next) => {
     created,
   };
 
-  next();
+  await next();
 };
 
 export default {

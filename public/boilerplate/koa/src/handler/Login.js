@@ -38,7 +38,7 @@ const account = async (ctx, next) => {
     authToken,
   };
 
-  next();
+  await next();
 };
 
 /**
@@ -48,7 +48,7 @@ const account = async (ctx, next) => {
  */
 const phone = async (ctx, next) => {
   // ...
-  next();
+  await next();
 };
 
 /**
@@ -58,7 +58,7 @@ const phone = async (ctx, next) => {
  */
 const wechat = async (ctx, next) => {
   // ...
-  next();
+  await next();
 };
 
 export default {

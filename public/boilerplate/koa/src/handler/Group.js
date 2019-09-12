@@ -26,7 +26,7 @@ const findAndCountAll = async (ctx, next) => {
   });
   ctx.body = { count, rows };
 
-  next();
+  await next();
 };
 
 /**
@@ -37,7 +37,7 @@ const findByPk = async (ctx, next) => {
   ctx.assert(group, 404, "记录不存在");
   ctx.body = group;
 
-  next();
+  await next();
 };
 
 /**
@@ -46,7 +46,7 @@ const findByPk = async (ctx, next) => {
 const singleCreate = async (ctx, next) => {
   ctx.body = await model.Group.create(ctx.request.body);
 
-  next();
+  await next();
 };
 
 /**
@@ -57,7 +57,7 @@ const bulkCreate = async (ctx, next) => {
     validate: true,
   });
 
-  next();
+  await next();
 };
 
 /**
@@ -68,7 +68,7 @@ const bulkUpdate = async (ctx, next) => {
     where: ctx.request.body.filter,
   });
 
-  next();
+  await next();
 };
 
 /**
@@ -79,7 +79,7 @@ const updateByPk = async (ctx, next) => {
   ctx.assert(group, 404, "记录不存在");
   ctx.body = await group.update(ctx.request.body);
 
-  next();
+  await next();
 };
 
 /**
@@ -90,7 +90,7 @@ const bulkDestroy = async (ctx, next) => {
     where: ctx.request.body,
   });
 
-  next();
+  await next();
 };
 
 /**
@@ -101,7 +101,7 @@ const destroyByPk = async (ctx, next) => {
   ctx.assert(group, 404, "记录不存在");
   ctx.body = await group.destroy();
 
-  next();
+  await next();
 };
 
 /**
@@ -112,7 +112,7 @@ const findOne = async (ctx, next) => {
   ctx.assert(group, 404, "记录不存在");
   ctx.body = group;
 
-  next();
+  await next();
 };
 
 /**
@@ -128,7 +128,7 @@ const findOrCreate = async (ctx, next) => {
     created,
   };
 
-  next();
+  await next();
 };
 
 export default {
