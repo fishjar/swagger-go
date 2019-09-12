@@ -224,55 +224,78 @@ ipcMain.on(
       return;
     }
     const tmpDir = path.join(__dirname, "tmp", boilerplateName);
-    const swaggerEjs = require(path.join(sourceDir, "swagger", "config.json"));
+    const swaggerConfig = require(path.join(
+      sourceDir,
+      "swagger",
+      "config.json"
+    ));
     const {
-      globalEjs = [],
-      modelEjs = [],
+      globalFiles = [],
+      modelFiles = [],
       replaceFiles = [],
+      removeFiles = [],
       boilerplateLanguage,
-    } = swaggerEjs;
+      templateEngine,
+    } = swaggerConfig;
 
-    const renderPromise = (ejsFile, data) => {
+    /**
+     * 格式化文件
+     * @param {*} str
+     */
+    const strFormat = str => {
+      try {
+        if (
+          ["js", "javascript", "node", "nodejs"].includes(boilerplateLanguage)
+        ) {
+          str = prettier.format(str, {
+            semi: true,
+            trailingComma: "es5",
+            parser: "babel",
+          });
+        }
+      } catch (err) {
+        console.log("格式化失败");
+        console.log(err);
+      }
+      return str;
+    };
+
+    /**
+     * 渲染模板
+     * @param {*} templateFile
+     * @param {*} data
+     */
+    const renderPromise = (templateFile, data) => {
       return new Promise((resolve, reject) => {
-        ejs.renderFile(ejsFile, data, function(err, str) {
-          if (err) {
-            console.log("渲染失败");
-            console.log(err);
-            reject(err);
-          } else {
-            // console.log(str);
-            try {
-              let formatStr = "";
-              if (
-                ["js", "javascript", "node", "nodejs"].includes(
-                  boilerplateLanguage
-                )
-              ) {
-                formatStr = prettier.format(str, {
-                  semi: true,
-                  trailingComma: "es5",
-                  parser: "babel",
-                });
-              } else {
-                formatStr = str;
-              }
-              resolve(formatStr);
-            } catch (err) {
-              console.log("格式化失败");
+        if (templateEngine === "ejs") {
+          ejs.renderFile(templateFile, data, function(err, str) {
+            if (err) {
+              console.log("渲染失败");
               console.log(err);
               reject(err);
+            } else {
+              // console.log(str);
+              resolve(strFormat(str));
             }
-          }
-        });
+          });
+        } else {
+          throw new Error(`不支持的模板引擎: ${templateEngine}`);
+        }
       });
     };
 
-    const doPromise = (ejsFile, outFile, data) => {
+    /**
+     * 删除 -> 渲染 -> 生成
+     * @param {*} templateFile
+     * @param {*} outFile
+     * @param {*} data
+     */
+    const doPromise = (templateFile, outFile, data) => {
       return fse
         .remove(outFile)
         .then(() => {
           console.log("删除成功", outFile);
-          return renderPromise(ejsFile, data);
+          return renderPromise(templateFile, data);
         })
         .then(fileStr => {
           console.log("渲染成功", outFile);
@@ -289,9 +312,18 @@ ipcMain.on(
       .then(() => {
         console.log("拷贝文件夹成功");
         return Promise.all(
+          removeFiles.map(item => {
+            const rmFile = path.join(tmpDir, item);
+            return fse.remove(rmFile);
+          })
+        );
+      })
+      .then(() => {
+        console.log("删除文件成功");
+        return Promise.all(
           replaceFiles.map(item => {
-            const placeFile = path.join(tmpDir, item.placeFile);
-            const outFile = path.join(tmpDir, item.outFile);
+            const placeFile = path.join(tmpDir, item[0]);
+            const outFile = path.join(tmpDir, item[1]);
             return fse.copy(placeFile, outFile);
           })
         );
@@ -306,10 +338,10 @@ ipcMain.on(
       .then(() => {
         console.log("生成swagger文件成功");
         return Promise.all(
-          globalEjs.map(item => {
-            const ejsFile = path.join(tmpDir, item.ejsFile);
-            const outFile = path.join(tmpDir, item.outFile);
-            return doPromise(ejsFile, outFile, {
+          globalFiles.map(item => {
+            const inFile = path.join(tmpDir, item[0]);
+            const outFile = path.join(tmpDir, item[1]);
+            return doPromise(inFile, outFile, {
               definitions,
               dataFormats,
               associations,
@@ -321,11 +353,11 @@ ipcMain.on(
         console.log("生成全局文件成功");
         const tasks = [];
         modelKeys.forEach(key => {
-          modelEjs.forEach(item => {
-            const ejsFile = path.join(tmpDir, item.ejsFile);
-            const outFile = path.join(tmpDir, item.outFile.replace("*", key));
+          modelFiles.forEach(item => {
+            const inFile = path.join(tmpDir, item[0]);
+            const outFile = path.join(tmpDir, item[1].replace("*", key));
             tasks.push(
-              doPromise(ejsFile, outFile, {
+              doPromise(inFile, outFile, {
                 definitions,
                 modelKey: key,
                 model: definitions[key],
