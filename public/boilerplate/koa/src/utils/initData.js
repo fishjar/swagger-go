@@ -30,6 +30,75 @@ export default async () => {
     const titanicGroup = await model.Group.create({ name: "titanic" });
     const rayjarGroup = await model.Group.create({ name: "rayjar" });
 
+    // 创建菜单
+    const dashboardMenu = await model.Menu.create({
+      name: "dashboard",
+      path: "/dashboard",
+      icon: "dashboard",
+      sort: 0,
+    });
+    const indexMenu = await model.Menu.create({
+      parentId: dashboardMenu.id,
+      name: "index",
+      path: "/dashboard/index",
+      sort: 0,
+    });
+    const modelsMenu = await model.Menu.create({
+      name: "models",
+      path: "/models",
+      icon: "table",
+      sort: 1,
+    });
+    const usersMenu = await model.Menu.create({
+      parentId: modelsMenu.id,
+      name: "users",
+      path: "/models/users",
+      sort: 0,
+    });
+    const authsMenu = await model.Menu.create({
+      parentId: modelsMenu.id,
+      name: "auths",
+      path: "/models/auths",
+      sort: 1,
+    });
+    const rolesMenu = await model.Menu.create({
+      parentId: modelsMenu.id,
+      name: "roles",
+      path: "/models/roles",
+      sort: 2,
+    });
+    const groupsMenu = await model.Menu.create({
+      parentId: modelsMenu.id,
+      name: "groups",
+      path: "/models/groups",
+      sort: 3,
+    });
+    const menusMenu = await model.Menu.create({
+      parentId: modelsMenu.id,
+      name: "menus",
+      path: "/models/menus",
+      sort: 5,
+    });
+    const usergroupsMenu = await model.Menu.create({
+      parentId: modelsMenu.id,
+      name: "usergroups",
+      path: "/models/usergroups",
+      sort: 4,
+    });
+
+    // 关联角色菜单
+    await adminRole.addMenu(dashboardMenu);
+    await adminRole.addMenu(indexMenu);
+    await adminRole.addMenu(modelsMenu);
+    await adminRole.addMenu(usersMenu);
+    await adminRole.addMenu(authsMenu);
+    await adminRole.addMenu(rolesMenu);
+    await adminRole.addMenu(groupsMenu);
+    await adminRole.addMenu(menusMenu);
+    await adminRole.addMenu(usergroupsMenu);
+    await userRole.addMenu(dashboardMenu);
+    await userRole.addMenu(indexMenu);
+
     // 关联用户角色
     await user.addRole(userRole);
     await user.addRole(adminRole);

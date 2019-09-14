@@ -1,7 +1,7 @@
 import Sequelize from "sequelize";
 import sequelize from "../db";
 
-const Group = sequelize.define(
+export default sequelize.define(
   "group",
   {
     id: {
@@ -16,6 +16,7 @@ const Group = sequelize.define(
       comment: "组名称",
       type: Sequelize.STRING(32),
       allowNull: false,
+      unique: true,
       validate: {
         notEmpty: true,
         len: [3, 20],
@@ -29,5 +30,3 @@ const Group = sequelize.define(
     tableName: "group", // 定义表的名称
   }
 );
-
-export default Group;

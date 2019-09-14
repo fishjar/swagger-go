@@ -2,7 +2,7 @@ import Sequelize from "sequelize";
 import sequelize from "../db";
 import User from "./User";
 
-const Auth = sequelize.define(
+export default sequelize.define(
   "auth",
   {
     id: {
@@ -72,5 +72,3 @@ const Auth = sequelize.define(
     tableName: "auth", // 定义表的名称
   }
 );
-
-export default Auth;

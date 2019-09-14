@@ -1,4 +1,5 @@
 import model from "../model";
+import { formatMenus } from "../utils";
 
 /**
  * 查询多条信息
@@ -29,6 +30,12 @@ const findAndCountAll = async (ctx, next) => {
       {
         model: model.Role,
         as: "roles",
+        include: [
+          {
+            model: model.Menu,
+            as: "menus",
+          },
+        ],
       },
       {
         model: model.User,
@@ -126,11 +133,23 @@ const destroyByPk = async (ctx, next) => {
  * 查询单条信息
  */
 const findOne = async (ctx, next) => {
-  const user = await model.User.findOne({ where: ctx.query });
+  const user = await model.User.findOne({
+    where: ctx.query,
+    include: [
+      {
+        model: model.Role,
+        as: "roles",
+        include: [
+          {
+            model: model.Menu,
+            as: "menus",
+          },
+        ],
+      },
+    ],
+  });
   ctx.assert(user, 404, "记录不存在");
-  const auths = await user.getAuths();
-  const roles = await user.getRoles();
-  ctx.body = { ...user.get({ plain: true }), auths, roles };
+  ctx.body = user;
 
   await next();
 };
@@ -151,6 +170,42 @@ const findOrCreate = async (ctx, next) => {
   await next();
 };
 
+const findUserMenus = async (ctx, next) => {
+  const { userId } = ctx.state.user;
+  ctx.assert(userId, 401, "请先登录");
+  const user = await model.User.findByPk(userId);
+  ctx.assert(user, 404, "用户不存在");
+  const roles = await user.getRoles({
+    include: [
+      {
+        model: model.Menu,
+        as: "menus",
+        // include: [
+        //   {
+        //     model: model.Role,
+        //     as: "roles",
+        //   },
+        // ],
+      },
+    ],
+  });
+  const menusMap = {};
+  roles.forEach(role => {
+    role.menus.forEach(menu => {
+      menusMap[menu.id] = menu;
+    });
+  });
+  const menus = Object.entries(menusMap).map(([_, item]) => item);
+  const { format } = ctx.query;
+  if (format) {
+    ctx.body = formatMenus(menus, null);
+  } else {
+    ctx.body = menus;
+  }
+
+  await next();
+};
+
 export default {
   findAndCountAll,
   findByPk,
@@ -162,4 +217,5 @@ export default {
   destroyByPk,
   findOne,
   findOrCreate,
+  findUserMenus,
 };

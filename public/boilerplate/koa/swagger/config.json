@@ -1,33 +1,15 @@
 {
   "boilerplateLanguage": "nodejs",
-  "globalEjs": [
-    {
-      "ejsFile": "swagger/template/router.ejs",
-      "outFile": "src/router/index.js"
-    },
-    {
-      "ejsFile": "swagger/template/modelIndex.ejs",
-      "outFile": "src/model/index.js"
-    },
-    {
-      "ejsFile": "swagger/template/handlerIndex.ejs",
-      "outFile": "src/handler/index.js"
-    }
+  "templateEngine": "ejs",
+  "globalFiles": [
+    ["swagger/template/router.ejs", "src/router/index.js"],
+    ["swagger/template/modelIndex.ejs", "src/model/index.js"],
+    ["swagger/template/handlerIndex.ejs", "src/handler/index.js"]
   ],
-  "modelEjs": [
-    {
-      "ejsFile": "swagger/template/model.ejs",
-      "outFile": "src/model/*.js"
-    },
-    {
-      "ejsFile": "swagger/template/handler.ejs",
-      "outFile": "src/handler/*.js"
-    }
+  "modelFiles": [
+    ["swagger/template/model.ejs", "src/model/*.js"],
+    ["swagger/template/handler.ejs", "src/handler/*.js"]
   ],
-  "replaceFiles": [
-    {
-      "placeFile": "swagger/replace/initData.js",
-      "outFile": "src/utils/initData.js"
-    }
-  ]
+  "replaceFiles": [["swagger/replace/initData.js", "src/utils/initData.js"]],
+  "removeFiles": ["swagger/swagger.yaml"]
 }
