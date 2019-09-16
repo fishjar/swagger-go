@@ -33,9 +33,19 @@ const account = async (ctx, next) => {
     authName,
     userId,
   });
+  const user = await model.User.findByPk(userId);
+  ctx.assert(auth, 401, "用户不存在");
+  let roles = ["guest"];
+  try {
+    roles = await user.getRoles();
+  } catch (err) {
+    logger.error("查找用户角色错误");
+  }
+
   ctx.body = {
     message: "登录成功",
     authToken,
+    roles: roles.map(role => role.name),
   };
 
   await next();

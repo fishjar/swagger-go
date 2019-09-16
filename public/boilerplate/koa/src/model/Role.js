@@ -11,11 +11,11 @@ export default sequelize.define(
       defaultValue: Sequelize.UUIDV4,
       primaryKey: true,
     },
-    parentId: {
-      field: "parent_id",
-      comment: "父ID",
-      type: Sequelize.UUID,
-    },
+    // parentId: {
+    //   field: "parent_id",
+    //   comment: "父ID",
+    //   type: Sequelize.UUID,
+    // },
     name: {
       field: "name",
       comment: "角色名称",

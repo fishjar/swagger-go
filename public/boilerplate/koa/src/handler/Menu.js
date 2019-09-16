@@ -16,6 +16,21 @@ const findAndCountAll = async (ctx, next) => {
     offset: (pageNum - 1) * pageSize,
     limit: pageSize,
     order,
+    include: [
+      {
+        model: model.Role,
+        as: "roles",
+      },
+      {
+        model: model.Menu,
+        as: "parent",
+      },
+      {
+        model: model.Menu,
+        as: "children",
+      },
+    ],
+    distinct: true,
   });
   ctx.body = { count, rows };
 
@@ -28,7 +43,10 @@ const findAndCountAll = async (ctx, next) => {
 const findByPk = async (ctx, next) => {
   const menu = await model.Menu.findByPk(ctx.params.id);
   ctx.assert(menu, 404, "记录不存在");
-  ctx.body = menu;
+  const parent = await role.getParent();
+  const children = await role.getChildren();
+
+  ctx.body = { ...menu.get({ plain: true }), parent, children };
 
   await next();
 };

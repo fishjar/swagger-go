@@ -19,16 +19,19 @@ export default async () => {
     await deluser.destroy();
 
     // 创建角色
+    const adminRole = await model.Role.create({ name: "admin" });
     const userRole = await model.Role.create({ name: "user" });
-    const adminRole = await model.Role.create({
-      name: "admin",
-      parentId: userRole.id,
-    });
     const guestRole = await model.Role.create({ name: "guest" });
 
     // 创建团队
-    const titanicGroup = await model.Group.create({ name: "titanic" });
-    const rayjarGroup = await model.Group.create({ name: "rayjar" });
+    const titanicGroup = await model.Group.create({
+      name: "titanic",
+      leaderId: jack.id,
+    });
+    const rayjarGroup = await model.Group.create({
+      name: "rayjar",
+      leaderId: user.id,
+    });
 
     // 创建菜单
     const dashboardMenu = await model.Menu.create({
@@ -51,38 +54,38 @@ export default async () => {
     });
     const usersMenu = await model.Menu.create({
       parentId: modelsMenu.id,
-      name: "users",
-      path: "/models/users",
+      name: "user",
+      path: "/models/user",
       sort: 0,
     });
     const authsMenu = await model.Menu.create({
       parentId: modelsMenu.id,
-      name: "auths",
-      path: "/models/auths",
+      name: "auth",
+      path: "/models/auth",
       sort: 1,
     });
     const rolesMenu = await model.Menu.create({
       parentId: modelsMenu.id,
-      name: "roles",
-      path: "/models/roles",
+      name: "role",
+      path: "/models/role",
       sort: 2,
     });
     const groupsMenu = await model.Menu.create({
       parentId: modelsMenu.id,
-      name: "groups",
-      path: "/models/groups",
+      name: "group",
+      path: "/models/group",
       sort: 3,
     });
     const menusMenu = await model.Menu.create({
       parentId: modelsMenu.id,
-      name: "menus",
-      path: "/models/menus",
+      name: "menu",
+      path: "/models/menu",
       sort: 5,
     });
     const usergroupsMenu = await model.Menu.create({
       parentId: modelsMenu.id,
-      name: "usergroups",
-      path: "/models/usergroups",
+      name: "usergroup",
+      path: "/models/usergroup",
       sort: 4,
     });
 

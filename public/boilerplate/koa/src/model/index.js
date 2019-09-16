@@ -8,8 +8,10 @@ import Menu from "./Menu";
 User.hasMany(Auth, { as: "auths", foreignKey: "userId", sourceKey: "id" });
 Auth.belongsTo(User, { as: "user", foreignKey: "userId", targetKey: "id" });
 
-Role.hasOne(Role, { as: "child", foreignKey: "parentId", sourceKey: "id" });
-Role.belongsTo(Role, { as: "parent", foreignKey: "parentId", targetKey: "id" });
+Menu.hasOne(Menu, { as: "parent", foreignKey: "parentId", sourceKey: "id" });
+Menu.hasMany(Menu, { as: "children", foreignKey: "parentId", sourceKey: "id" });
+// Menu.belongsTo(Menu, { as: "parent", foreignKey: "parentId", targetKey: "id" });
+
 
 User.belongsToMany(Role, {
   as: "roles",
@@ -37,6 +39,12 @@ Role.belongsToMany(Menu, {
   otherKey: "menuId",
 });
 
+Group.belongsTo(User, {
+  as: "leader",
+  foreignKey: "leaderId",
+  targetKey: "id",
+});
+
 User.belongsToMany(Group, {
   as: "groups",
   through: UserGroup,
@@ -44,7 +52,7 @@ User.belongsToMany(Group, {
   otherKey: "groupId",
 });
 Group.belongsToMany(User, {
-  as: "users",
+  as: "menbers",
   through: UserGroup,
   foreignKey: "groupId",
   otherKey: "userId",

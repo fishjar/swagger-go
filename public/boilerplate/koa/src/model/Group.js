@@ -1,5 +1,6 @@
 import Sequelize from "sequelize";
 import sequelize from "../db";
+import User from "./User";
 
 export default sequelize.define(
   "group",
@@ -20,6 +21,16 @@ export default sequelize.define(
       validate: {
         notEmpty: true,
         len: [3, 20],
+      },
+    },
+    leaderId: {
+      field: "leader_id",
+      comment: "队长ID",
+      type: Sequelize.UUID,
+      allowNull: false,
+      references: {
+        model: User,
+        key: "id",
       },
     },
   },

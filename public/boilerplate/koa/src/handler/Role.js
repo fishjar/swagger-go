@@ -19,14 +19,6 @@ const findAndCountAll = async (ctx, next) => {
     order,
     include: [
       {
-        model: model.Role,
-        as: "parent",
-      },
-      {
-        model: model.Role,
-        as: "child",
-      },
-      {
         model: model.User,
         as: "users",
       },
@@ -44,10 +36,8 @@ const findAndCountAll = async (ctx, next) => {
 const findByPk = async (ctx, next) => {
   const role = await model.Role.findByPk(ctx.params.id);
   ctx.assert(role, 404, "记录不存在");
-  const parent = await role.getParent();
-  const child = await role.getChild();
 
-  ctx.body = { ...role.get({ plain: true }), parent, child };
+  ctx.body = role;
 
   await next();
 };

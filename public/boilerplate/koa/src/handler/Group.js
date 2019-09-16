@@ -19,7 +19,11 @@ const findAndCountAll = async (ctx, next) => {
     include: [
       {
         model: model.User,
-        as: "users",
+        as: "leader",
+      },
+      {
+        model: model.User,
+        as: "menbers",
       },
     ],
     distinct: true,
