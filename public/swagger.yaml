@@ -416,12 +416,6 @@ definitions:
         example: fc3c286e-78b3-490b-be6a-79a6069fd68e
         x-fieldName: id
         x-primaryKey: true
-      parentId:
-        type: string
-        format: uuid
-        description: 父ID
-        example: cc1aca88-feae-4dad-b906-cad6d50e16de
-        x-fieldName: parent_id
       name:
         type: string
         format: string
@@ -436,7 +430,6 @@ definitions:
         x-length: 32
     example:
       id: fc3c286e-78b3-490b-be6a-79a6069fd68e
-      parentId: cc1aca88-feae-4dad-b906-cad6d50e16de
       name: admin
   Menu:
     type: object
@@ -536,6 +529,7 @@ definitions:
     required:
       - id
       - name
+      - leaderId
     properties:
       id:
         type: string
@@ -557,9 +551,19 @@ definitions:
         x-message: 请输入
         x-showTable: true
         x-length: 32
+      leaderId:
+        type: string
+        format: uuid
+        description: 队长ID
+        example: cc1aca88-feae-4dad-b906-cad6d50e16de
+        x-fieldName: leader_id
+        x-foreignKey: true
+        x-refFieldKey: id
+        x-ref: '#/definitions/User'
     example:
       id: fc3c286e-78b3-490b-be6a-79a6069fd68e
       name: titanic
+      leaderId: cc1aca88-feae-4dad-b906-cad6d50e16de
   UserGroup:
     type: object
     description: 用户-组模型
@@ -695,18 +699,18 @@ x-associations:
     as: user
     foreignKey: userId
     targetKey: id
-  - source: Role
-    target: Role
+  - source: Menu
+    target: Menu
     type: hasOne
-    as: child
-    foreignKey: parentId
-    sourceKey: id
-  - source: Role
-    target: Role
-    type: belongsTo
     as: parent
     foreignKey: parentId
-    targetKey: id
+    sourceKey: id
+  - source: Menu
+    target: Menu
+    type: hasMany
+    as: children
+    foreignKey: parentId
+    sourceKey: id
   - source: User
     target: Role
     type: belongsToMany
@@ -723,6 +727,28 @@ x-associations:
     through: userrole
     foreignKey: roleId
     otherKey: userId
+  - source: Menu
+    target: Role
+    type: belongsToMany
+    as: roles
+    throughModel: false
+    through: rolemenu
+    foreignKey: menuId
+    otherKey: roleId
+  - source: Role
+    target: Menu
+    type: belongsToMany
+    as: users
+    throughModel: false
+    through: rolemenu
+    foreignKey: roleId
+    otherKey: menuId
+  - source: Group
+    target: User
+    type: belongsTo
+    as: leader
+    foreignKey: leaderId
+    targetKey: id
   - source: User
     target: Group
     type: belongsToMany
@@ -734,7 +760,7 @@ x-associations:
   - source: Group
     target: User
     type: belongsToMany
-    as: users
+    as: menbers
     throughModel: true
     through: UserGroup
     foreignKey: groupId
