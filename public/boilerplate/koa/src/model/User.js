@@ -1,7 +1,7 @@
 import Sequelize from "sequelize";
 import sequelize from "../db";
 
-const User = sequelize.define(
+export default sequelize.define(
   "user",
   {
     id: {
@@ -83,7 +83,7 @@ const User = sequelize.define(
       comment: "血型(ABO)",
       type: Sequelize.STRING(8),
       validate: {
-        isIn: [["A","B","AB","O","NULL"]],
+        isIn: [["A", "B", "AB", "O", "NULL"]],
       },
     },
     notice: {
@@ -145,5 +145,3 @@ const User = sequelize.define(
     tableName: "user", // 定义表的名称
   }
 );
-
-export default User;

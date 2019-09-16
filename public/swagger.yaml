@@ -426,6 +426,7 @@ definitions:
         type: string
         format: string
         description: 角色名
+        uniqueItems: true
         example: admin
         minLength: 3
         maxLength: 20
@@ -437,6 +438,84 @@ definitions:
       id: fc3c286e-78b3-490b-be6a-79a6069fd68e
       parentId: cc1aca88-feae-4dad-b906-cad6d50e16de
       name: admin
+  Menu:
+    type: object
+    description: 菜单模型
+    x-isModel: true
+    x-plural: Menus
+    x-tableName: menu
+    x-apis:
+      - findAndCountAll
+      - findByPk
+      - singleCreate
+      - bulkCreate
+      - bulkUpdate
+      - updateByPk
+      - bulkDestroy
+      - destroyByPk
+      - findOne
+      - findOrCreate
+    required:
+      - id
+      - name
+      - path
+      - sort
+    properties:
+      id:
+        type: string
+        format: uuid
+        description: ID
+        uniqueItems: true
+        example: fc3c286e-78b3-490b-be6a-79a6069fd68e
+        x-fieldName: id
+        x-primaryKey: true
+      parentId:
+        type: string
+        format: uuid
+        description: 父ID
+        example: cc1aca88-feae-4dad-b906-cad6d50e16de
+        x-fieldName: parent_id
+      name:
+        type: string
+        format: string
+        description: 菜单名
+        example: dashboard
+        x-fieldName: name
+        x-message: 请输入
+        x-showTable: true
+        x-length: 64
+      path:
+        type: string
+        format: string
+        description: 菜单路径
+        example: /dashboard
+        x-fieldName: path
+        x-message: 请输入
+        x-showTable: true
+      icon:
+        type: string
+        format: string
+        description: 菜单图标
+        example: dashboard
+        x-fieldName: icon
+        x-message: 请输入
+        x-showTable: true
+        x-length: 64
+      sort:
+        type: integer
+        format: int32
+        description: 菜单排序
+        default: 0
+        x-fieldName: sort
+        x-message: 请输入
+        x-showTable: true
+        x-showSorter: true
+    example:
+      id: fc3c286e-78b3-490b-be6a-79a6069fd68e
+      name: dashboard
+      path: /dashboard
+      icon: dashboard
+      sort: 0
   Group:
     type: object
     description: 组模型
@@ -470,6 +549,7 @@ definitions:
         type: string
         format: string
         description: 角色名
+        uniqueItems: true
         example: admin
         minLength: 3
         maxLength: 20

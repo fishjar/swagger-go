@@ -3,6 +3,7 @@ import Auth from "./Auth";
 import Role from "./Role";
 import Group from "./Group";
 import UserGroup from "./UserGroup";
+import Menu from "./Menu";
 
 User.hasMany(Auth, { as: "auths", foreignKey: "userId", sourceKey: "id" });
 Auth.belongsTo(User, { as: "user", foreignKey: "userId", targetKey: "id" });
@@ -21,6 +22,19 @@ Role.belongsToMany(User, {
   through: "userrole",
   foreignKey: "roleId",
   otherKey: "userId",
+});
+
+Menu.belongsToMany(Role, {
+  as: "roles",
+  through: "rolemenu",
+  foreignKey: "menuId",
+  otherKey: "roleId",
+});
+Role.belongsToMany(Menu, {
+  as: "menus",
+  through: "rolemenu",
+  foreignKey: "roleId",
+  otherKey: "menuId",
 });
 
 User.belongsToMany(Group, {
@@ -49,4 +63,5 @@ export default {
   Role,
   Group,
   UserGroup,
+  Menu,
 };

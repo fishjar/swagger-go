@@ -1,7 +1,7 @@
 import Sequelize from "sequelize";
 import sequelize from "../db";
 
-const UserGroup = sequelize.define(
+export default sequelize.define(
   "usergroup",
   {
     id: {
@@ -48,5 +48,3 @@ const UserGroup = sequelize.define(
     tableName: "usergroup", // 定义表的名称
   }
 );
-
-export default UserGroup;

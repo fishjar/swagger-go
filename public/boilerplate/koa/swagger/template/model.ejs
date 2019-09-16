@@ -15,7 +15,7 @@ import <%- refModelKey -%> from "./<%- refModelKey -%>";
 /**
  * <%- model.description %>
  */
-const <%- modelKey -%> = sequelize.define(
+export default sequelize.define(
   "<%- modelKeyLower -%>",
   {
     <% Object.entries(model.properties).forEach(([fieldKey,field])=>{ -%>
@@ -87,5 +87,3 @@ const <%- modelKey -%> = sequelize.define(
     tableName: "<%- model['x-tableName'] -%>", // 定义表的名称
   }
 );
-
-export default <%- modelKey -%>;

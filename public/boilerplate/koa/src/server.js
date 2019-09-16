@@ -14,8 +14,8 @@ const { NODE_ENV, NODE_PORT } = config;
     if (NODE_ENV === "development") {
       // 同步数据库
       // 带上{force: true}参数会强制删除已存在的表
-      // await sequelize.sync();
-      await sequelize.sync({ force: true });
+      await sequelize.sync();
+      // await sequelize.sync({ force: true });
       console.log("\n同步数据库表成功\n");
 
       // 插入初始数据
