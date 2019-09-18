@@ -82,6 +82,7 @@ definitions:
         x-fieldName: name
         x-message: 请输入
         x-showTable: true
+        x-showFilter: true
         x-length: 32
       nickname:
         type: string
@@ -153,7 +154,6 @@ definitions:
         x-fieldName: height
         x-message: 请输入
         x-showTable: true
-        x-showFilter: true
         x-showSorter: true
       bloodType:
         type: string
@@ -175,10 +175,10 @@ definitions:
         x-description: 血型(ABO)
         description: |
           "血型(ABO)"
-            * A - A
-            * B - B
-            * AB - AB
-            * O - O
+            * A - A型
+            * B - B型
+            * AB - AB型
+            * O - O型
             * NULL - 保密
       notice:
         type: string
@@ -213,11 +213,11 @@ definitions:
         x-fieldName: lives
         items:
           $ref: '#/definitions/Coord'
-      labels:
+      tags:
         type: array
         format: array
         description: 标签
-        x-fieldName: labels
+        x-fieldName: tags
         items:
           type: string
       luckyNumbers:
