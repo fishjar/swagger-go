@@ -49,6 +49,8 @@ definitions:
     x-isModel: true
     x-plural: Users
     x-tableName: user
+    x-underscored: true
+    x-paranoid: true
     x-apis:
       - findAndCountAll
       - findByPk
@@ -279,6 +281,8 @@ definitions:
     x-isModel: true
     x-plural: Auths
     x-tableName: auth
+    x-underscored: true
+    x-paranoid: true
     x-apis:
       - findAndCountAll
       - findByPk
@@ -393,6 +397,8 @@ definitions:
     x-isModel: true
     x-plural: Roles
     x-tableName: role
+    x-underscored: true
+    x-paranoid: true
     x-apis:
       - findAndCountAll
       - findByPk
@@ -437,6 +443,8 @@ definitions:
     x-isModel: true
     x-plural: Menus
     x-tableName: menu
+    x-underscored: true
+    x-paranoid: true
     x-apis:
       - findAndCountAll
       - findByPk
@@ -515,6 +523,8 @@ definitions:
     x-isModel: true
     x-plural: Groups
     x-tableName: group
+    x-underscored: true
+    x-paranoid: true
     x-apis:
       - findAndCountAll
       - findByPk
@@ -570,6 +580,8 @@ definitions:
     x-isModel: true
     x-plural: UserGroups
     x-tableName: usergroup
+    x-underscored: true
+    x-paranoid: false
     x-apis:
       - findAndCountAll
     required:
@@ -701,16 +713,16 @@ x-associations:
     targetKey: id
   - source: Menu
     target: Menu
-    type: hasOne
-    as: parent
-    foreignKey: parentId
-    sourceKey: id
-  - source: Menu
-    target: Menu
     type: hasMany
     as: children
     foreignKey: parentId
     sourceKey: id
+  - source: Menu
+    target: Menu
+    type: belongsTo
+    as: parent
+    foreignKey: parentId
+    targetKey: id
   - source: User
     target: Role
     type: belongsToMany

@@ -202,7 +202,7 @@ ipcMain.on(
       sourceType = "defaultLocal",
       sourceDir,
       yamlData,
-      associations,
+      associations = [],
     }
   ) => {
     const modelKeys = Object.keys(definitions).filter(
@@ -358,10 +358,11 @@ ipcMain.on(
             const outFile = path.join(tmpDir, item[1].replace("*", key));
             tasks.push(
               doPromise(inFile, outFile, {
-                definitions,
                 modelKey: key,
                 model: definitions[key],
+                definitions,
                 dataFormats,
+                associations,
               })
             );
           });
