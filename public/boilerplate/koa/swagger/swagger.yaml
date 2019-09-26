@@ -531,6 +531,169 @@ paths:
       responses:
         '200':
           description: 创建成功
+  /menu:
+    get:
+      summary: 根据条件查找单个菜单模型
+      description: 根据条件查找单个菜单模型...
+      parameters:
+        - in: query
+          name: id
+          type: string
+          description: 不限于id，可以是任意参数
+      responses:
+        '200':
+          description: 查询成功
+          schema:
+            $ref: '#/definitions/Menu'
+    post:
+      summary: 查找或创建单个菜单模型
+      description: 查找或创建单个菜单模型...
+      parameters:
+        - in: body
+          name: body
+          description: 模型参数
+          required: true
+          schema:
+            $ref: '#/definitions/Menu'
+      responses:
+        '200':
+          description: 创建成功
+          schema:
+            $ref: '#/definitions/Menu'
+  /menus:
+    get:
+      summary: 查询多个菜单模型
+      description: 查询多个菜单模型...
+      parameters:
+        - in: query
+          name: pageNum
+          type: integer
+          description: 页码
+          default: 1
+        - in: query
+          name: pageSize
+          type: integer
+          description: 分页大小
+          default: 10
+        - in: query
+          name: sorter
+          type: string
+          description: 排序
+      responses:
+        '200':
+          description: 查询成功
+          schema:
+            type: object
+            properties:
+              count:
+                type: integer
+              rows:
+                type: array
+                items:
+                  $ref: '#/definitions/Menu'
+    post:
+      summary: 创建单个菜单模型
+      description: 创建单个菜单模型...
+      parameters:
+        - in: body
+          name: body
+          description: 模型参数
+          required: true
+          schema:
+            $ref: '#/definitions/Menu'
+      responses:
+        '200':
+          description: 创建成功
+    patch:
+      summary: 更新多个菜单模型
+      description: 更新多个菜单模型...
+      parameters:
+        - in: body
+          name: body
+          description: body参数
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Menu'
+      responses:
+        '200':
+          description: 更新成功
+    delete:
+      summary: 删除多个菜单模型
+      description: 删除多个菜单模型...
+      parameters:
+        - in: body
+          name: body
+          description: body参数
+          schema:
+            type: object
+            example:
+              id:
+                - '1'
+                - '2'
+      responses:
+        '200':
+          description: 更新成功
+  '/menus/:id':
+    get:
+      summary: 查询单个菜单模型
+      description: 查询单个菜单模型..
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: ID
+      responses:
+        '200':
+          description: 查询成功
+          schema:
+            $ref: '#/definitions/Menu'
+    patch:
+      summary: 修改单个菜单模型
+      description: 修改单个菜单模型..
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: ID
+        - in: body
+          name: body
+          description: 模型参数
+          required: true
+          schema:
+            $ref: '#/definitions/Menu'
+      responses:
+        '200':
+          description: 修改成功
+    delete:
+      summary: 删除单个菜单模型
+      description: 删除单个菜单模型..
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: ID
+      responses:
+        '200':
+          description: 删除成功
+  /menus/multiple:
+    post:
+      summary: 创建多个菜单模型
+      description: 创建多个菜单模型...
+      parameters:
+        - in: body
+          name: body
+          description: body参数
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Menu'
+      responses:
+        '200':
+          description: 创建成功
   /group:
     get:
       summary: 根据条件查找单个组模型
@@ -732,6 +895,8 @@ definitions:
     x-isModel: true
     x-plural: Users
     x-tableName: user
+    x-underscored: true
+    x-paranoid: true
     x-apis:
       - findAndCountAll
       - findByPk
@@ -765,6 +930,7 @@ definitions:
         x-fieldName: name
         x-message: 请输入
         x-showTable: true
+        x-showFilter: true
         x-length: 32
       nickname:
         type: string
@@ -836,7 +1002,6 @@ definitions:
         x-fieldName: height
         x-message: 请输入
         x-showTable: true
-        x-showFilter: true
         x-showSorter: true
       bloodType:
         type: string
@@ -858,10 +1023,10 @@ definitions:
         x-description: 血型(ABO)
         description: |
           "血型(ABO)"
-            * A - A
-            * B - B
-            * AB - AB
-            * O - O
+            * A - A型
+            * B - B型
+            * AB - AB型
+            * O - O型
             * NULL - 保密
       notice:
         type: string
@@ -896,11 +1061,11 @@ definitions:
         x-fieldName: lives
         items:
           $ref: '#/definitions/Coord'
-      labels:
+      tags:
         type: array
         format: array
         description: 标签
-        x-fieldName: labels
+        x-fieldName: tags
         items:
           type: string
       luckyNumbers:
@@ -962,6 +1127,8 @@ definitions:
     x-isModel: true
     x-plural: Auths
     x-tableName: auth
+    x-underscored: true
+    x-paranoid: true
     x-apis:
       - findAndCountAll
       - findByPk
@@ -1076,6 +1243,8 @@ definitions:
     x-isModel: true
     x-plural: Roles
     x-tableName: role
+    x-underscored: true
+    x-paranoid: true
     x-apis:
       - findAndCountAll
       - findByPk
@@ -1090,6 +1259,54 @@ definitions:
     required:
       - id
       - name
+    properties:
+      id:
+        type: string
+        format: uuid
+        description: ID
+        uniqueItems: true
+        example: fc3c286e-78b3-490b-be6a-79a6069fd68e
+        x-fieldName: id
+        x-primaryKey: true
+      name:
+        type: string
+        format: string
+        description: 角色名
+        uniqueItems: true
+        example: admin
+        minLength: 3
+        maxLength: 20
+        x-fieldName: name
+        x-message: 请输入
+        x-showTable: true
+        x-length: 32
+    example:
+      id: fc3c286e-78b3-490b-be6a-79a6069fd68e
+      name: admin
+  Menu:
+    type: object
+    description: 菜单模型
+    x-isModel: true
+    x-plural: Menus
+    x-tableName: menu
+    x-underscored: true
+    x-paranoid: true
+    x-apis:
+      - findAndCountAll
+      - findByPk
+      - singleCreate
+      - bulkCreate
+      - bulkUpdate
+      - updateByPk
+      - bulkDestroy
+      - destroyByPk
+      - findOne
+      - findOrCreate
+    required:
+      - id
+      - name
+      - path
+      - sort
     properties:
       id:
         type: string
@@ -1108,24 +1325,52 @@ definitions:
       name:
         type: string
         format: string
-        description: 角色名
-        example: admin
-        minLength: 3
-        maxLength: 20
+        description: 菜单名
+        example: dashboard
         x-fieldName: name
         x-message: 请输入
         x-showTable: true
-        x-length: 32
+        x-length: 64
+      path:
+        type: string
+        format: string
+        description: 菜单路径
+        example: /dashboard
+        x-fieldName: path
+        x-message: 请输入
+        x-showTable: true
+      icon:
+        type: string
+        format: string
+        description: 菜单图标
+        example: dashboard
+        x-fieldName: icon
+        x-message: 请输入
+        x-showTable: true
+        x-length: 64
+      sort:
+        type: integer
+        format: int32
+        description: 菜单排序
+        default: 0
+        x-fieldName: sort
+        x-message: 请输入
+        x-showTable: true
+        x-showSorter: true
     example:
       id: fc3c286e-78b3-490b-be6a-79a6069fd68e
-      parentId: cc1aca88-feae-4dad-b906-cad6d50e16de
-      name: admin
+      name: dashboard
+      path: /dashboard
+      icon: dashboard
+      sort: 0
   Group:
     type: object
     description: 组模型
     x-isModel: true
     x-plural: Groups
     x-tableName: group
+    x-underscored: true
+    x-paranoid: true
     x-apis:
       - findAndCountAll
       - findByPk
@@ -1140,6 +1385,7 @@ definitions:
     required:
       - id
       - name
+      - leaderId
     properties:
       id:
         type: string
@@ -1153,6 +1399,7 @@ definitions:
         type: string
         format: string
         description: 角色名
+        uniqueItems: true
         example: admin
         minLength: 3
         maxLength: 20
@@ -1160,15 +1407,27 @@ definitions:
         x-message: 请输入
         x-showTable: true
         x-length: 32
+      leaderId:
+        type: string
+        format: uuid
+        description: 队长ID
+        example: cc1aca88-feae-4dad-b906-cad6d50e16de
+        x-fieldName: leader_id
+        x-foreignKey: true
+        x-refFieldKey: id
+        x-ref: '#/definitions/User'
     example:
       id: fc3c286e-78b3-490b-be6a-79a6069fd68e
       name: titanic
+      leaderId: cc1aca88-feae-4dad-b906-cad6d50e16de
   UserGroup:
     type: object
     description: 用户-组模型
     x-isModel: true
     x-plural: UserGroups
     x-tableName: usergroup
+    x-underscored: true
+    x-paranoid: false
     x-apis:
       - findAndCountAll
     required:
@@ -1298,14 +1557,14 @@ x-associations:
     as: user
     foreignKey: userId
     targetKey: id
-  - source: Role
-    target: Role
-    type: hasOne
-    as: child
+  - source: Menu
+    target: Menu
+    type: hasMany
+    as: children
     foreignKey: parentId
     sourceKey: id
-  - source: Role
-    target: Role
+  - source: Menu
+    target: Menu
     type: belongsTo
     as: parent
     foreignKey: parentId
@@ -1326,6 +1585,28 @@ x-associations:
     through: userrole
     foreignKey: roleId
     otherKey: userId
+  - source: Menu
+    target: Role
+    type: belongsToMany
+    as: roles
+    throughModel: false
+    through: rolemenu
+    foreignKey: menuId
+    otherKey: roleId
+  - source: Role
+    target: Menu
+    type: belongsToMany
+    as: menus
+    throughModel: false
+    through: rolemenu
+    foreignKey: roleId
+    otherKey: menuId
+  - source: Group
+    target: User
+    type: belongsTo
+    as: leader
+    foreignKey: leaderId
+    targetKey: id
   - source: User
     target: Group
     type: belongsToMany
@@ -1337,7 +1618,7 @@ x-associations:
   - source: Group
     target: User
     type: belongsToMany
-    as: users
+    as: menbers
     throughModel: true
     through: UserGroup
     foreignKey: groupId

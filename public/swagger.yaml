@@ -750,7 +750,7 @@ x-associations:
   - source: Role
     target: Menu
     type: belongsToMany
-    as: users
+    as: menus
     throughModel: false
     through: rolemenu
     foreignKey: roleId

@@ -95,7 +95,7 @@ function App() {
           gutter={24}
           style={{ height: "100vh" }}
         >
-          <Col>
+          {/* <Col>
             <Button
               type="dashed"
               icon="plus"
@@ -106,7 +106,7 @@ function App() {
             >
               New
             </Button>
-          </Col>
+          </Col> */}
           <Col>
             <Button
               type="dashed"
@@ -116,7 +116,7 @@ function App() {
                 setResetting(true);
               }}
             >
-              Sample
+              New
             </Button>
           </Col>
           <Col>

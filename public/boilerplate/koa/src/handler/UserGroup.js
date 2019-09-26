@@ -11,7 +11,7 @@ const findAndCountAll = async (ctx, next) => {
   } else if (sorter) {
     order = [sorter.split("__")];
   }
-  const { count, rows } = await model.Group.findAndCountAll({
+  const { count, rows } = await model.UserGroup.findAndCountAll({
     where,
     offset: (pageNum - 1) * pageSize,
     limit: pageSize > 0 ? pageSize : null,
@@ -19,11 +19,11 @@ const findAndCountAll = async (ctx, next) => {
     include: [
       {
         model: model.User,
-        as: "leader",
+        as: "user",
       },
       {
-        model: model.User,
-        as: "menbers",
+        model: model.Group,
+        as: "group",
       },
     ],
     distinct: true,
@@ -37,7 +37,7 @@ const findAndCountAll = async (ctx, next) => {
  * 根据主键查询单条信息
  */
 const findByPk = async (ctx, next) => {
-  const group = await model.Group.findByPk(ctx.params.id);
+  const group = await model.UserGroup.findByPk(ctx.params.id);
   ctx.assert(group, 404, "记录不存在");
   ctx.body = group;
 
@@ -48,7 +48,7 @@ const findByPk = async (ctx, next) => {
  * 创建单条信息
  */
 const singleCreate = async (ctx, next) => {
-  ctx.body = await model.Group.create(ctx.request.body);
+  ctx.body = await model.UserGroup.create(ctx.request.body);
 
   await next();
 };
@@ -57,7 +57,7 @@ const singleCreate = async (ctx, next) => {
  * 创建多条信息
  */
 const bulkCreate = async (ctx, next) => {
-  ctx.body = await model.Group.bulkCreate(ctx.request.body, {
+  ctx.body = await model.UserGroup.bulkCreate(ctx.request.body, {
     validate: true,
   });
 
@@ -70,7 +70,7 @@ const bulkCreate = async (ctx, next) => {
 const bulkUpdate = async (ctx, next) => {
   const { id } = ctx.query;
   ctx.assert(id, 400, "参数有误");
-  ctx.body = await model.Group.update(ctx.request.body, { where: { id } });
+  ctx.body = await model.UserGroup.update(ctx.request.body, { where: { id } });
 
   await next();
 };
@@ -79,17 +79,9 @@ const bulkUpdate = async (ctx, next) => {
  * 更新单条信息
  */
 const updateByPk = async (ctx, next) => {
-  const group = await model.Group.findByPk(ctx.params.id);
+  const group = await model.UserGroup.findByPk(ctx.params.id);
   ctx.assert(group, 404, "记录不存在");
-  const { menbers, ...fields } = ctx.request.body;
-
-  if (menbers) {
-    await group.setMenbers(
-      await Promise.all(menbers.map(item => model.User.findByPk(item.id)))
-    );
-  }
-
-  ctx.body = await group.update(fields);
+  ctx.body = await group.update(ctx.request.body);
 
   await next();
 };
@@ -100,7 +92,7 @@ const updateByPk = async (ctx, next) => {
 const bulkDestroy = async (ctx, next) => {
   const { id } = ctx.query;
   ctx.assert(id, 400, "参数有误");
-  ctx.body = await model.Group.destroy({ where: { id } });
+  ctx.body = await model.UserGroup.destroy({ where: { id } });
 
   await next();
 };
@@ -109,7 +101,7 @@ const bulkDestroy = async (ctx, next) => {
  * 删除单条信息
  */
 const destroyByPk = async (ctx, next) => {
-  const group = await model.Group.findByPk(ctx.params.id);
+  const group = await model.UserGroup.findByPk(ctx.params.id);
   ctx.assert(group, 404, "记录不存在");
   ctx.body = await group.destroy();
 
@@ -120,7 +112,7 @@ const destroyByPk = async (ctx, next) => {
  * 查询单条信息
  */
 const findOne = async (ctx, next) => {
-  const group = await model.Group.findOne({ where: ctx.query });
+  const group = await model.UserGroup.findOne({ where: ctx.query });
   ctx.assert(group, 404, "记录不存在");
   ctx.body = group;
 
@@ -131,7 +123,7 @@ const findOne = async (ctx, next) => {
  * 查询或创建单条信息
  */
 const findOrCreate = async (ctx, next) => {
-  const [group, created] = await model.Group.findOrCreate({
+  const [group, created] = await model.UserGroup.findOrCreate({
     where: ctx.request.body,
   });
   ctx.body = {

@@ -43,7 +43,7 @@ export default sequelize.define(
   },
   {
     underscored: true, // 使用下划线字段
-    paranoid: true, // 软删除
+    paranoid: false, // 禁用软删除
     freezeTableName: true, // 禁用表名自动复数
     tableName: "usergroup", // 定义表的名称
   }

@@ -9,15 +9,15 @@ const { JWT_SECRET, JWT_EXPIRES_IN } = config;
  * @param {string} authName 鉴权名称
  * @param {UUID} authName 用户ID
  */
-const makeToken = ({ authType, authName, userId }) => {
-  if (!authType || !authName || !userId) {
+const makeToken = ({ authId, authType, authName }) => {
+  if (!authId || !authType || !authName) {
     return "";
   }
   return jwt.sign(
     {
+      authId,
       authType,
       authName,
-      userId,
     },
     JWT_SECRET,
     { expiresIn: JWT_EXPIRES_IN }

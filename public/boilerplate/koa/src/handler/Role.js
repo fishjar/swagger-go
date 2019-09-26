@@ -1,4 +1,5 @@
 import model from "../model";
+import sequelize from "../db";
 import { formatMenus } from "../utils";
 
 /**
@@ -15,12 +16,16 @@ const findAndCountAll = async (ctx, next) => {
   const { count, rows } = await model.Role.findAndCountAll({
     where,
     offset: (pageNum - 1) * pageSize,
-    limit: pageSize,
+    limit: pageSize > 0 ? pageSize : null,
     order,
     include: [
       {
         model: model.User,
         as: "users",
+      },
+      {
+        model: model.Menu,
+        as: "menus",
       },
     ],
     distinct: true,
@@ -66,9 +71,9 @@ const bulkCreate = async (ctx, next) => {
  * 更新多条信息
  */
 const bulkUpdate = async (ctx, next) => {
-  ctx.body = await model.Role.update(ctx.request.body.fields, {
-    where: ctx.request.body.filter,
-  });
+  const { id } = ctx.query;
+  ctx.assert(id, 400, "参数有误");
+  ctx.body = await model.Role.update(ctx.request.body, { where: { id } });
 
   await next();
 };
@@ -79,7 +84,28 @@ const bulkUpdate = async (ctx, next) => {
 const updateByPk = async (ctx, next) => {
   const role = await model.Role.findByPk(ctx.params.id);
   ctx.assert(role, 404, "记录不存在");
-  ctx.body = await role.update(ctx.request.body);
+  const { menus, ...fields } = ctx.request.body;
+
+  // // 创建事务
+  // const t = await sequelize.transaction();
+  // // 设置据色菜单
+  // const menus = [];
+  // for (let i = 0; i < menus.length; i++) {
+  //   menus.push(await model.Menu.findByPk(menus[i]));
+  // }
+  // await role.setMenus(menus, { transaction: t });
+  // // 更新角色资料
+  // ctx.body = await role.update(fields, { transaction: t });
+
+  // 设置菜单
+  if (menus) {
+    await role.setMenus(
+      await Promise.all(menus.map(item => model.Menu.findByPk(item.id)))
+    );
+  }
+
+  // 更新资料
+  ctx.body = await role.update(fields);
 
   await next();
 };
@@ -88,9 +114,9 @@ const updateByPk = async (ctx, next) => {
  * 删除多条信息
  */
 const bulkDestroy = async (ctx, next) => {
-  ctx.body = await model.Role.destroy({
-    where: ctx.request.body,
-  });
+  const { id } = ctx.query;
+  ctx.assert(id, 400, "参数有误");
+  ctx.body = await model.Role.destroy({ where: { id } });
 
   await next();
 };
@@ -112,10 +138,7 @@ const destroyByPk = async (ctx, next) => {
 const findOne = async (ctx, next) => {
   const role = await model.Role.findOne({ where: ctx.query });
   ctx.assert(role, 404, "记录不存在");
-  const parent = await role.getParent();
-  const child = await role.getChild();
-
-  ctx.body = { ...role.get({ plain: true }), parent, child };
+  ctx.body = role;
 
   await next();
 };
@@ -136,31 +159,6 @@ const findOrCreate = async (ctx, next) => {
   await next();
 };
 
-/**
- * 角色菜单
- */
-const findRoleMenus = async (ctx, next) => {
-  const role = await model.Role.findByPk(ctx.params.id);
-  ctx.assert(role, 404, "角色不存在");
-  // const menus = await role.getMenus();
-  const menus = await model.Menu.findAll({
-    include: [
-      {
-        model: model.Role,
-        as: "roles",
-      },
-    ],
-  });
-  const { format } = ctx.query;
-  if (format) {
-    ctx.body = formatMenus(menus, null, ctx.params.id);
-  } else {
-    ctx.body = menus;
-  }
-
-  await next();
-};
-
 export default {
   findAndCountAll,
   findByPk,
@@ -172,5 +170,4 @@ export default {
   destroyByPk,
   findOne,
   findOrCreate,
-  findRoleMenus,
 };

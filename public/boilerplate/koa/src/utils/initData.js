@@ -34,81 +34,87 @@ export default async () => {
     });
 
     // 创建菜单
+    const welcomeMenu = await model.Menu.create({
+      name: "welcome",
+      path: "/welcome",
+      icon: "smile",
+      sort: 0,
+    });
     const dashboardMenu = await model.Menu.create({
       name: "dashboard",
       path: "/dashboard",
       icon: "dashboard",
-      sort: 0,
-    });
-    const indexMenu = await model.Menu.create({
-      parentId: dashboardMenu.id,
-      name: "index",
-      path: "/dashboard/index",
-      sort: 0,
-    });
-    const modelsMenu = await model.Menu.create({
-      name: "models",
-      path: "/models",
-      icon: "table",
       sort: 1,
     });
     const usersMenu = await model.Menu.create({
-      parentId: modelsMenu.id,
-      name: "user",
-      path: "/models/user",
+      parentId: dashboardMenu.id,
+      name: "users",
+      path: "/dashboard/users",
       sort: 0,
     });
     const authsMenu = await model.Menu.create({
-      parentId: modelsMenu.id,
-      name: "auth",
-      path: "/models/auth",
+      parentId: dashboardMenu.id,
+      name: "auths",
+      path: "/dashboard/auths",
       sort: 1,
     });
     const rolesMenu = await model.Menu.create({
-      parentId: modelsMenu.id,
-      name: "role",
-      path: "/models/role",
+      parentId: dashboardMenu.id,
+      name: "roles",
+      path: "/dashboard/roles",
       sort: 2,
     });
     const groupsMenu = await model.Menu.create({
-      parentId: modelsMenu.id,
-      name: "group",
-      path: "/models/group",
+      parentId: dashboardMenu.id,
+      name: "groups",
+      path: "/dashboard/groups",
       sort: 3,
     });
     const menusMenu = await model.Menu.create({
-      parentId: modelsMenu.id,
-      name: "menu",
-      path: "/models/menu",
+      parentId: dashboardMenu.id,
+      name: "menus",
+      path: "/dashboard/menus",
       sort: 5,
     });
     const usergroupsMenu = await model.Menu.create({
-      parentId: modelsMenu.id,
-      name: "usergroup",
-      path: "/models/usergroup",
+      parentId: dashboardMenu.id,
+      name: "usergroups",
+      path: "/dashboard/usergroups",
       sort: 4,
     });
 
     // 关联角色菜单
-    await adminRole.addMenu(dashboardMenu);
-    await adminRole.addMenu(indexMenu);
-    await adminRole.addMenu(modelsMenu);
-    await adminRole.addMenu(usersMenu);
-    await adminRole.addMenu(authsMenu);
-    await adminRole.addMenu(rolesMenu);
-    await adminRole.addMenu(groupsMenu);
-    await adminRole.addMenu(menusMenu);
-    await adminRole.addMenu(usergroupsMenu);
-    await userRole.addMenu(dashboardMenu);
-    await userRole.addMenu(indexMenu);
+    // await adminRole.addMenu(dashboardMenu);
+    // await adminRole.addMenu(welcomeMenu);
+    // await adminRole.addMenu(usersMenu);
+    // await adminRole.addMenu(authsMenu);
+    // await adminRole.addMenu(rolesMenu);
+    // await adminRole.addMenu(groupsMenu);
+    // await adminRole.addMenu(menusMenu);
+    // await adminRole.addMenu(usergroupsMenu);
+    // await userRole.addMenu(welcomeMenu);
+    await adminRole.setMenus([
+      welcomeMenu,
+      dashboardMenu,
+      usersMenu,
+      authsMenu,
+      rolesMenu,
+      groupsMenu,
+      menusMenu,
+      usergroupsMenu,
+    ]);
+    await userRole.setMenus([welcomeMenu, dashboardMenu, usersMenu, menusMenu]);
 
     // 关联用户角色
-    await user.addRole(userRole);
-    await user.addRole(adminRole);
-    await user.addRole(guestRole);
-    await jack.addRole(userRole);
-    await jack.addRole(guestRole);
-    await rose.addRole(guestRole);
+    // await user.addRole(userRole);
+    // await user.addRole(adminRole);
+    // await user.addRole(guestRole);
+    // await jack.addRole(userRole);
+    // await jack.addRole(guestRole);
+    // await rose.addRole(guestRole);
+    await user.setRoles([guestRole, userRole, adminRole]);
+    await jack.setRoles([guestRole, userRole]);
+    await rose.setRoles([guestRole]);
 
     // 关联用户团队
     await user.addGroup(rayjarGroup, {

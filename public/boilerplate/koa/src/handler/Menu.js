@@ -14,7 +14,7 @@ const findAndCountAll = async (ctx, next) => {
   const { count, rows } = await model.Menu.findAndCountAll({
     where,
     offset: (pageNum - 1) * pageSize,
-    limit: pageSize,
+    limit: pageSize > 0 ? pageSize : null,
     order,
     include: [
       {
@@ -25,10 +25,10 @@ const findAndCountAll = async (ctx, next) => {
         model: model.Menu,
         as: "parent",
       },
-      {
-        model: model.Menu,
-        as: "children",
-      },
+      // {
+      //   model: model.Menu,
+      //   as: "children",
+      // },
     ],
     distinct: true,
   });
@@ -41,12 +41,20 @@ const findAndCountAll = async (ctx, next) => {
  * 根据主键查询单条信息
  */
 const findByPk = async (ctx, next) => {
-  const menu = await model.Menu.findByPk(ctx.params.id);
+  const menu = await model.Menu.findByPk(ctx.params.id, {
+    include: [
+      {
+        model: model.Menu,
+        as: "parent",
+      },
+      {
+        model: model.Menu,
+        as: "children",
+      },
+    ],
+  });
   ctx.assert(menu, 404, "记录不存在");
-  const parent = await role.getParent();
-  const children = await role.getChildren();
-
-  ctx.body = { ...menu.get({ plain: true }), parent, children };
+  ctx.body = menu;
 
   await next();
 };
@@ -75,9 +83,9 @@ const bulkCreate = async (ctx, next) => {
  * 更新多条信息
  */
 const bulkUpdate = async (ctx, next) => {
-  ctx.body = await model.Menu.update(ctx.request.body.fields, {
-    where: ctx.request.body.filter,
-  });
+  const { id } = ctx.query;
+  ctx.assert(id, 400, "参数有误");
+  ctx.body = await model.Menu.update(ctx.request.body, { where: { id } });
 
   await next();
 };
@@ -97,9 +105,9 @@ const updateByPk = async (ctx, next) => {
  * 删除多条信息
  */
 const bulkDestroy = async (ctx, next) => {
-  ctx.body = await model.Menu.destroy({
-    where: ctx.request.body,
-  });
+  const { id } = ctx.query;
+  ctx.assert(id, 400, "参数有误");
+  ctx.body = await model.Menu.destroy({ where: { id } });
 
   await next();
 };

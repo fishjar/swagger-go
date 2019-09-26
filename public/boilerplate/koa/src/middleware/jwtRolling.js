@@ -1,34 +1,47 @@
 import jwt from "../utils/jwt";
-import logger from "../utils/logger";
 import model from "../model";
 
 export default () =>
   async function jwtRolling(ctx, next) {
-    ctx.state.roles = [];
-    const token = ctx.header.authorization;
-    if (token) {
-      const { authType, authName, userId } = jwt.parseToken(token);
-      if (authType && authName && userId) {
-        // 将会话信息挂载到ctx.state
-        ctx.state.foo = "bar";
-        // 角色信息
-        const user = await model.User.findByPk(userId);
-        ctx.assert(user, 401, "token用户不存在");
-        try {
-          const roles = await user.getRoles();
-          ctx.state.roles = roles.map(role => role.name);
-        } catch (err) {
-          logger.error(
-            `[角色错误] ${JSON.stringify({
-              auth: { authType, authName, userId },
-              err: err.message || err,
-            })}`
-          );
-        }
-        // 生成新token，并写入header
-        const newToken = jwt.makeToken({ authType, authName, userId });
-        ctx.set("authToken", newToken);
-      }
+    // 忽略登录请求
+    if (ctx.request.url && ctx.request.url.startsWith("/login/")) {
+      await next();
+      return;
     }
+
+    const token = ctx.header.authorization;
+    ctx.assert(token, 401, "缺少token");
+
+    // 解密token信息
+    // const { authId, authType, authName } = ctx.state.user;
+    const { authId, authType, authName } = jwt.parseToken(token);
+    ctx.assert(authId && authType && authName, 401, "tokeni信息有误");
+
+    // 查找并验证帐号信息
+    const auth = await model.Auth.findByPk(authId, {
+      include: [
+        {
+          model: model.User,
+          as: "user",
+          include: [
+            {
+              model: model.Role,
+              as: "roles",
+            },
+          ],
+        },
+      ],
+    });
+    ctx.assert(auth, 401, "帐号不存在");
+    ctx.assert(auth.isEnabled, 401, "帐号停用");
+    ctx.assert(auth.user, 401, "帐号异常");
+
+    // 挂载最新角色信息
+    ctx.state.roles = auth.user.roles.map(role => role.name);
+
+    // 生成新token，并写入header
+    const newToken = jwt.makeToken({ authId, authType, authName });
+    ctx.set("authToken", newToken);
+
     await next();
   };

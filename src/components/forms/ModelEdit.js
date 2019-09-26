@@ -172,13 +172,13 @@ function ModelEdit({
               <Form.Item label="其他选项" style={{ marginBottom: 0 }}>
                 <Form.Item style={{ display: "inline-block", marginRight: 12 }}>
                   {getFieldDecorator("x-paranoid", {
-                    initialValue: !!field["x-paranoid"],
+                    initialValue: !!model["x-paranoid"],
                     valuePropName: "checked",
                   })(<Checkbox>软删除</Checkbox>)}
                 </Form.Item>
                 <Form.Item style={{ display: "inline-block", marginRight: 12 }}>
                   {getFieldDecorator("x-underscored", {
-                    initialValue: !!field["x-underscored"],
+                    initialValue: !!model["x-underscored"],
                     valuePropName: "checked",
                   })(<Checkbox>下划线字段</Checkbox>)}
                 </Form.Item>

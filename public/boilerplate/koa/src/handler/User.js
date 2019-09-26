@@ -15,7 +15,7 @@ const findAndCountAll = async (ctx, next) => {
   const { count, rows } = await model.User.findAndCountAll({
     where,
     offset: (pageNum - 1) * pageSize,
-    limit: pageSize,
+    limit: pageSize > 0 ? pageSize : null,
     order,
     include: [
       {
@@ -30,12 +30,12 @@ const findAndCountAll = async (ctx, next) => {
       {
         model: model.Role,
         as: "roles",
-        include: [
-          {
-            model: model.Menu,
-            as: "menus",
-          },
-        ],
+        // include: [
+        //   {
+        //     model: model.Menu,
+        //     as: "menus",
+        //   },
+        // ],
       },
       {
         model: model.User,
@@ -57,11 +57,25 @@ const findAndCountAll = async (ctx, next) => {
  * 根据主键查询单条信息
  */
 const findByPk = async (ctx, next) => {
-  const user = await model.User.findByPk(ctx.params.id);
+  const user = await model.User.findByPk(ctx.params.id, {
+    include: [
+      {
+        model: model.Role,
+        as: "roles",
+      },
+      {
+        model: model.Group,
+        as: "groups",
+      },
+      {
+        model: model.User,
+        as: "friends",
+      },
+    ],
+  });
   ctx.assert(user, 404, "记录不存在");
-  const auths = await user.getAuths();
-  const roles = await user.getRoles();
-  ctx.body = { ...user.get({ plain: true }), auths, roles };
+  ctx.body = user;
+
   await next();
 };
 
@@ -69,7 +83,30 @@ const findByPk = async (ctx, next) => {
  * 创建单条信息
  */
 const singleCreate = async (ctx, next) => {
-  ctx.body = await model.User.create(ctx.request.body);
+  const { roles, groups, friends, ...fields } = ctx.request.body;
+
+  // 创建用户
+  const user = await model.User.create(fields);
+  // 设置角色
+  if (roles) {
+    await user.setRoles(
+      await Promise.all(roles.map(item => model.Role.findByPk(item.id)))
+    );
+  }
+  // 设置组
+  if (groups) {
+    await user.setGroups(
+      await Promise.all(groups.map(item => model.Group.findByPk(item.id)))
+    );
+  }
+  // 设置朋友
+  if (friends) {
+    await user.setFriends(
+      await Promise.all(friends.map(item => model.User.findByPk(item.id)))
+    );
+  }
+
+  ctx.body = user;
 
   await next();
 };
@@ -89,9 +126,9 @@ const bulkCreate = async (ctx, next) => {
  * 更新多条信息
  */
 const bulkUpdate = async (ctx, next) => {
-  ctx.body = await model.User.update(ctx.request.body.fields, {
-    where: ctx.request.body.filter,
-  });
+  const { id } = ctx.query;
+  ctx.assert(id, 400, "参数有误");
+  ctx.body = await model.User.update(ctx.request.body, { where: { id } });
 
   await next();
 };
@@ -102,7 +139,28 @@ const bulkUpdate = async (ctx, next) => {
 const updateByPk = async (ctx, next) => {
   const user = await model.User.findByPk(ctx.params.id);
   ctx.assert(user, 404, "记录不存在");
-  ctx.body = await user.update(ctx.request.body);
+  const { roles, groups, friends, ...fields } = ctx.request.body;
+
+  // 设置角色
+  if (roles) {
+    await user.setRoles(
+      await Promise.all(roles.map(item => model.Role.findByPk(item.id)))
+    );
+  }
+  // 设置组
+  if (groups) {
+    await user.setGroups(
+      await Promise.all(groups.map(item => model.Group.findByPk(item.id)))
+    );
+  }
+  // 设置朋友
+  if (friends) {
+    await user.setFriends(
+      await Promise.all(friends.map(item => model.User.findByPk(item.id)))
+    );
+  }
+
+  ctx.body = await user.update(fields);
 
   await next();
 };
@@ -111,9 +169,9 @@ const updateByPk = async (ctx, next) => {
  * 删除多条信息
  */
 const bulkDestroy = async (ctx, next) => {
-  ctx.body = await model.User.destroy({
-    where: ctx.request.body,
-  });
+  const { id } = ctx.query;
+  ctx.assert(id, 400, "参数有误");
+  ctx.body = await model.User.destroy({ where: { id } });
 
   await next();
 };
@@ -124,6 +182,12 @@ const bulkDestroy = async (ctx, next) => {
 const destroyByPk = async (ctx, next) => {
   const user = await model.User.findByPk(ctx.params.id);
   ctx.assert(user, 404, "记录不存在");
+
+  // 删除关联数据
+  await user.setRoles([]);
+  await user.setGroups([]);
+  await user.setFriends([]);
+
   ctx.body = await user.destroy();
 
   await next();
@@ -170,38 +234,63 @@ const findOrCreate = async (ctx, next) => {
   await next();
 };
 
+/**
+ * 获取当前用户菜单
+ * @param {*} ctx 
+ * @param {*} next 
+ */
 const findUserMenus = async (ctx, next) => {
-  const { userId } = ctx.state.user;
-  ctx.assert(userId, 401, "请先登录");
-  const user = await model.User.findByPk(userId);
-  ctx.assert(user, 404, "用户不存在");
-  const roles = await user.getRoles({
+  const { authId } = ctx.state.user;
+  const auth = await model.Auth.findByPk(authId, {
     include: [
       {
-        model: model.Menu,
-        as: "menus",
-        // include: [
-        //   {
-        //     model: model.Role,
-        //     as: "roles",
-        //   },
-        // ],
+        model: model.User,
+        as: "user",
+        include: [
+          {
+            model: model.Role,
+            as: "roles",
+            include: [
+              {
+                model: model.Menu,
+                as: "menus",
+              },
+            ],
+          },
+        ],
       },
     ],
   });
+
   const menusMap = {};
-  roles.forEach(role => {
+  auth.user.roles.forEach(role => {
     role.menus.forEach(menu => {
       menusMap[menu.id] = menu;
     });
   });
-  const menus = Object.entries(menusMap).map(([_, item]) => item);
-  const { format } = ctx.query;
-  if (format) {
-    ctx.body = formatMenus(menus, null);
-  } else {
-    ctx.body = menus;
-  }
+
+  ctx.body = Object.entries(menusMap).map(([_, item]) => item);
+
+  await next();
+};
+
+
+/**
+ * 获取当前用户信息
+ * @param {*} ctx 
+ * @param {*} next 
+ */
+const findCurrentUser = async (ctx, next) => {
+  const { authId } = ctx.state.user;
+  const auth = await model.Auth.findByPk(authId, {
+    include: [
+      {
+        model: model.User,
+        as: "user",
+      },
+    ],
+  });
+  ctx.body = auth.user;
 
   await next();
 };
@@ -218,4 +307,5 @@ export default {
   findOne,
   findOrCreate,
   findUserMenus,
+  findCurrentUser,
 };

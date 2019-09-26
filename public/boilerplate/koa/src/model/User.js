@@ -106,8 +106,8 @@ export default sequelize.define(
       comment: "生活轨迹",
       type: Sequelize.JSON, // [{x,y}]
     },
-    labels: {
-      field: "labels",
+    tags: {
+      field: "tags",
       comment: "标签",
       type: Sequelize.JSON, // ["string"]
     },

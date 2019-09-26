@@ -9,7 +9,7 @@ export default (roles = []) => (ctx, next) => {
         ctx.state.roles &&
         Array.isArray(ctx.state.roles) &&
         ctx.state.roles.includes(role),
-      401,
+      403,
       "角色缺少权限"
     );
   });

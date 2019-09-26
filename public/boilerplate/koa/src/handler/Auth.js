@@ -14,7 +14,7 @@ const findAndCountAll = async (ctx, next) => {
   const { count, rows } = await model.Auth.findAndCountAll({
     where,
     offset: (pageNum - 1) * pageSize,
-    limit: pageSize,
+    limit: pageSize > 0 ? pageSize : null,
     order,
     attributes: { exclude: ["authCode"] },
     include: [
@@ -73,9 +73,9 @@ const bulkCreate = async (ctx, next) => {
  * 更新多条信息
  */
 const bulkUpdate = async (ctx, next) => {
-  ctx.body = await model.Auth.update(ctx.request.body.fields, {
-    where: ctx.request.body.filter,
-  });
+  const { id } = ctx.query;
+  ctx.assert(id, 400, "参数有误");
+  ctx.body = await model.Auth.update(ctx.request.body, { where: { id } });
 
   await next();
 };
@@ -95,9 +95,9 @@ const updateByPk = async (ctx, next) => {
  * 删除多条信息
  */
 const bulkDestroy = async (ctx, next) => {
-  ctx.body = await model.Auth.destroy({
-    where: ctx.request.body,
-  });
+  const { id } = ctx.query;
+  ctx.assert(id, 400, "参数有误");
+  ctx.body = await model.Auth.destroy({ where: { id } });
 
   await next();
 };

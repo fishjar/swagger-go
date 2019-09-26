@@ -13,37 +13,39 @@ router
   -%>
 
   <% if(model['x-apis'].includes('findOne')) { -%>
-    .get("/<%- modelKeyLower -%>", roleAuth(["guest"]), handler.<%- modelKey -%>.findOne)                 // 根据条件查找单条
+    .get("/<%- modelKeyLower -%>", roleAuth(["admin"]), handler.<%- modelKey -%>.findOne)                 // 根据条件查找单条
   <% } -%>
   <% if(model['x-apis'].includes('findOrCreate')) { -%>
-    .post("/<%- modelKeyLower -%>", roleAuth(["guest"]), handler.<%- modelKey -%>.findOrCreate)           // 查找或创建单条
+    .post("/<%- modelKeyLower -%>", roleAuth(["admin"]), handler.<%- modelKey -%>.findOrCreate)           // 查找或创建单条
   <% } -%>
   <% if(model['x-apis'].includes('findAndCountAll')) { -%>
-    .get("/<%- modelKeyPlural -%>", roleAuth(["guest"]), handler.<%- modelKey -%>.findAndCountAll)        // 获取多条
+    .get("/<%- modelKeyPlural -%>", roleAuth(["admin"]), handler.<%- modelKey -%>.findAndCountAll)        // 获取多条
   <% } -%>
   <% if(model['x-apis'].includes('singleCreate')) { -%>
-    .post("/<%- modelKeyPlural -%>", roleAuth(["guest"]), handler.<%- modelKey -%>.singleCreate)          // 创建单条
+    .post("/<%- modelKeyPlural -%>", roleAuth(["admin"]), handler.<%- modelKey -%>.singleCreate)          // 创建单条
   <% } -%>
   <% if(model['x-apis'].includes('bulkUpdate')) { -%>
-    .patch("/<%- modelKeyPlural -%>", roleAuth(["guest"]), handler.<%- modelKey -%>.bulkUpdate)           // 更新多条
+    .patch("/<%- modelKeyPlural -%>", roleAuth(["admin"]), handler.<%- modelKey -%>.bulkUpdate)           // 更新多条
   <% } -%>
   <% if(model['x-apis'].includes('bulkDestroy')) { -%>
-    .delete("/<%- modelKeyPlural -%>", roleAuth(["guest"]), handler.<%- modelKey -%>.bulkDestroy)         // 删除多条
+    .delete("/<%- modelKeyPlural -%>", roleAuth(["admin"]), handler.<%- modelKey -%>.bulkDestroy)         // 删除多条
   <% } -%>
   <% if(model['x-apis'].includes('findByPk')) { -%>
-    .get("/<%- modelKeyPlural -%>/:id", roleAuth(["guest"]), handler.<%- modelKey -%>.findByPk)           // 根据主键查找单条
+    .get("/<%- modelKeyPlural -%>/:id", roleAuth(["admin"]), handler.<%- modelKey -%>.findByPk)           // 根据主键查找单条
   <% } -%>
   <% if(model['x-apis'].includes('updateByPk')) { -%>
-    .patch("/<%- modelKeyPlural -%>/:id", roleAuth(["guest"]), handler.<%- modelKey -%>.updateByPk)       // 更新单条
+    .patch("/<%- modelKeyPlural -%>/:id", roleAuth(["admin"]), handler.<%- modelKey -%>.updateByPk)       // 更新单条
   <% } -%>
   <% if(model['x-apis'].includes('destroyByPk')) { -%>
-    .delete("/<%- modelKeyPlural -%>/:id", roleAuth(["guest"]), handler.<%- modelKey -%>.destroyByPk)     // 删除单条
+    .delete("/<%- modelKeyPlural -%>/:id", roleAuth(["admin"]), handler.<%- modelKey -%>.destroyByPk)     // 删除单条
   <% } -%>
   <% if(model['x-apis'].includes('bulkCreate')) { -%>
-    .post("/<%- modelKeyPlural -%>/multiple", roleAuth(["guest"]), handler.<%- modelKey -%>.bulkCreate)   // 创建多条
+    .post("/<%- modelKeyPlural -%>/multiple", roleAuth(["admin"]), handler.<%- modelKey -%>.bulkCreate)   // 创建多条
   <% } -%>
   <% }) -%>
 
+  .get("/user/menus", roleAuth(["user"]), handler.User.findUserMenus) // 菜单
+  .get("/user/current", roleAuth(["user"]), handler.User.findCurrentUser) // 用户信息
   .post("/login/account", handler.Login.account);      // 帐号密码登录
 
 export default router;
