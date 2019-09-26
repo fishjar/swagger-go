@@ -214,7 +214,35 @@ definitions:
         description: 生活轨迹
         x-fieldName: lives
         items:
-          $ref: '#/definitions/Coord'
+          type: object
+          properties:
+            x:
+              type: string
+              description: x坐标
+            y:
+              type: string
+              description: y坐标
+      roles:
+        type: array
+        format: array
+        description: 角色
+        x-fieldName: roles
+        items:
+          $ref: '#/definitions/Role'
+      groups:
+        type: array
+        format: array
+        description: 组
+        x-fieldName: groups
+        items:
+          $ref: '#/definitions/Group'
+      friends:
+        type: array
+        format: array
+        description: 朋友
+        x-fieldName: friends
+        items:
+          $ref: '#/definitions/User'
       tags:
         type: array
         format: array
@@ -317,6 +345,11 @@ definitions:
         x-foreignKey: true
         x-refFieldKey: id
         x-ref: '#/definitions/User'
+      user:
+        x-fieldName: "user"
+        x-refFieldKey: "id"
+        x-description: "用户"
+        $ref: "#/definitions/User"
       authType:
         type: string
         format: string
@@ -434,6 +467,13 @@ definitions:
         x-message: 请输入
         x-showTable: true
         x-length: 32
+      menus:
+        type: array
+        format: array
+        description: 菜单
+        x-fieldName: menus
+        items:
+          $ref: '#/definitions/Menu'
     example:
       id: fc3c286e-78b3-490b-be6a-79a6069fd68e
       name: admin
@@ -570,6 +610,18 @@ definitions:
         x-foreignKey: true
         x-refFieldKey: id
         x-ref: '#/definitions/User'
+      leader:
+        x-fieldName: "leader"
+        x-refFieldKey: "id"
+        x-description: "队长"
+        $ref: "#/definitions/User"
+      menbers:
+        type: array
+        format: array
+        description: 队员
+        x-fieldName: menbers
+        items:
+          $ref: '#/definitions/User'
     example:
       id: fc3c286e-78b3-490b-be6a-79a6069fd68e
       name: titanic
@@ -688,16 +740,6 @@ definitions:
       errmsg:
         type: string
         description: 错误信息
-  Coord:
-    type: object
-    description: 坐标
-    properties:
-      x:
-        type: number
-        description: x坐标
-      'y':
-        type: number
-        description: y坐标
 x-associations:
   - source: User
     target: Auth

@@ -1,9 +1,5 @@
 import React, { Fragment, useState } from "react";
-import {
-  formItemLayout,
-  dataTypes,
-  standDataTypes,
-} from "../../config";
+import { formItemLayout, dataTypes, standDataTypes } from "../../config";
 import {
   parseRef,
   hasDuplication,
@@ -127,6 +123,7 @@ function FieldEdit({
         subFields,
         arrayType,
         arrayRef,
+        arrayItemFields,
         ...data
       } = values;
 
@@ -135,8 +132,13 @@ function FieldEdit({
       if (data.type === "object") {
         data.properties = parseArrayToObject(subFields);
       } else if (data.type === "array") {
-        if (arrayType === "object") {
+        if (arrayType === "ref") {
           data.items = { $ref: arrayRef };
+        } else if (arrayType === "object") {
+          data.items = {
+            type: arrayType,
+            properties: parseArrayToObject(arrayItemFields),
+          };
         } else {
           data.items = { type: arrayType };
         }
@@ -443,7 +445,7 @@ function FieldEdit({
                 checkedChildren="是"
                 unCheckedChildren="否"
                 onChange={handleRefSwitch}
-                disabled
+                // disabled
               />
             )}
           </Form.Item>
@@ -764,6 +766,7 @@ function FieldEdit({
                             .indexOf(input.toLowerCase()) >= 0
                         }
                       >
+                        <Option value="ref">ref</Option>
                         {standDataTypes.map(item => (
                           <Option value={item} key={item}>
                             {item}
@@ -772,9 +775,9 @@ function FieldEdit({
                       </Select>
                     )}
                   </Form.Item>
-                  {getFieldValue("arrayType") === "object" && (
+                  {getFieldValue("arrayType") === "ref" && (
                     <Fragment>
-                      <Form.Item label="数组模型">
+                      <Form.Item label="数组模型ref">
                         {getFieldDecorator("arrayRef", {
                           initialValue: field.arrayRef,
                           rules: [
@@ -830,7 +833,7 @@ function FieldEdit({
                                     wordBreak: "break-all",
                                   }}
                                 >
-                                  {text}
+                                  {JSON.stringify(text)}
                                 </div>
                               ),
                             },
@@ -842,6 +845,18 @@ function FieldEdit({
                         />
                       </Form.Item>
                     </Fragment>
+                  )}
+                  {getFieldValue("arrayType") === "object" && (
+                    <Form.Item label="子字段选项">
+                      {getFieldDecorator("arrayItemFields", {
+                        initialValue: field.arrayItemFields,
+                        // rules: [
+                        //   {
+                        //     validator: handleSubFieldsValidator,
+                        //   },
+                        // ],
+                      })(<SubFields />)}
+                    </Form.Item>
                   )}
                 </Fragment>
               )}

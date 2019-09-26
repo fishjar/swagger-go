@@ -2,13 +2,7 @@ import React, { Fragment } from "react";
 import FieldEdit from "./forms/FieldEdit";
 import FieldCopy from "./forms/FieldCopy";
 import { getModelProps, parseRef } from "../utils";
-import {
-  Icon,
-  Button,
-  Table,
-  Divider,
-  Badge,
-} from "antd";
+import { Icon, Button, Table, Divider, Badge } from "antd";
 
 // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#schemaObject
 export default function Definition({ models, model, dispatch }) {
@@ -34,9 +28,11 @@ export default function Definition({ models, model, dispatch }) {
 
     // 数组类型
     const arrayType =
-      field.items && (field.items.$ref ? "object" : field.items.type);
+      field.items && (field.items.$ref ? "ref" : field.items.type);
     const arrayRef = field.items && field.items.$ref;
     const [arrayModel, arrayFields] = parseRef(models, arrayRef);
+    const arrayItemFields =
+      arrayType === "object" ? getModelProps(field.items) : [];
 
     // 枚举类型
     const enumItems = Array.isArray(field.enum)
@@ -60,6 +56,7 @@ export default function Definition({ models, model, dispatch }) {
       arrayRef,
       arrayModel,
       arrayFields,
+      arrayItemFields,
       subFields,
       enumItems,
       isRef: !!field.$ref,
@@ -153,7 +150,7 @@ export default function Definition({ models, model, dispatch }) {
             <div>
               <div>{`- ${record["x-description"] || ""}`}</div>
               <div>{`- ${record.refModel.description} ( ${record.refModel.key} )`}</div>
-              <ul style={{ margin: 0 }}>
+              {/* <ul style={{ margin: 0 }}>
                 {record.refFields.map(({ key, type, description }) =>
                   key === record["x-refFieldKey"] ? (
                     <li key={key} style={{ color: "#52c41a" }}>
@@ -165,10 +162,10 @@ export default function Definition({ models, model, dispatch }) {
                     </li>
                   )
                 )}
-              </ul>
+              </ul> */}
             </div>
           );
-        } else if (record["x-foreignKey"]) {
+        } /* else if (record["x-foreignKey"]) {
           return (
             <div>
               <div>{`- ${record.description || ""}`}</div>
@@ -188,47 +185,63 @@ export default function Definition({ models, model, dispatch }) {
               </ul>
             </div>
           );
-        } else if (record.isEnum) {
+        } */ else if (
+          record.isEnum
+        ) {
           return (
             <div>
               <div>{`${record["x-message"] || ""} - ${
                 record["x-description"]
               }`}</div>
-              <ul style={{ margin: 0 }}>
+              {/* <ul style={{ margin: 0 }}>
                 {record.enumItems.map(({ key, description }) => (
                   <li key={key}>
                     {key} - {description}
                   </li>
                 ))}
-              </ul>
+              </ul> */}
             </div>
           );
         } else if (record.format === "object") {
           return (
             <div>
               <div>{`${record["x-message"] || ""} - ${text}`}</div>
-              <ul style={{ margin: 0 }}>
+              {/* <ul style={{ margin: 0 }}>
                 {record.subFields.map(({ key, type, description }) => (
                   <li key={key}>
                     {type} - {key} ({description})
                   </li>
                 ))}
-              </ul>
+              </ul> */}
             </div>
           );
         } else if (record.format === "array") {
-          if (record.arrayType === "object") {
+          if (record.arrayType === "ref") {
             return (
               <div>
                 <div>{`${record["x-message"] || ""} - ${text}`}</div>
                 <div>{`[ ${record.arrayType} - ${record.arrayModel.description} ( ${record.arrayModel.key} ) ]`}</div>
-                <ul style={{ margin: 0 }}>
+                {/* <ul style={{ margin: 0 }}>
                   {record.arrayFields.map(({ key, type, description }) => (
                     <li key={key}>
                       {type} - {key} ({description})
                     </li>
                   ))}
-                </ul>
+                </ul> */}
+              </div>
+            );
+          } else if (record.arrayType === "object") {
+            return (
+              <div>
+                <div>{`${record["x-message"] || ""} - ${text}`}</div>
+                <div>{`[ ${record.arrayType} - ${record.description} ]`}</div>
+                {/* <ul style={{ margin: 0 }}>
+                  {record.arrayItemFields.map(({ key, type, description }) => (
+                    <li key={key}>
+                      {type} - {key} ({description})
+                    </li>
+                  ))}
+                </ul> */}
               </div>
             );
           } else {
