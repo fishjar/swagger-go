@@ -46,7 +46,7 @@ function SubField({ value: subFields = [], onChange }, ref) {
           <InputGroup compact>
             <Select
               placeholder="Type"
-              defaultValue={item.type}
+              value={item.type}
               style={{ width: "20%" }}
               onChange={value => {
                 handleItemChange(index, "type", value);
@@ -61,7 +61,7 @@ function SubField({ value: subFields = [], onChange }, ref) {
             <Input
               style={{ width: "40%" }}
               placeholder="Key"
-              defaultValue={item.key}
+              value={item.key}
               onChange={e => {
                 handleItemChange(index, "key", e.target.value);
               }}
@@ -69,7 +69,7 @@ function SubField({ value: subFields = [], onChange }, ref) {
             <Input
               style={{ width: "40%" }}
               placeholder="Description"
-              defaultValue={item.description}
+              value={item.description}
               onChange={e => {
                 handleItemChange(index, "description", e.target.value);
               }}

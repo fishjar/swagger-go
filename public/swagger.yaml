@@ -3,7 +3,7 @@ info:
   version: 0.1.0
   title: koa rest app
   description: koa rest boilerplate
-host: 'localhost:8000'
+host: 'localhost:4000'
 basePath: /
 schemes:
   - http
@@ -346,7 +346,6 @@ definitions:
         x-refFieldKey: id
         x-ref: '#/definitions/User'
       user:
-        x-fieldName: "user"
         x-refFieldKey: "id"
         x-description: "用户"
         $ref: "#/definitions/User"

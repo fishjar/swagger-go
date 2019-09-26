@@ -11,7 +11,7 @@ export default function Definition({ models, model, dispatch }) {
    * 将字段对象转为字段列表
    */
   const fields = Object.entries(model.properties || {}).map(([key, field]) => {
-    // 外链模型或者外键
+    // 外链模型
     const [refModel, refFields] = parseRef(
       models,
       field.$ref || field["x-ref"]
@@ -31,7 +31,8 @@ export default function Definition({ models, model, dispatch }) {
       field.items && (field.items.$ref ? "ref" : field.items.type);
     const arrayRef = field.items && field.items.$ref;
     const [arrayModel, arrayFields] = parseRef(models, arrayRef);
-    const arrayItemFields = getModelProps(field.items);
+    const arrayItemFields =
+      arrayType === "object" ? getModelProps(field.items) : [];
 
     // 枚举类型
     const enumItems = Array.isArray(field.enum)
@@ -164,28 +165,29 @@ export default function Definition({ models, model, dispatch }) {
               </ul> */}
             </div>
           );
-        } else if (record["x-foreignKey"]) {
-          // return (
-          //   <div>
-          //     <div>{`- ${record.description || ""}`}</div>
-          //     <div>{`- ${record.refModel.description} ( ${record.refModel.key} )`}</div>
-          //     <ul style={{ margin: 0 }}>
-          //       {record.refFields.map(({ key, type, description }) =>
-          //         key === record["x-refFieldKey"] ? (
-          //           <li key={key} style={{ color: "#52c41a" }}>
-          //             {type} - {key} ({description})
-          //           </li>
-          //         ) : (
-          //           <li key={key}>
-          //             {type} - {key} ({description})
-          //           </li>
-          //         )
-          //       )}
-          //     </ul>
-          //   </div>
-          // );
-          return `外键 - ${text || ""}`;
-        } else if (record.isEnum) {
+        } /* else if (record["x-foreignKey"]) {
+          return (
+            <div>
+              <div>{`- ${record.description || ""}`}</div>
+              <div>{`- ${record.refModel.description} ( ${record.refModel.key} )`}</div>
+              <ul style={{ margin: 0 }}>
+                {record.refFields.map(({ key, type, description }) =>
+                  key === record["x-refFieldKey"] ? (
+                    <li key={key} style={{ color: "#52c41a" }}>
+                      {type} - {key} ({description})
+                    </li>
+                  ) : (
+                    <li key={key}>
+                      {type} - {key} ({description})
+                    </li>
+                  )
+                )}
+              </ul>
+            </div>
+          );
+        } */ else if (
+          record.isEnum
+        ) {
           return (
             <div>
               <div>{`${record["x-message"] || ""} - ${

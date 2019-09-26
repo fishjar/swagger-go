@@ -370,16 +370,6 @@ function FieldEdit({
   }
 
   /**
-   * 数组类型时选择数据模型时
-   * 获取模型字段
-   * @param {String} value
-   */
-  function handleArrayItemModelChange(ref) {
-    const [_, newArrayFields] = parseRef(models, ref);
-    setFieldsValue({ arrayItemFields: newArrayFields });
-  }
-
-  /**
    * 选择外键
    * @param {*} key
    */
@@ -424,6 +414,22 @@ function FieldEdit({
               ],
             })(<Input placeholder="fieldKey" disabled={formMode === "edit"} />)}
           </Form.Item>
+
+          <Form.Item label="数据库字段名" hasFeedback>
+            {getFieldDecorator("x-fieldName", {
+              initialValue: field["x-fieldName"] || field.key,
+              rules: [
+                {
+                  required: true,
+                  message: "请填写!",
+                },
+                {
+                  validator: handleFieldNameValidator,
+                },
+              ],
+            })(<Input placeholder="field_name" />)}
+          </Form.Item>
+
           <Form.Item label="外链模型" required>
             {getFieldDecorator("isRef", {
               initialValue: field.isRef,
@@ -496,23 +502,15 @@ function FieldEdit({
                   ],
                 })(<RefFields refFields={refFields} />)}
               </Form.Item>
+              <Form.Item label="其他选项">
+                {getFieldDecorator("isRequired", {
+                  initialValue: field.isRequired,
+                  valuePropName: "checked",
+                })(<Checkbox>不能为空</Checkbox>)}
+              </Form.Item>
             </Fragment>
           ) : (
             <Fragment>
-              <Form.Item label="数据库字段名" hasFeedback>
-                {getFieldDecorator("x-fieldName", {
-                  initialValue: field["x-fieldName"] || field.key,
-                  rules: [
-                    {
-                      required: true,
-                      message: "请填写!",
-                    },
-                    {
-                      validator: handleFieldNameValidator,
-                    },
-                  ],
-                })(<Input placeholder="field_name" />)}
-              </Form.Item>
               <Form.Item label="键属性">
                 <Form.Item
                   style={{
@@ -849,39 +847,16 @@ function FieldEdit({
                     </Fragment>
                   )}
                   {getFieldValue("arrayType") === "object" && (
-                    <Fragment>
-                      <Form.Item label="快速填充数据">
-                        <Select
-                          placeholder="请选择"
-                          onChange={handleArrayItemModelChange}
-                        >
-                          {models.map(({ key, description }) => (
-                            <Option
-                              value={`#/definitions/${key}`}
-                              key={key}
-                              // disabled={model.key === key}
-                            >
-                              <span>{`#/definitions/${key}`}</span>
-                              <span
-                                style={{
-                                  color: "#999",
-                                }}
-                              >{` (${description})`}</span>
-                            </Option>
-                          ))}
-                        </Select>
-                      </Form.Item>
-                      <Form.Item label="子字段选项">
-                        {getFieldDecorator("arrayItemFields", {
-                          initialValue: field.arrayItemFields,
-                          // rules: [
-                          //   {
-                          //     validator: handleSubFieldsValidator,
-                          //   },
-                          // ],
-                        })(<SubFields />)}
-                      </Form.Item>
-                    </Fragment>
+                    <Form.Item label="子字段选项">
+                      {getFieldDecorator("arrayItemFields", {
+                        initialValue: field.arrayItemFields,
+                        // rules: [
+                        //   {
+                        //     validator: handleSubFieldsValidator,
+                        //   },
+                        // ],
+                      })(<SubFields />)}
+                    </Form.Item>
                   )}
                 </Fragment>
               )}

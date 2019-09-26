@@ -158,16 +158,35 @@ export default function definitionsToPaths(definitions) {
           summary: `更新多个${modelName}`,
           description: `更新多个${modelName}...`,
           parameters: [
+            // {
+            //   in: "body",
+            //   name: "body",
+            //   description: "body参数",
+            //   schema: {
+            //     type: "array",
+            //     items: {
+            //       $ref: `#/definitions/${modelKey}`,
+            //     },
+            //   },
+            // },
             {
               in: "body",
               name: "body",
-              description: "body参数",
+              description: "模型参数",
+              required: true,
               schema: {
-                type: "array",
-                items: {
-                  $ref: `#/definitions/${modelKey}`,
-                },
+                $ref: `#/definitions/${modelKey}`,
               },
+            },
+            {
+              in: "query",
+              name: "id",
+              required: true,
+              type: "array",
+              description: "ID",
+              items: { type: "string" },
+              collectionFormat: "multi",
+              example: ["1", "2"],
             },
           ],
           responses: {
@@ -187,16 +206,26 @@ export default function definitionsToPaths(definitions) {
           summary: `删除多个${modelName}`,
           description: `删除多个${modelName}...`,
           parameters: [
+            // {
+            //   in: "body",
+            //   name: "body",
+            //   description: "body参数",
+            //   schema: {
+            //     type: "object",
+            //     example: {
+            //       id: ["1", "2"],
+            //     },
+            //   },
+            // },
             {
-              in: "body",
-              name: "body",
-              description: "body参数",
-              schema: {
-                type: "object",
-                example: {
-                  id: ["1", "2"],
-                },
-              },
+              in: "query",
+              name: "id",
+              required: true,
+              type: "array",
+              description: "ID",
+              items: { type: "string" },
+              collectionFormat: "multi",
+              example: ["1", "2"],
             },
           ],
           responses: {
