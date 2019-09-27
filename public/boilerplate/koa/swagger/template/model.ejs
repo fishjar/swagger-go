@@ -18,7 +18,7 @@ import <%- refModelKey -%> from "./<%- refModelKey -%>";
 export default sequelize.define(
   "<%- modelKeyLower -%>",
   {
-    <% Object.entries(model.properties).forEach(([fieldKey,field])=>{ -%>
+    <% Object.entries(model.properties).filter(([_,field])=>!(field.$ref||(field.type==="array"&&(!field.items||field.items.$ref)))).forEach(([fieldKey,field])=>{ -%>
       <%- fieldKey -%>: {
         field: "<%- field['x-fieldName'] || fieldKey -%>",
         <% if (field.description) { -%>
