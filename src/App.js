@@ -9,6 +9,7 @@ import Preview from "./components/Preview";
 import Readme from "./components/Readme";
 import SecurityDefinitions from "./components/SecurityDefinitions";
 import Associations from "./components/Associations";
+import Paths from "./components/Paths";
 import GeneralInfoEdit from "./components/forms/GeneralInfoEdit";
 
 import {
@@ -263,7 +264,7 @@ function App() {
                   <Associations state={state} dispatch={dispatch} />
                 </Panel>
                 <Panel header="Paths" key="paths">
-                  <p>开发中...</p>
+                  <Paths state={state} dispatch={dispatch} />
                 </Panel>
               </Collapse>
             </div>

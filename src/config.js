@@ -161,3 +161,13 @@ export const associationTypes = {
   belongsTo: "targetKey",
   belongsToMany: "otherKey",
 };
+
+export const httpMethods = [
+  "get",
+  "post",
+  "put",
+  "patch",
+  "delete",
+  // "head",
+  // "options",
+];

@@ -23,6 +23,8 @@ security:
 paths:
   /login/account:
     post:
+      tags:
+      - 'default'
       summary: 登录
       description: 登录...
       security: []
@@ -42,6 +44,30 @@ paths:
           description: 登录失败
           schema:
             $ref: '#/definitions/Error'
+  /user/current:
+    get:
+      tags:
+        - 'user'
+      summary: 获取当前用户信息
+      description: 获取当前用户信息...
+      responses:
+        '200':
+          description: 查询成功
+          schema:
+            $ref: '#/definitions/User'
+  /user/menus:
+    get:
+      tags:
+        - 'user'
+      summary: 获取当前用户菜单
+      description: 获取当前用户菜单...
+      responses:
+        '200':
+          description: 查询成功
+          schema:
+            type: 'array'
+            items:
+              $ref: '#/definitions/Menu'
 definitions:
   User:
     type: object
@@ -110,7 +136,7 @@ definitions:
           '2': 女
         x-description: 性别
         description: |
-          "性别"
+          '性别'
             * 0 - 保密
             * 1 - 男
             * 2 - 女
@@ -176,7 +202,7 @@ definitions:
           'NULL': 保密
         x-description: 血型(ABO)
         description: |
-          "血型(ABO)"
+          '血型(ABO)'
             * A - A型
             * B - B型
             * AB - AB型
@@ -346,9 +372,9 @@ definitions:
         x-refFieldKey: id
         x-ref: '#/definitions/User'
       user:
-        x-refFieldKey: "id"
-        x-description: "用户"
-        $ref: "#/definitions/User"
+        x-refFieldKey: 'id'
+        x-description: '用户'
+        $ref: '#/definitions/User'
       authType:
         type: string
         format: string
@@ -371,7 +397,7 @@ definitions:
           weibo: 微博
         x-description: 鉴权类型
         description: |
-          "鉴权类型"
+          '鉴权类型'
             * account - 帐号
             * email - 邮箱
             * phone - 手机
@@ -552,6 +578,7 @@ definitions:
         x-showSorter: true
     example:
       id: fc3c286e-78b3-490b-be6a-79a6069fd68e
+      parentId: null
       name: dashboard
       path: /dashboard
       icon: dashboard
@@ -610,10 +637,10 @@ definitions:
         x-refFieldKey: id
         x-ref: '#/definitions/User'
       leader:
-        x-fieldName: "leader"
-        x-refFieldKey: "id"
-        x-description: "队长"
-        $ref: "#/definitions/User"
+        x-fieldName: 'leader'
+        x-refFieldKey: 'id'
+        x-description: '队长'
+        $ref: '#/definitions/User'
       menbers:
         type: array
         format: array
@@ -703,18 +730,37 @@ definitions:
     type: object
     description: 登录返回数据模型
     required:
+      - status
+      - type
       - message
       - authtoken
+      - currentAuthority
     properties:
+      status:
+        type: string
+        description: 状态
+      type:
+        type: string
+        description: 登录类型
       message:
         type: string
         description: 描述
-      authtoken:
+      authToken:
         type: string
         description: token
+      currentAuthority:
+        type: array
+        items:
+          type: string
     example:
+      status: ok
+      type: account
       message: 登录成功
       authToken: abc...
+      currentAuthority:
+        - admin
+        - user
+        - guest
   Error:
     type: object
     description: 错误模型
