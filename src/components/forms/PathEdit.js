@@ -1,5 +1,13 @@
 import React, { Fragment, useState } from "react";
-import { formItemLayout, associationTypes, httpMethods } from "../../config";
+import {
+  formItemLayout,
+  associationTypes,
+  httpMethods,
+  apiOptions,
+} from "../../config";
+import { filterObjectItemsNew } from "../../utils";
+import SecuritySelect from "./SecuritySelect";
+import PathResponses from "./PathResponses";
 import {
   Form,
   Input,
@@ -10,6 +18,7 @@ import {
   Drawer,
   Select,
   Switch,
+  message,
 } from "antd";
 const { Option } = Select;
 
@@ -74,24 +83,49 @@ function PathEdit({
         return;
       }
       console.log(values);
-      // updateData(values);
-      // setVisible(false);
+      updateData(values);
     });
   }
 
-  function updateData(values) {
-    const associations = state["x-associations"];
-    if (formMode === "edit") {
-      associations[dataIndex] = values;
-    } else if (formMode === "create") {
-      associations.push(values);
+  function updateData({ path, method, ...values }) {
+    const paths = state["paths"];
+    if (formMode === "create") {
+      if (paths[path] && paths[path][method]) {
+        message.error(`[${method}] ${path} 已存在`);
+        return;
+      }
+
+      const modelPaths = [];
+      models.forEach(model => {
+        (model["x-apis"] || []).forEach(apiKey => {
+          const api = apiOptions.find(item => item.key === apiKey);
+          modelPaths.push({
+            path: `/${
+              api.plural
+                ? (model["x-plural"] || "").toLowerCase()
+                : model.key.toLowerCase()
+            }${api.path}`,
+            method: api.method,
+          });
+        });
+      });
+      if (
+        modelPaths.find(item => item.path === path && item.method === method)
+      ) {
+        message.error(`[${method}] ${path} 与已定义的model冲突`);
+        return;
+      }
+
+      if (!paths[path]) {
+        paths[path] = {};
+      }
     }
+    paths[path][method] = filterObjectItemsNew(values);
     dispatch({
       type: "DATA_UPDATE",
-      payload: {
-        "x-associations": [...associations],
-      },
+      payload: { paths: { ...paths } },
     });
+    setVisible(false);
   }
 
   return (
@@ -118,23 +152,13 @@ function PathEdit({
           <Form.Item label="Path" hasFeedback>
             {getFieldDecorator(`path`, {
               initialValue: data.path,
-              rules: [
-                {
-                  required: true,
-                  message: "请填写!",
-                },
-              ],
+              rules: [{ required: true, message: "请填写!" }],
             })(<Input placeholder="请填写" disabled={formMode === "edit"} />)}
           </Form.Item>
           <Form.Item label="Method">
             {getFieldDecorator(`method`, {
               initialValue: data.method,
-              rules: [
-                {
-                  required: true,
-                  message: "请选择!",
-                },
-              ],
+              rules: [{ required: true, message: "请选择!" }],
             })(
               <Select placeholder="请选择" disabled={formMode === "edit"}>
                 {httpMethods.map((item, index) => (
@@ -158,50 +182,34 @@ function PathEdit({
               </Select>
             )}
           </Form.Item>
-
-          {/* <Form.Item label="Source">
-            {getFieldDecorator("source", {
-              initialValue: association.source,
-              rules: [
-                {
-                  required: true,
-                  message: "请选择!",
-                },
-              ],
+          <Form.Item label="Security">
+            {getFieldDecorator(`security`, {
+              initialValue: data.security,
             })(
-              <Select placeholder="请选择">
-                {models.map(({ key, description }) => (
-                  <Option value={key} key={key}>
-                    <span>{`#/definitions/${key}`}</span>
-                    <span
-                      style={{
-                        color: "#999",
-                      }}
-                    >{` (${description})`}</span>
-                  </Option>
-                ))}
-              </Select>
+              <SecuritySelect securityDefinitions={state.securityDefinitions} />
             )}
-          </Form.Item> */}
-          {/* <Form.Item label="Type">
-            {getFieldDecorator(`type`, {
-              initialValue: association.type,
-              rules: [
-                {
-                  required: true,
-                  message: "请选择!",
-                },
-              ],
-            })(
-              <Radio.Group>
-                {Object.keys(associationTypes).map(key => (
-                  <Radio value={key} key={key}>
-                    {key}
-                  </Radio>
-                ))}
-              </Radio.Group>
-            )}
-          </Form.Item> */}
+          </Form.Item>
+          <Form.Item label="Summary" hasFeedback>
+            {getFieldDecorator(`summary`, {
+              initialValue: data.summary,
+              rules: [{ required: true, message: "请填写!" }],
+            })(<Input placeholder="请填写" />)}
+          </Form.Item>
+          <Form.Item label="Description" hasFeedback>
+            {getFieldDecorator(`description`, {
+              initialValue: data.description,
+            })(<Input placeholder="请填写" />)}
+          </Form.Item>
+          <Form.Item label="OperationId" hasFeedback>
+            {getFieldDecorator(`operationId`, {
+              initialValue: data.operationId,
+            })(<Input placeholder="请填写" />)}
+          </Form.Item>
+          <Form.Item label="Responses">
+            {getFieldDecorator(`responses`, {
+              initialValue: data.responses,
+            })(<PathResponses state={state} />)}
+          </Form.Item>
         </Form>
         <div
           style={{

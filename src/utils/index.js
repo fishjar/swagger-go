@@ -330,7 +330,7 @@ export const hasDuplication = a => a.length !== [...new Set(a)].length;
 
 /**
  * 过滤对象
- * 返回对象和参数是同一个
+ * 直接对参数对象操作
  * @param {Object} o
  * @param {*} value
  */
@@ -341,6 +341,25 @@ export const filterObjectItems = (o, value = undefined) => {
         delete o[k];
       }
     });
+};
+
+/**
+ * 过滤对象
+ * 返回新对象
+ * @param {Object} o
+ * @param {*} value
+ */
+export const filterObjectItemsNew = (o, value = undefined) => {
+  if (getType(o) !== "object") {
+    return o;
+  }
+  const copy = { ...o };
+  Object.entries(copy).forEach(([k, v]) => {
+    if (v === value) {
+      delete copy[k];
+    }
+  });
+  return copy;
 };
 
 /**

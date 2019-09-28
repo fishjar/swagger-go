@@ -11,7 +11,7 @@ export default function Paths({ state, dispatch }) {
   const paths = [];
   Object.entries(state.paths || {}).forEach(([path, pathItem]) => {
     Object.entries(pathItem).forEach(([method, methodItem]) => {
-      allTags.push(...(methodItem.tags || "default"));
+      allTags.push(...(methodItem.tags || ["default"]));
       !methodItem["x-auto"] &&
         paths.push({
           ...methodItem,
@@ -80,11 +80,12 @@ export default function Paths({ state, dispatch }) {
       dataIndex: "parameters",
       render: val =>
         (val || []).map((item, idx) => (
-          <Badge
-            key={idx}
-            status={item.required ? "success" : "default"}
-            text={`[${item.in}] ${item.name} (${item.description})`}
-          />
+          <div key={idx}>
+            <Badge
+              status={item.required ? "success" : "default"}
+              text={`[${item.in}] ${item.name} (${item.description})`}
+            />
+          </div>
         )),
     },
     {

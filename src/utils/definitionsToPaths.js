@@ -21,6 +21,7 @@ export default function definitionsToPaths(definitions) {
         paths[`/${_name}`].get = {
           "x-auto": true,
           tags: [_name],
+          security: [{ JWT: [] }],
           summary: `根据条件查找单个${modelName}`,
           description: `根据条件查找单个${modelName}...`,
           parameters: [
@@ -50,6 +51,7 @@ export default function definitionsToPaths(definitions) {
         paths[`/${_name}`].post = {
           "x-auto": true,
           tags: [_name],
+          security: [{ JWT: [] }],
           summary: `查找或创建单个${modelName}`,
           description: `查找或创建单个${modelName}...`,
           parameters: [
@@ -82,6 +84,7 @@ export default function definitionsToPaths(definitions) {
         paths[`/${_plural}`].get = {
           "x-auto": true,
           tags: [_name],
+          security: [{ JWT: [] }],
           summary: `查询多个${modelName}`,
           description: `查询多个${modelName}...`,
           parameters: [
@@ -136,6 +139,7 @@ export default function definitionsToPaths(definitions) {
         paths[`/${_plural}`].post = {
           "x-auto": true,
           tags: [_name],
+          security: [{ JWT: [] }],
           summary: `创建单个${modelName}`,
           description: `创建单个${modelName}...`,
           parameters: [
@@ -165,6 +169,7 @@ export default function definitionsToPaths(definitions) {
         paths[`/${_plural}`].patch = {
           "x-auto": true,
           tags: [_name],
+          security: [{ JWT: [] }],
           summary: `更新多个${modelName}`,
           description: `更新多个${modelName}...`,
           parameters: [
@@ -214,6 +219,7 @@ export default function definitionsToPaths(definitions) {
         paths[`/${_plural}`].delete = {
           "x-auto": true,
           tags: [_name],
+          security: [{ JWT: [] }],
           summary: `删除多个${modelName}`,
           description: `删除多个${modelName}...`,
           parameters: [
@@ -254,6 +260,7 @@ export default function definitionsToPaths(definitions) {
         paths[`/${_plural}/:id`].get = {
           "x-auto": true,
           tags: [_name],
+          security: [{ JWT: [] }],
           summary: `查询单个${modelName}`,
           description: `查询单个${modelName}..`,
           parameters: [
@@ -284,6 +291,7 @@ export default function definitionsToPaths(definitions) {
         paths[`/${_plural}/:id`].patch = {
           "x-auto": true,
           tags: [_name],
+          security: [{ JWT: [] }],
           summary: `修改单个${modelName}`,
           description: `修改单个${modelName}..`,
           parameters: [
@@ -320,6 +328,7 @@ export default function definitionsToPaths(definitions) {
         paths[`/${_plural}/:id`].delete = {
           "x-auto": true,
           tags: [_name],
+          security: [{ JWT: [] }],
           summary: `删除单个${modelName}`,
           description: `删除单个${modelName}..`,
           parameters: [
@@ -347,6 +356,7 @@ export default function definitionsToPaths(definitions) {
         paths[`/${_plural}/multiple`].post = {
           "x-auto": true,
           tags: [_name],
+          security: [{ JWT: [] }],
           summary: `创建多个${modelName}`,
           description: `创建多个${modelName}...`,
           parameters: [
