@@ -171,3 +171,12 @@ export const httpMethods = [
   // "head",
   // "options",
 ];
+
+export const parameterTypes = [
+  "path",
+  "query",
+  "body",
+  "header",
+  "cookie",
+  "formData",
+];

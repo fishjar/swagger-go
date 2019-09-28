@@ -8,6 +8,7 @@ import {
 import { filterObjectItemsNew } from "../../utils";
 import SecuritySelect from "./SecuritySelect";
 import PathResponses from "./PathResponses";
+import PathParameters from "./PathParameters";
 import {
   Form,
   Input,
@@ -204,6 +205,11 @@ function PathEdit({
             {getFieldDecorator(`operationId`, {
               initialValue: data.operationId,
             })(<Input placeholder="请填写" />)}
+          </Form.Item>
+          <Form.Item label="Parameters">
+            {getFieldDecorator(`parameters`, {
+              initialValue: data.parameters,
+            })(<PathParameters state={state} />)}
           </Form.Item>
           <Form.Item label="Responses">
             {getFieldDecorator(`responses`, {
