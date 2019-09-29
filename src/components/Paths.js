@@ -7,11 +7,11 @@ export default function Paths({ state, dispatch }) {
   /**
    * 计算值
    */
-  const allTags = [];
+  // const allTags = [];
   const paths = [];
   Object.entries(state.paths || {}).forEach(([path, pathItem]) => {
     Object.entries(pathItem).forEach(([method, methodItem]) => {
-      allTags.push(...(methodItem.tags || ["default"]));
+      // allTags.push(...(methodItem.tags || ["default"]));
       !methodItem["x-auto"] &&
         paths.push({
           ...methodItem,
@@ -21,22 +21,20 @@ export default function Paths({ state, dispatch }) {
         });
     });
   });
-  const tagsList = [...new Set(allTags)];
+  const tagsList = (state.tags || []).map(item => item.name);
 
   /**
    * 删除
-   * @param {Number} index
+   * @param {string} path
+   * @param {string} method
    */
-  function handleAssociationRemove(index) {
-    console.log(index);
-    // const associations = state["x-associations"];
-    // associations.splice(index);
-    // dispatch({
-    //   type: "DATA_UPDATE",
-    //   payload: {
-    //     "x-associations": [...associations],
-    //   },
-    // });
+  function handlePathRemove(path, method) {
+    const paths = { ...state.paths };
+    delete paths[path][method];
+    dispatch({
+      type: "DATA_UPDATE",
+      payload: { paths },
+    });
   }
 
   const columns = [
@@ -117,7 +115,7 @@ export default function Paths({ state, dispatch }) {
           <Icon
             type="close"
             onClick={() => {
-              handleAssociationRemove(record.key);
+              handlePathRemove(record.path, record.method);
             }}
           />
         </span>

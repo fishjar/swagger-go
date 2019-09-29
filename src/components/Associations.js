@@ -17,13 +17,12 @@ export default function Associations({ state, dispatch }) {
    * @param {Number} index
    */
   function handleAssociationRemove(index) {
-    console.log(index);
-    const associations = state["x-associations"];
-    associations.splice(index);
+    const newAssociations = [...associations];
+    newAssociations.splice(index, 1);
     dispatch({
       type: "DATA_UPDATE",
       payload: {
-        "x-associations": [...associations],
+        "x-associations": [...newAssociations],
       },
     });
   }

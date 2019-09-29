@@ -1,6 +1,16 @@
 import React, { Fragment, useState } from "react";
 import { formItemLayout, apiOptions } from "../../config";
-import { Form, Input, Checkbox, Button, Drawer, Switch, Row } from "antd";
+import {
+  Form,
+  Input,
+  Checkbox,
+  Button,
+  Drawer,
+  Switch,
+  Row,
+  Select,
+} from "antd";
+const { Option } = Select;
 
 function ModelEdit({
   children,
@@ -10,6 +20,7 @@ function ModelEdit({
   models,
   model,
   form,
+  tagsList = [],
 }) {
   const { getFieldDecorator, getFieldValue, resetFields } = form;
 
@@ -151,6 +162,23 @@ function ModelEdit({
                     },
                   ],
                 })(<Input />)}
+              </Form.Item>
+              <Form.Item label="Tags">
+                {getFieldDecorator("x-tags", {
+                  initialValue: model["x-tags"],
+                })(
+                  <Select
+                    mode="tags"
+                    tokenSeparators={[","]}
+                    placeholder="请选择"
+                  >
+                    {tagsList.map((item, index) => (
+                      <Option key={index} value={item}>
+                        {item}
+                      </Option>
+                    ))}
+                  </Select>
+                )}
               </Form.Item>
               <Form.Item label="接口选项">
                 {getFieldDecorator("x-apis", {

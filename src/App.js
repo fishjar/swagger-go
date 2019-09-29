@@ -9,6 +9,7 @@ import Preview from "./components/Preview";
 import Readme from "./components/Readme";
 import SecurityDefinitions from "./components/SecurityDefinitions";
 import Associations from "./components/Associations";
+import Tags from "./components/Tags";
 import Paths from "./components/Paths";
 import GeneralInfoEdit from "./components/forms/GeneralInfoEdit";
 
@@ -256,6 +257,9 @@ function App() {
                 </Panel>
                 <Panel header="SecurityDefinitions" key="security">
                   <SecurityDefinitions state={state} dispatch={dispatch} />
+                </Panel>
+                <Panel header="Tags" key="tags">
+                  <Tags state={state} dispatch={dispatch} />
                 </Panel>
                 <Panel header="Definitions" key="definitions">
                   <Definitions state={state} dispatch={dispatch} />

@@ -5,12 +5,7 @@ import Definition from "./Definition";
 import ModelEdit from "./forms/ModelEdit";
 import ModelCopy from "./forms/ModelCopy";
 
-import {
-  Icon,
-  Button,
-  Collapse,
-  Badge,
-} from "antd";
+import { Icon, Button, Collapse, Badge } from "antd";
 const { Panel } = Collapse;
 
 export default function Definitions({ state, dispatch }) {
@@ -22,6 +17,7 @@ export default function Definitions({ state, dispatch }) {
     ...values,
     key,
   }));
+  const tagsList = (state.tags || []).map(item => item.name);
 
   /**
    * 删除模型
@@ -45,7 +41,9 @@ export default function Definitions({ state, dispatch }) {
                 model["x-isModel"]
                   ? `${model.key} [${model["x-plural"]}][${
                       model["x-tableName"]
-                    }] (${model.description})`
+                    }] (${model.description})[${(model["x-tags"] || []).join(
+                      ","
+                    )}]`
                   : `${model.key} (${model.description || ""})`
               }
               key={model.key}
@@ -83,6 +81,7 @@ export default function Definitions({ state, dispatch }) {
                     models={models}
                     model={model}
                     dispatch={dispatch}
+                    tagsList={tagsList}
                   >
                     <Icon type="edit" style={{ marginRight: 12 }} />
                   </ModelEdit>
@@ -119,6 +118,7 @@ export default function Definitions({ state, dispatch }) {
         models={models}
         model={{}}
         dispatch={dispatch}
+        tagsList={tagsList}
       >
         <Button
           style={{

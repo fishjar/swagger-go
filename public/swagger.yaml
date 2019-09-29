@@ -18,6 +18,37 @@ securityDefinitions:
     type: apiKey
     name: Authorization
     in: header
+tags:
+  - name: 'default'
+    description: 'default description'
+    externalDocs:
+      description: 'Find out more'
+      url: 'http://swagger.io'
+  - name: 'user'
+    description: 'user description'
+    externalDocs:
+      description: 'Find out more'
+      url: 'http://swagger.io'
+  - name: 'auth'
+    description: 'auth description'
+    externalDocs:
+      description: 'Find out more'
+      url: 'http://swagger.io'
+  - name: 'role'
+    description: 'role description'
+    externalDocs:
+      description: 'Find out more'
+      url: 'http://swagger.io'
+  - name: 'menu'
+    description: 'menu description'
+    externalDocs:
+      description: 'Find out more'
+      url: 'http://swagger.io'
+  - name: 'group'
+    description: 'group description'
+    externalDocs:
+      description: 'Find out more'
+      url: 'http://swagger.io'
 paths:
   /login/account:
     post:
@@ -79,6 +110,8 @@ definitions:
     x-tableName: user
     x-underscored: true
     x-paranoid: true
+    x-tags:
+      - user
     x-apis:
       - findAndCountAll
       - findByPk
@@ -339,6 +372,8 @@ definitions:
     x-tableName: auth
     x-underscored: true
     x-paranoid: true
+    x-tags:
+      - auth
     x-apis:
       - findAndCountAll
       - findByPk
@@ -459,6 +494,8 @@ definitions:
     x-tableName: role
     x-underscored: true
     x-paranoid: true
+    x-tags:
+      - role
     x-apis:
       - findAndCountAll
       - findByPk
@@ -512,6 +549,8 @@ definitions:
     x-tableName: menu
     x-underscored: true
     x-paranoid: true
+    x-tags:
+      - menu
     x-apis:
       - findAndCountAll
       - findByPk
@@ -593,6 +632,8 @@ definitions:
     x-tableName: group
     x-underscored: true
     x-paranoid: true
+    x-tags:
+      - group
     x-apis:
       - findAndCountAll
       - findByPk
@@ -662,8 +703,18 @@ definitions:
     x-tableName: usergroup
     x-underscored: true
     x-paranoid: false
+    x-tags:
+      - user
+      - group
     x-apis:
       - findAndCountAll
+      - findByPk
+      - singleCreate
+      - bulkCreate
+      - bulkUpdate
+      - updateByPk
+      - bulkDestroy
+      - destroyByPk
     required:
       - id
       - userId

@@ -40,6 +40,8 @@ const dataReducer = (state, action) => {
         securityDefinitions: {},
         paths: {},
         definitions: {},
+        tags: [],
+        "x-associations": [],
       };
     case "DATA_RESET":
       return {
