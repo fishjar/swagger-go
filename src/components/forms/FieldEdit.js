@@ -1131,17 +1131,50 @@ function FieldEdit({
                       </Form.Item>
                     </Fragment>
                   );
-                } else if (
-                  getFieldValue("type") === "object" ||
-                  getFieldValue("type") === "array"
-                ) {
+                } else if (getFieldValue("type") === "object") {
+                  const subFields = getFieldValue("subFields");
                   return (
                     <Fragment>
-                      <Form.Item label="默认值">
+                      {/* <Form.Item label="默认值">
+                        {subFields.map((item, index) => (
+                          <Form.Item key={index}>
+                            {getFieldDecorator(`default.${item.key}`, {
+                              initialValue:
+                                field.default && field.default[item.key],
+                            })(
+                              <Input
+                                addonBefore={item.key}
+                                placeholder={item.description}
+                              />
+                            )}
+                          </Form.Item>
+                        ))}
+                      </Form.Item> */}
+                      <Form.Item label="示例值">
+                        {subFields.map((item, index) => (
+                          <Form.Item key={index}>
+                            {getFieldDecorator(`example.${item.key}`, {
+                              initialValue:
+                                field.example && field.example[item.key],
+                            })(
+                              <Input
+                                addonBefore={item.key}
+                                placeholder={item.description}
+                              />
+                            )}
+                          </Form.Item>
+                        ))}
+                      </Form.Item>
+                    </Fragment>
+                  );
+                } else if (getFieldValue("type") === "array") {
+                  return (
+                    <Fragment>
+                      {/* <Form.Item label="默认值">
                         {getFieldDecorator(`default`, {
                           initialValue: field.default,
                         })(<JSONEdit />)}
-                      </Form.Item>
+                      </Form.Item> */}
                       <Form.Item label="示例值">
                         {getFieldDecorator(`example`, {
                           initialValue: field.example,

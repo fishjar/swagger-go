@@ -1,8 +1,8 @@
 swagger: '2.0'
 info:
   version: 0.1.0
-  title: koa rest app
-  description: koa rest boilerplate
+  title: rest app
+  description: rest boilerplate
 host: 'localhost:4000'
 basePath: /
 schemes:
