@@ -1,10 +1,13 @@
 // 判断是否开发环境
 const isDev = require("electron-is-dev");
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, shell } = require("electron");
+const { app, BrowserWindow, shell, Menu } = require("electron");
 const path = require("path");
 const os = require("os");
 const URL = require("url").URL;
+
+// 去掉默认菜单
+Menu.setApplicationMenu(null)
 
 // ipc事件监听
 require("./ipc");
@@ -18,8 +21,8 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 960,
     height: 600,
-    minWidth: 960,
-    minHeight: 450,
+    minWidth: 720,
+    minHeight: 420,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
