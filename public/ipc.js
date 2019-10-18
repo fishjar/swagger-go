@@ -236,6 +236,7 @@ ipcMain.on(
       removeFiles = [],
       boilerplateLanguage,
       templateEngine,
+      modelFilesCase = "default",
     } = swaggerConfig;
 
     /**
@@ -355,7 +356,15 @@ ipcMain.on(
         modelKeys.forEach(key => {
           modelFiles.forEach(item => {
             const inFile = path.join(tmpDir, item[0]);
-            const outFile = path.join(tmpDir, item[1].replace("*", key));
+            let pathKey = key;
+            if (modelFilesCase === "lower") {
+              pathKey = pathKey.toLowerCase();
+            } else if (modelFilesCase === "plural") {
+              pathKey = definitions[key]["x-plural"];
+            } else if (modelFilesCase === "pluralLower") {
+              pathKey = definitions[key]["x-plural"].toLowerCase();
+            }
+            const outFile = path.join(tmpDir, item[1].replace("*", pathKey));
             tasks.push(
               doPromise(inFile, outFile, {
                 modelKey: key,

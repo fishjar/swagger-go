@@ -81,6 +81,7 @@
     ["swagger/template/model.ejs", "src/model/*.js"],
     ["swagger/template/handler.ejs", "src/handler/*.js"]
   ],
+  "modelFilesCase": "pluralLower",
   "replaceFiles": [["swagger/replace/initData.js", "src/utils/initData.js"]],
   "removeFiles": ["swagger/swagger.yaml"]
 }
@@ -92,7 +93,8 @@
 "boilerplateLanguage"       # 项目使用的开发语言
 "templateEngine"            # 使用的模板引擎
 "globalFiles"               # 全部模型文件列表，对应一个文件
-"modelFiles"                # 独立模型文件列表，对应多个（模型）文件，星号（*）会被模型名称代替
+"modelFiles"                # 独立模型文件列表，对应多个（模型）文件，默认星号（*）会被模型名称代替
+"modelFilesCase"            # path的替换形式，可选值：default|lower|plural|pluralLower
 "replaceFiles"              # 需替换的文件列表
 "removeFiles"               # 将删除的文件列表
 ```
