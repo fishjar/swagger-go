@@ -11,5 +11,6 @@
     ["swagger/template/handler.ejs", "src/handler/*.js"]
   ],
   "replaceFiles": [["swagger/replace/initData.js", "src/utils/initData.js"]],
+  "modelReplaceFiles": [],
   "removeFiles": ["swagger/swagger.yaml"]
 }

@@ -74,6 +74,7 @@ function BoilerplateUpdate({ showUpdate, setShowUpdate, form }) {
         "boilerplate"
       );
       message.success("更新成功!");
+      // handleHide();
     } catch (err) {
       console.log(err);
       message.error(err.message || "更新失败!");

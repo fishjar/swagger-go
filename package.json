@@ -1,6 +1,6 @@
 {
   "name": "swagger-go",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "通用、易用、强大、跨平台的可视化 Swagger 文档编辑及前后端代码生成工具。",
   "author": "Gabe Yuan <yugang2002@gmail.com>",
   "license": "MIT",
@@ -41,7 +41,7 @@
     "icon-maker": "./node_modules/.bin/electron-icon-maker --input=./src/icon.png --output=./public"
   },
   "build": {
-    "productName": "Swagger Go",
+    "productName": "swagger-go",
     "appId": "com.swagger.go.app",
     "copyright": "Copyright © 2019 FishJar",
     "linux": {

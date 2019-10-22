@@ -1,0 +1,706 @@
+<%
+
+  const pluralLower = model["x-plural"].toLowerCase();
+  const properties = Object.entries(model.properties).map(([key,obj])=>({...obj,key}));
+  const required = model.required || [];
+  const filters = properties.filter(item=>item["x-showFilter"]);
+
+-%>
+import React, { Component, Fragment, useState, useEffect } from 'react';
+import { PageHeaderWrapper } from '@ant-design/pro-layout';
+import { connect } from 'dva';
+import moment from 'moment';
+import StandardTable from '@/components/StandardTable';
+import DateSelect from '@/components/DateSelect';
+import JSONEdit from '@/components/JSONEdit';
+import ObjectArrayEdit from '@/components/ObjectArrayEdit';
+import ObjectArraySelect from '@/components/ObjectArraySelect';
+import TreeNodeSelect from '@/components/TreeNodeSelect';
+import styles from './style.less';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+import {
+  Badge,
+  Button,
+  Card,
+  Col,
+  DatePicker,
+  Divider,
+  Dropdown,
+  Form,
+  Icon,
+  Input,
+  InputNumber,
+  Menu,
+  Row,
+  Select,
+  message,
+  Popconfirm,
+  Modal,
+  Switch,
+  Tree,
+  TreeSelect,
+} from 'antd';
+
+const modelKey = '<%- pluralLower -%>';
+
+const FormItem = Form.Item;
+const { Option } = Select;
+const { TextArea } = Input;
+const { TreeNode } = Tree;
+
+const formLayout = {
+  labelCol: { span: 5 },
+  wrapperCol: { span: 15 },
+};
+
+const enumMaps = {
+  <% properties.filter(item=>item.enum).forEach(item=>{ -%>
+  <%- item.key -%>: {
+    <% item.enum.forEach(enumKey=>{ -%>
+    <%- enumKey -%>: '<%- item["x-enumMap"][enumKey] -%>',
+    <% }) -%>
+  },
+  <% }) -%>
+};
+
+const ViewModal = ({
+  children,
+  modalTitle = '编辑',
+  modalWith = 720,
+  formData: {
+    <% properties.forEach(item=>{ -%>
+      <% if(item.$ref) { -%>
+        <%- item.key -%> = {},
+      <% } else if(item.type==="array") { -%>
+        <%- item.key -%> = [],
+      <% } else { -%>
+        <%- item.key -%>,
+      <% } -%>
+    <% }) -%>
+    createdAt,
+    updatedAt,
+  },
+}) => {
+  const [visible, setVisible] = useState(false);
+
+  const handleShow = () => {
+    setVisible(true);
+  };
+
+  const handleHide = () => {
+    setVisible(false);
+  };
+
+  return (
+    <span>
+      <span onClick={handleShow}>{children}</span>
+      <Modal
+        destroyOnClose
+        title={modalTitle}
+        width={modalWith}
+        visible={visible}
+        onOk={handleHide}
+        onCancel={handleHide}
+        footer={null}
+      >
+        <Form {...formLayout}>
+          <% properties.filter(item=>!item.$ref).forEach(item=>{ -%>
+            <% if(item.enum) { -%>
+              <FormItem label="<%- item['x-description'] -%>">{enumMaps['<%- item.key -%>'][<%- item.key -%>]}</FormItem>
+            <% } else if(item.type==="boolean") { -%>
+              <FormItem label="<%- item.description -%>">{<%- item.key -%> ? 'YES' : 'NO'}</FormItem>
+            <% } else if(item.type==="object") { -%>
+              <FormItem label="<%- item.description -%>">{<%- item.key -%> && JSON.stringify(<%- item.key -%>)}</FormItem>
+            <% } else if(item.type==="array") { -%>
+              <% if(item.items && item.items.$ref) { -%>
+                <FormItem label="<%- item.description -%>">{<%- item.key -%>.map(item => item.name).join(', ')}</FormItem>
+              <% } else if(item.items && item.items.type==="object") { -%>
+                <FormItem label="<%- item.description -%>">{<%- item.key -%> && JSON.stringify(<%- item.key -%>)}</FormItem>
+              <% } else { -%>
+                <FormItem label="<%- item.description -%>">{<%- item.key -%> && <%- item.key -%>.join(', ')}</FormItem>
+              <% } -%>
+            <% } else if(item.format==="date") { -%>
+              <FormItem label="<%- item.description -%>">{<%- item.key -%> && moment(<%- item.key -%>).format('YYYY-MM-DD')}</FormItem>
+            <% } else if(item.format==="date-time") { -%>
+              <FormItem label="<%- item.description -%>">{<%- item.key -%> && moment(<%- item.key -%>).format('YYYY-MM-DD HH:mm:ss')}</FormItem>
+            <% } else { -%>
+              <FormItem label="<%- item['x-description'] || item.description -%>">{<%- item.key -%>}</FormItem>
+            <% } -%>
+          <% }) -%>
+          <FormItem label="创建时间">{moment(createdAt).format('YYYY-MM-DD HH:mm:ss')}</FormItem>
+          <FormItem label="更新时间">{moment(updatedAt).format('YYYY-MM-DD HH:mm:ss')}</FormItem>
+        </Form>
+      </Modal>
+    </span>
+  );
+};
+
+const EditModal = Form.create()(
+  ({
+    children,
+    modalTitle = '编辑',
+    modalWith = 720,
+    form,
+    formData: {
+      <% properties.forEach(item=>{ -%>
+      <% if(item.$ref) { -%>
+        <%- item.key -%> = {},
+      <% } else if(item.type==="array") { -%>
+        <%- item.key -%> = [],
+      <% } else { -%>
+        <%- item.key -%>,
+      <% } -%>
+      <% }) -%>
+    },
+    dispatch,
+    handleRefresh,
+  }) => {
+    const { getFieldDecorator, setFieldsValue, getFieldValue } = form;
+
+    const [visible, setVisible] = useState(false);
+    const [loading, setLoading] = useState(false);
+    <% properties.filter(item=>item.type==="array"&&item.items&&item.items.$ref).forEach(item=>{
+      const itemKey = `${item.key[0].toUpperCase()}${item.key.slice(1)}`;
+    -%>
+      const [all<%- itemKey -%>, setAll<%- itemKey -%>] = useState([]);
+    <% }) -%>
+
+    const handleShow = () => {
+      setVisible(true);
+      <% properties.filter(item=>item.type==="array"&&item.items&&item.items.$ref).forEach(item=>{
+        const itemKey = `${item.key[0].toUpperCase()}${item.key.slice(1)}`;
+      -%>
+        dispatch({
+          type: '<%- item.key -%>/fetch',
+          payload: { pageSize: 0 },
+          callback: res => {
+            setAll<%- itemKey -%>(res.list);
+          },
+        });
+      <% }) -%>
+    };
+
+    const handleHide = () => {
+      form.resetFields();
+      setVisible(false);
+      setLoading(false);
+    };
+
+    const handleOk = () => {
+      form.validateFields((err, fields) => {
+        if (err) return;
+        console.log(fields);
+        setLoading(true);
+        if (id) {
+          dispatch({
+            type: '<%- pluralLower -%>/update',
+            payload: {
+              id,
+              ...fields,
+              <% properties.filter(item=>item.enum).forEach(item=>{ -%>
+                <%- item.key -%>: fields.<%- item.key -%> || null,
+              <% }) -%>
+            },
+            callback: () => {
+              message.success('更新成功');
+              handleHide();
+            },
+          });
+        } else {
+          dispatch({
+            type: '<%- pluralLower -%>/add',
+            payload: fields,
+            callback: () => {
+              message.success('添加成功');
+              handleHide();
+              handleRefresh();
+            },
+          });
+        }
+      });
+    };
+
+    return (
+      <span>
+        <span onClick={handleShow}>{children}</span>
+        <Modal
+          destroyOnClose
+          title={modalTitle}
+          width={modalWith}
+          visible={visible}
+          onOk={handleOk}
+          onCancel={handleHide}
+          confirmLoading={loading}
+        >
+          <Form {...formLayout} onSubmit={handleOk}>
+            
+            <% properties.filter(item=>!item.$ref && !item['x-primaryKey']).forEach(item=>{ 
+              const itemKey = `${item.key[0].toUpperCase()}${item.key.slice(1)}`;
+            -%>
+              <% if(item.enum) { -%>
+                <FormItem label="<%- item['x-description'] -%>">
+                  {getFieldDecorator('<%- item.key -%>', {
+                    initialValue: <%- item['x-message'] || '请输入' -%>,
+                    rules: [{ 
+                      <%- required.includes(item.key)?'required: true,':'' -%>
+                      message: '<%- item['x-message'] || '请输入' -%>！',
+                    }],
+                  })(
+                    <Select placeholder="<%- item.key -%>" allowClear>
+                      {Object.entries(enumMaps['<%- item.key -%>']).map(([key, val]) => (
+                        <Option key={key} value={Number.isNaN(parseInt(key)) ? key : parseInt(key)}>
+                          {val}
+                        </Option>
+                      ))}
+                    </Select>,
+                  )}
+                </FormItem>
+              <% } else if(item.type==="boolean") { -%>
+                <FormItem label="<%- item.description -%>">
+                  {form.getFieldDecorator('<%- item.key -%>', {
+                    initialValue: <%- item.key -%>,
+                    valuePropName: 'checked',
+                  })(<Switch />)}
+                </FormItem>
+              <% } else if(item.type==="object") { -%>
+                <FormItem label="<%- item.description -%>">
+                  <% Object.entries(item.properties).forEach(([key,val])=>{ -%>
+                    <FormItem>
+                      {getFieldDecorator('<%- item.key -%>.<%- key -%>', {
+                        initialValue: <%- item.key -%> && <%- item.key -%>.<%- key -%>,
+                        rules: [{ 
+                          <%- required.includes(item.key)?'required: true,':'' -%>
+                          message: '<%- item['x-message'] || '请输入' -%>！',
+                        }],
+                      })(<Input addonBefore="<%- val.description -%>" />)}
+                    </FormItem>
+                  <% }) -%>
+                </FormItem>
+              <% } else if(item.type==="array") { -%>
+                <% if(item.items && item.items.$ref) { -%>
+                  <FormItem label="<%- item.description -%>">
+                    {getFieldDecorator('<%- item.key -%>', {
+                      initialValue: <%- item.key -%>,
+                      rules: [{ 
+                        <%- required.includes(item.key)?'required: true,':'' -%>
+                        message: '<%- item['x-message'] || '请选择' -%>！',
+                      }],
+                    })(<ObjectArraySelect listData={all<%- itemKey -%>} />)}
+                  </FormItem>
+                <% } else if (item.items && item.items.type==="object") { -%>
+                  <FormItem label="<%- item.description -%>">
+                    {getFieldDecorator('<%- item.key -%>', {
+                      initialValue: <%- item.key -%>,
+                      rules: [{ 
+                        <%- required.includes(item.key)?'required: true,':'' -%>
+                        message: '<%- item['x-message'] || '请输入' -%>！',
+                      }],
+                    })(
+                      <ObjectArrayEdit
+                        fieldsDefine={{
+                          <% Object.entries(item.items.properties).forEach(([key,val])=>{ -%>
+                            <%- key -%>: { type: '<%- val.type -%>', description: '<%- val.description -%>' },
+                          <% }) -%>
+                        }}
+                        placeholder="<%- item['x-message'] || '请输入' -%>"
+                      />,
+                    )}
+                  </FormItem>
+                <% } else { -%>
+                  <FormItem label="<%- item.description -%>">
+                    {getFieldDecorator('<%- item.key -%>', {
+                      initialValue: <%- item.key -%> || undefined,
+                      rules: [{ 
+                        <%- required.includes(item.key)?'required: true,':'' -%>
+                        message: '<%- item['x-message'] || '请输入' -%>！',
+                      }],
+                    })(
+                      <Select mode="tags" tokenSeparators={[',']} placeholder="<%- item['x-message'] || '请输入' -%>">
+                        {(<%- item.key -%> || []).map((item, index) => (
+                          <Option key={index} value={item}>
+                            {item}
+                          </Option>
+                        ))}
+                      </Select>,
+                    )}
+                  </FormItem>
+                <% } -%>
+              <% } else if(item.format==="date") { -%>
+                <FormItem label="<%- item.description -%>">
+                  {getFieldDecorator('<%- item.key -%>', {
+                    initialValue: <%- item.key -%>,
+                    rules: [{ 
+                      <%- required.includes(item.key)?'required: true,':'' -%>
+                      message: '<%- item['x-message'] || '请选择' -%>！',
+                    }],
+                  })(<DateSelect />)}
+                </FormItem>
+              <% } else if(item.format==="date-time") { -%>
+                <FormItem label="<%- item.description -%>">
+                  {getFieldDecorator('<%- item.key -%>', {
+                    initialValue: <%- item.key -%>,
+                    rules: [{ 
+                      <%- required.includes(item.key)?'required: true,':'' -%>
+                      message: '<%- item['x-message'] || '请选择' -%>！',
+                    }],
+                  })(<DateSelect showTime />)}
+                </FormItem>
+              <% } else if(item.type==="integer"||item.type==="number") { -%>
+                <FormItem label="<%- item.description -%>">
+                  {getFieldDecorator('<%- item.key -%>', {
+                    initialValue: <%- item.key -%>,
+                    rules: [{ 
+                      <%- required.includes(item.key)?'required: true,':'' -%>
+                      message: '<%- item['x-message'] || '请输入' -%>！',
+                    }],
+                  })(<InputNumber <%- item.minimum?`min={${item.minimum}}`:'' -%> <%- item.maximum?`max={${item.maximum}}`:'' -%> placeholder="<%- item['x-message'] || '请输入' -%>" <%- item.type==="integer"?'parser={input => input && ~~input}':'' -%> />)}
+                </FormItem>
+              <% } else { -%>
+                <FormItem label="<%- item.description -%>">
+                  {getFieldDecorator('<%- item.key -%>', {
+                    initialValue: <%- item.key -%>,
+                    rules: [{ 
+                      <%- required.includes(item.key)?'required: true,':'' -%>
+                      message: '<%- item['x-message'] || '请输入' -%>！',
+                      <%- item.minLength?`min: ${item.minLength},`:'' -%>
+                      <%- item.maxLength?`min: ${item.maxLength},`:'' -%>
+                    }],
+                  })(<Input placeholder="<%- item['x-message'] || '请输入' -%>" />)}
+                </FormItem>
+              <% } -%>
+            <% }) -%>
+
+          </Form>
+        </Modal>
+      </span>
+    );
+  },
+);
+
+@connect(({ [modelKey]: data, loading }) => ({
+  data,
+  loading: loading.models[modelKey],
+}))
+@Form.create()
+export default class ModelTable extends Component {
+  state = {
+    selectedRows: [],
+    formValues: {},
+  };
+
+  componentDidMount() {
+    this.fetchData();
+  }
+
+  fetchData = params => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: `${modelKey}/fetch`,
+      payload: params,
+      callback: () => {
+        this.setState({ selectedRows: [] });
+      },
+    });
+  };
+
+  handleStandardTableChange = (pagination, filtersArg, sorter) => {
+    const { formValues } = this.state;
+
+    const params = {
+      pageNum: pagination.current,
+      pageSize: pagination.pageSize,
+      ...formValues,
+      ...filtersArg,
+    };
+
+    if (sorter.field) {
+      params.sorter = `${sorter.field}__${sorter.order.slice(0, -3)}`;
+    }
+
+    this.fetchData(params);
+  };
+
+  handleFormReset = () => {
+    const { form } = this.props;
+    form.resetFields();
+    this.setState({
+      formValues: {},
+    });
+    this.fetchData();
+  };
+
+  handleRefresh = () => {
+    const { formValues } = this.state;
+    this.fetchData(formValues);
+  };
+
+  handleSelectRows = rows => {
+    this.setState({
+      selectedRows: rows,
+    });
+  };
+
+  handleSearch = e => {
+    e.preventDefault();
+    const { form } = this.props;
+    form.validateFields((err, fieldsValue) => {
+      if (err) return;
+      const values = {
+        ...fieldsValue,
+      };
+      this.setState({
+        formValues: values,
+      });
+      this.fetchData(values);
+    });
+  };
+
+  handleDelete = id => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: `${modelKey}/remove`,
+      payload: { id },
+      callback: () => {
+        message.success('删除成功');
+        this.handleRefresh();
+      },
+    });
+  };
+
+  handleDeleteMultiple = () => {
+    const { dispatch } = this.props;
+    const { selectedRows } = this.state;
+    if (!selectedRows.length) return;
+    dispatch({
+      type: `${modelKey}/removeBulk`,
+      payload: {
+        ids: selectedRows.map(item => item.id),
+      },
+      callback: () => {
+        message.success('删除成功');
+        this.handleRefresh();
+      },
+    });
+  };
+
+  renderForm() {
+    const { form } = this.props;
+    const { getFieldDecorator } = form;
+    return (
+      <Form onSubmit={this.handleSearch} layout="inline">
+        <%
+          let filterIndex = 0;
+          let filterRow = true;
+          let filterTotal = filters.length;
+          while(filterRow) {
+            -%>
+              <Row
+                gutter={{
+                  md: 8,
+                  lg: 24,
+                  xl: 48,
+                }}
+              >
+            <%
+            for(let n = 0; n<4 ; n++) {
+              const filterCurrent = filterIndex*4+n;
+              if (filterCurrent>filterTotal) {
+                filterRow = false
+                break;
+              }
+              if (filterCurrent===filterTotal){
+              -%>
+                <Col md={6} sm={24}>
+                  <span className={styles.submitButtons}>
+                    <Button type="primary" htmlType="submit">
+                      查询
+                    </Button>
+                    <Button
+                      style={{
+                        marginLeft: 8,
+                      }}
+                      onClick={this.handleFormReset}
+                    >
+                      重置
+                    </Button>
+                  </span>
+                </Col>
+              <%
+              } else {
+                const filterItem = filters[filterCurrent];
+              -%>
+                <Col md={6} sm={24}>
+                  <% if(filterItem.enum) { -%>
+                    <FormItem label="<%- filterItem['x-description'] || filterItem.description -%>">
+                      {getFieldDecorator('<%- filterItem.key -%>')(
+                        <Select allowClear placeholder="请选择">
+                          {Object.entries(enumMaps['<%- filterItem.key -%>']).map(([key, val]) => (
+                            <Option value={key} key={key}>
+                              {val}
+                            </Option>
+                          ))}
+                        </Select>,
+                      )}
+                    </FormItem>
+                  <% } else if(filterItem.type==="boolean") { -%>
+                    <FormItem label="<%- filterItem.description -%>">
+                      {getFieldDecorator('<%- filterItem.key -%>')(
+                        <Select allowClear placeholder="请选择">
+                          <Option value={1}>YES</Option>
+                          <Option value={0}>NO</Option>
+                        </Select>,
+                      )}
+                    </FormItem>
+                  <% } else { -%>
+                    <FormItem label="<%- filterItem['x-description'] || filterItem.description -%>">
+                      {getFieldDecorator('<%- filterItem.key -%>')(<Input placeholder="请输入" />)}
+                    </FormItem>
+                  <% } -%>
+                </Col>
+              <%
+              }
+            }
+            filterIndex++;
+            -%>
+              </Row>
+            <%
+          }
+        -%>
+
+      </Form>
+    );
+  }
+
+  render() {
+    const { data, loading, dispatch } = this.props;
+    const { selectedRows } = this.state;
+    const columns = [
+      <% properties.filter(item=>!item.$ref && item["x-showTable"]).forEach(item=>{ -%>
+        <% if(item.enum) { -%>
+          {
+            title: '<%- item['x-description'] -%>',
+            dataIndex: '<%- item.key -%>',
+            filters: Object.entries(enumMaps['<%- item.key -%>']).map(([key, val]) => ({
+              text: val,
+              value: key,
+            })),
+            render: val => enumMaps['<%- item.key -%>'][val],
+          },
+        <% } else if(item.type==="boolean") { -%>
+          {
+            title: '<%- item.description -%>',
+            dataIndex: '<%- item.key -%>',
+            render: val => (val ? 'YES' : 'NO'),
+          },
+        <% } else if(item.type==="object") { -%>
+          {
+            title: '<%- item.description -%>',
+            dataIndex: '<%- item.key -%>',
+            render: val => val && JSON.stringify(val),
+          },
+        <% } else if(item.type==="array") { -%>
+          <% if(item.items && (item.items.$ref||item.items.type==="object")) { -%>
+            {
+              title: '<%- item.description -%>',
+              dataIndex: '<%- item.key -%>',
+              render: val => val && val.map(item => item.name).join(', '),
+            },
+          <% } else { -%>
+            {
+              title: '<%- item.description -%>',
+              dataIndex: '<%- item.key -%>',
+              render: val => val && val.join(', '),
+            },
+          <% } -%>
+        <% } else if(item.format==="date") { -%>
+          {
+            title: '<%- item.description -%>',
+            dataIndex: '<%- item.key -%>',
+            sorter: true,
+            render: val => val && moment(val).format('YYYY-MM-DD'),
+          },
+        <% } else if(item.format==="date-time") { -%>
+          {
+            title: '<%- item.description -%>',
+            dataIndex: '<%- item.key -%>',
+            sorter: true,
+            render: val => moment(val).format('YYYY-MM-DD HH:mm:ss'),
+          },
+        <% } else { -%>
+          {
+            title: '<%- item.description -%>',
+            dataIndex: '<%- item.key -%>',
+            <%- item['x-showSorter']?'sorter: true,':'' -%>
+          },
+        <% } -%>
+      <% }) -%>
+      {
+        title: '创建时间',
+        dataIndex: 'createdAt',
+        sorter: true,
+        render: val => moment(val).format('YYYY-MM-DD HH:mm:ss'),
+      },
+      {
+        title: '更新时间',
+        dataIndex: 'updatedAt',
+        sorter: true,
+        render: val => moment(val).format('YYYY-MM-DD HH:mm:ss'),
+      },
+      {
+        title: '操作',
+        render: (_, record) => (
+          <Fragment>
+            <ViewModal modalTitle="查看" dispatch={dispatch} formData={record}>
+              <a>查看</a>
+            </ViewModal>
+            <Divider type="vertical" />
+            <EditModal modalTitle="编辑" dispatch={dispatch} formData={record}>
+              <a>编辑</a>
+            </EditModal>
+            <Divider type="vertical" />
+            <Popconfirm title="确定删除？" onConfirm={() => this.handleDelete(record.id)}>
+              <a>删除</a>
+            </Popconfirm>
+          </Fragment>
+        ),
+      },
+    ];
+
+    return (
+      <PageHeaderWrapper>
+        <Card bordered={false}>
+          <div className={styles.tableList}>
+            <div className={styles.tableListForm}>{this.renderForm()}</div>
+            <div className={styles.tableListOperator}>
+              <EditModal
+                modalTitle="新建"
+                dispatch={dispatch}
+                formData={{}}
+                handleRefresh={this.handleRefresh}
+              >
+                <Button icon="plus" type="primary">
+                  新建
+                </Button>
+              </EditModal>
+              {selectedRows.length > 0 && (
+                <Popconfirm title="确定删除？" onConfirm={() => this.handleDeleteMultiple()}>
+                  <Button icon="delete">删除</Button>
+                </Popconfirm>
+              )}
+            </div>
+            <StandardTable
+              selectedRows={selectedRows}
+              loading={loading}
+              data={data}
+              rowKey={'id'}
+              columns={columns}
+              onSelectRow={this.handleSelectRows}
+              onChange={this.handleStandardTableChange}
+            />
+          </div>
+        </Card>
+      </PageHeaderWrapper>
+    );
+  }
+}

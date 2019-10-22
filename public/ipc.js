@@ -233,6 +233,7 @@ ipcMain.on(
       globalFiles = [],
       modelFiles = [],
       replaceFiles = [],
+      modelReplaceFiles = [],
       removeFiles = [],
       boilerplateLanguage,
       templateEngine,
@@ -315,6 +316,7 @@ ipcMain.on(
         return Promise.all(
           removeFiles.map(item => {
             const rmFile = path.join(tmpDir, item);
+            console.log(`删除 ${rmFile}`);
             return fse.remove(rmFile);
           })
         );
@@ -325,6 +327,7 @@ ipcMain.on(
           replaceFiles.map(item => {
             const placeFile = path.join(tmpDir, item[0]);
             const outFile = path.join(tmpDir, item[1]);
+            console.log(`替换文件 ${outFile}`);
             return fse.copy(placeFile, outFile);
           })
         );
@@ -354,16 +357,16 @@ ipcMain.on(
         console.log("生成全局文件成功");
         const tasks = [];
         modelKeys.forEach(key => {
+          let pathKey = key;
+          if (modelFilesCase === "lower") {
+            pathKey = pathKey.toLowerCase();
+          } else if (modelFilesCase === "plural") {
+            pathKey = definitions[key]["x-plural"];
+          } else if (modelFilesCase === "pluralLower") {
+            pathKey = definitions[key]["x-plural"].toLowerCase();
+          }
           modelFiles.forEach(item => {
             const inFile = path.join(tmpDir, item[0]);
-            let pathKey = key;
-            if (modelFilesCase === "lower") {
-              pathKey = pathKey.toLowerCase();
-            } else if (modelFilesCase === "plural") {
-              pathKey = definitions[key]["x-plural"];
-            } else if (modelFilesCase === "pluralLower") {
-              pathKey = definitions[key]["x-plural"].toLowerCase();
-            }
             const outFile = path.join(tmpDir, item[1].replace("*", pathKey));
             tasks.push(
               doPromise(inFile, outFile, {
@@ -374,6 +377,11 @@ ipcMain.on(
                 associations,
               })
             );
+          });
+          modelReplaceFiles.forEach(item => {
+            const placeFile = path.join(tmpDir, item[0]);
+            const outFile = path.join(tmpDir, item[1].replace("*", pathKey));
+            tasks.push(fse.copy(placeFile, outFile));
           });
         });
         return Promise.all(tasks);

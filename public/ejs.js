@@ -4186,3 +4186,8 @@ const model = {
     score: 8848,
   },
 };
+
+const pluralLower = model["x-plural"].toLowerCase();
+const properties = Object.entries(model.properties).map(([key,obj])=>({...obj,key}));
+const required = model.required || [];
+const filters = properties.filter(item=>item["x-showFilter"]);

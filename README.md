@@ -83,6 +83,9 @@
   ],
   "modelFilesCase": "pluralLower",
   "replaceFiles": [["swagger/replace/initData.js", "src/utils/initData.js"]],
+  "modelReplaceFiles": [
+    ["swagger/template/style.less", "src/pages/dashboard/*/style.less"]
+  ],
   "removeFiles": ["swagger/swagger.yaml"]
 }
 ```
@@ -96,6 +99,7 @@
 "modelFiles"                # 独立模型文件列表，对应多个（模型）文件，默认星号（*）会被模型名称代替
 "modelFilesCase"            # path的替换形式，可选值：default|lower|plural|pluralLower
 "replaceFiles"              # 需替换的文件列表
+"modelReplaceFiles"         # 去要替换的模型文件列表
 "removeFiles"               # 将删除的文件列表
 ```
 

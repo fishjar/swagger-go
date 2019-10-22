@@ -143,6 +143,11 @@ export const defaultBoilerplates = {
     url: "fishjar/koa-rest-boilerplate",
     disabled: false,
   },
+  antd: {
+    language: "nodejs",
+    url: "fishjar/antd-admin-bolierplate",
+    disabled: false,
+  },
   gin: {
     language: "go",
     url: "fishjar/gin-rest-boilerplate",

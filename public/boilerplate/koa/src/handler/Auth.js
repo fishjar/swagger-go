@@ -39,12 +39,16 @@ const findAndCountAll = async (ctx, next) => {
  * 根据主键查询单条信息
  */
 const findByPk = async (ctx, next) => {
-  const auth = await model.Auth.findByPk(ctx.params.id);
+  const auth = await model.Auth.findByPk(ctx.params.id,{
+    include: [
+      {
+        model: model.User,
+        as: "user",
+      },
+    ],
+  });
   ctx.assert(auth, 404, "记录不存在");
-  // const user = await model.User.findByPk(auth.userId);
-  const user = await auth.getUser();
-  ctx.assert(user, 500, "外键记录不存在");
-  ctx.body = { ...auth.get({ plain: true }), user };
+  ctx.body = auth;
 
   await next();
 };
