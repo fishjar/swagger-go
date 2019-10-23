@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./App.css";
 import "antd/dist/antd.css";
 
@@ -12,6 +12,7 @@ import Associations from "./components/Associations";
 import Tags from "./components/Tags";
 import Paths from "./components/Paths";
 import GeneralInfoEdit from "./components/forms/GeneralInfoEdit";
+import packageJson from "../package.json";
 
 import {
   Layout,
@@ -60,6 +61,10 @@ function App() {
   } = useData();
   console.log(state);
   console.log(current);
+
+  useEffect(() => {
+    document.title = `Swagger Go (v${packageJson.version})`;
+  }, []);
 
   function handleClose() {
     confirm({

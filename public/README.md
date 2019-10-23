@@ -2,7 +2,7 @@
 
 通用、易用、强大、跨平台的可视化 Swagger 文档编辑及前后端代码生成工具。
 
-# 技术栈
+## 技术栈
 
 - Electron
 - Swagger
@@ -113,3 +113,16 @@
   - definitions
   - dataFormats
   - associations
+
+## 更新记录
+
+### 0.2.1(2019-10-23)
+
+- 修复了预览时生成的`yaml`文件中`tags`包含类似`*ref_0`的 bug
+- 增加了标题动态读取`package.json`中的版本号
+
+### 0.2.1(2019-10-22)
+
+- 添加了`antd`后台系统模板
+- 修改了`koa`模板的一个小问题
+- 模板配置文件新增`modelReplaceFiles`字段
