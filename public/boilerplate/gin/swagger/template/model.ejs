@@ -1,0 +1,39 @@
+<%
+  const modelKeyLower = modelKey.toLowerCase();
+  const modelAssociationsAll = associations.filter(item=>item.source===modelKey);
+  const modelAssociationsMany = modelAssociationsAll.filter(item=>item.type==='belongsToMany');
+  const modelAssociationsBelongs = modelAssociationsAll.filter(item=>item.type==='belongsTo');
+%>
+
+package model
+
+import (
+	"time"
+
+	"github.com/fishjar/gin-rest-boilerplate/db"
+)
+
+// <%- modelKey -%> 用户模型
+// gorm tags参考：https://gorm.io/docs/models.html
+// binding tags参考：https://godoc.org/gopkg.in/go-playground/validator.v8
+// 时间格式比较严格，参考：https://golang.org/pkg/time/#pkg-constants
+// 模型定义中全部使用指针类型，是为了可以插入null值到数据库，但这样会造成一些使用的麻烦
+// 也可以使用"database/sql"或"github.com/guregu/null"包中封装的类型
+// 但是这样会造成binding验证失效，目前没有更好的实现办法，所以暂时全部使用指针类型
+type <%- modelKey -%> struct {
+	Base
+<% Object.entries(model.properties).filter(([_,field])=>!(field.$ref||(field.type==="array"&&(!field.items||field.items.$ref)))).forEach(([fieldKey,field])=>{ 
+	const isRequired = model.required && model.required.includes(fieldKey);
+-%>
+	<%- fieldKey -%>         <%- isRequired?'':'*' -%><%- dataFormats[field.format][2] -%>     `json:"<%- field['x-fieldName'] || fieldKey -%>" gorm:"column:<%- field['x-fieldName'] || fieldKey -%>;<%- isRequired?'not null;':'' -%>"<%- isRequired?'':' binding:"omitempty"' -%>` 
+<% }) -%>
+}
+
+// TableName 自定义用户表名
+func (<%- modelKey -%>) TableName() string {
+	return "<%- model['x-tableName'] -%>"
+}
+
+func init() {
+	db.DB.AutoMigrate(&<%- modelKey -%>{})
+}

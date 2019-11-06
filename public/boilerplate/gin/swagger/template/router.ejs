@@ -1,0 +1,54 @@
+/*
+	路由配置
+*/
+
+package router
+
+import (
+	"github.com/fishjar/gin-rest-boilerplate/handler"
+	"github.com/fishjar/gin-rest-boilerplate/middleware"
+
+	"github.com/gin-gonic/gin"
+)
+
+// InitRouter 注入路由，及返回一个gin对象
+func InitRouter() *gin.Engine {
+
+	// r := gin.New()
+	r := gin.Default() // Default 使用 Logger 和 Recovery 中间件
+
+	r.Use(middleware.BodyLogger()) // 日志中间件
+	r.Use(middleware.JWTAuth())	// JWT验证中间件
+
+	r.POST("/login/account", handler.LoginAccount) //登录
+
+<% Object.entries(definitions)
+.filter(([_,model])=>model['x-isModel'])
+.forEach(([modelKey,model]) => {
+const modelKeyLower = modelKey.toLowerCase();
+const modelKeyPlural = model["x-plural"].toLowerCase();
+-%>
+	{
+<% if(model['x-apis'].includes('findOrCreate')) { -%>
+		r.POST("/<%- modelKeyLower -%>", handler.<%- modelKey -%>FindOrCreate)	   // 查询或创建
+<% } -%>
+<% if(model['x-apis'].includes('findAndCountAll')) { -%>
+		r.GET("/<%- modelKeyPlural -%>", handler.<%- modelKey -%>FindAndCountAll)	// 获取多条
+<% } -%>
+<% if(model['x-apis'].includes('singleCreate')) { -%>
+		r.POST("/<%- modelKeyPlural -%>", handler.<%- modelKey -%>SingleCreate)	  // 创建单条
+<% } -%>
+<% if(model['x-apis'].includes('findByPk')) { -%>
+		r.GET("/<%- modelKeyPlural -%>/:id", handler.<%- modelKey -%>FindByPk)	   // 按ID查找
+<% } -%>
+<% if(model['x-apis'].includes('updateByPk')) { -%>
+		r.PATCH("/<%- modelKeyPlural -%>/:id", handler.<%- modelKey -%>UpdateByPk)   // 按ID更新
+<% } -%>
+<% if(model['x-apis'].includes('destroyByPk')) { -%>
+		r.DELETE("/<%- modelKeyPlural -%>/:id", handler.<%- modelKey -%>DestroyByPk) // 按ID删除
+<% } -%>
+	}
+<% }) -%>
+
+	return r
+}

@@ -84,46 +84,47 @@ export const apiOptions = [
 
 // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md
 // https://swagger.io/docs/specification/data-models/data-types/
+// [Sequelize, SQLAlchemy, gorm]
 export const dataTypes = {
   integer: {
-    int4: ["TINYINT", "TINYINT"],
-    int8: ["SMALLINT", "SMALLINT"],
-    int16: ["MEDIUMINT", "INTEGER"],
-    int32: ["INTEGER", "INTEGER"],
-    int64: ["BIGINT", "BIGINT"],
-    "time-stamp": ["INTEGER", "TIMESTAMP"],
+    int4: ["TINYINT", "TINYINT", "int"],
+    int8: ["SMALLINT", "SMALLINT", "int"],
+    int16: ["MEDIUMINT", "INTEGER", "int"],
+    int32: ["INTEGER", "INTEGER", "int"],
+    int64: ["BIGINT", "BIGINT", "int"],
+    "time-stamp": ["INTEGER", "TIMESTAMP", "int"],
   },
   number: {
-    float: ["FLOAT", "FLOAT"],
-    double: ["DOUBLE", "FLOAT"],
-    decimal: ["DECIMAL", "DECIMAL"],
+    float: ["FLOAT", "FLOAT", "float32"],
+    double: ["DOUBLE", "FLOAT", "float32"],
+    decimal: ["DECIMAL", "DECIMAL", "float32"],
   },
   string: {
-    char: ["CHAR", "CHAR"],
-    string: ["STRING", "VARCHAR"],
-    text: ["TEXT", "TEXT"],
-    date: ["DATEONLY", "DATE"],
-    "date-time": ["DATE", "DATETIME"],
-    // "date-time(6)": ["DATE", "DATETIME"],
-    email: ["STRING", "VARCHAR"],
-    uri: ["STRING", "VARCHAR"],
-    hostname: ["STRING", "VARCHAR"],
-    ipv4: ["STRING", "VARCHAR"],
-    ipv6: ["STRING", "VARCHAR"],
-    byte: ["STRING", "VARCHAR"],
-    binary: ["STRING.BINARY", "binary"],
-    password: ["STRING", "VARCHAR"],
-    uuid: ["UUID", "UUID"],
-    // json: ["JSON", "JSON"],
+    char: ["CHAR", "CHAR", "string"],
+    string: ["STRING", "VARCHAR", "string"],
+    text: ["TEXT", "TEXT", "string"],
+    date: ["DATEONLY", "DATE", "time.Time"],
+    "date-time": ["DATE", "DATETIME", "time.Time"],
+    // "date-time(6)": ["DATE", "DATETIME", "time.Time"],
+    email: ["STRING", "VARCHAR", "string"],
+    uri: ["STRING", "VARCHAR", "string"],
+    hostname: ["STRING", "VARCHAR", "string"],
+    ipv4: ["STRING", "VARCHAR", "string"],
+    ipv6: ["STRING", "VARCHAR", "string"],
+    byte: ["STRING", "VARCHAR", "string"],
+    binary: ["STRING.BINARY", "binary", "string"],
+    password: ["STRING", "VARCHAR", "string"],
+    uuid: ["UUID", "UUID", "string"],
+    // json: ["JSON", "JSON", "string"],
   },
   object: {
-    object: ["JSON", "JSON"],
+    object: ["JSON", "JSON", "string"],
   },
   array: {
-    array: ["JSON", "JSON"],
+    array: ["JSON", "JSON", "string"],
   },
   boolean: {
-    boolean: ["BOOLEAN", "BOOLEAN"],
+    boolean: ["BOOLEAN", "BOOLEAN", "bool"],
   },
 };
 
@@ -148,15 +149,15 @@ export const defaultBoilerplates = {
     url: "fishjar/antd-admin-bolierplate",
     disabled: false,
   },
-  gin: {
-    language: "go",
-    url: "fishjar/gin-rest-boilerplate",
-    disabled: true,
-  },
   flask: {
     language: "python",
     url: "fishjar/flask-rest-boilerplate",
     disabled: true,
+  },
+  gin: {
+    language: "go",
+    url: "fishjar/gin-rest-boilerplate",
+    disabled: false,
   },
 };
 

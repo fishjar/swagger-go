@@ -407,8 +407,8 @@ export const parseArrayToObject = (a, key = "key") => {
 export const downloadBoilerplate = (
   boilerplateName,
   repoUrl,
-  repoBranch,
-  targetDir
+  repoBranch = "master",
+  targetDir = "download"
 ) => {
   return new Promise((resolve, reject) => {
     ipcRenderer.send(

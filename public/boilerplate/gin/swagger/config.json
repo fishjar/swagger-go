@@ -1,0 +1,15 @@
+{
+  "boilerplateLanguage": "go",
+  "templateEngine": "ejs",
+  "globalFiles": [
+    ["swagger/template/router.ejs", "router/router.go"]
+  ],
+  "modelFiles": [
+    ["swagger/template/model.ejs", "model/*.go"],
+    ["swagger/template/handler.ejs", "handler/*.go"]
+  ],
+  "modelFilesCase": "lower",
+  "replaceFiles": [],
+  "modelReplaceFiles": [],
+  "removeFiles": ["swagger/swagger.yaml"]
+}
