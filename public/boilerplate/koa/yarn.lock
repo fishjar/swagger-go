@@ -3087,9 +3087,10 @@ sequelize-pool@^2.3.0:
   version "2.3.0"
   resolved "https://registry.npm.taobao.org/sequelize-pool/download/sequelize-pool-2.3.0.tgz#64f1fe8744228172c474f530604b6133be64993d"
 
-sequelize@^5.10.1:
-  version "5.10.1"
-  resolved "https://registry.npm.taobao.org/sequelize/download/sequelize-5.10.1.tgz#ac12614fee2fd40417c4df585dcc28ba2ccf2c57"
+sequelize@^5.15.1:
+  version "5.15.1"
+  resolved "https://registry.npm.taobao.org/sequelize/download/sequelize-5.15.1.tgz#f130ded17e74395ae7f5e265277c99577e895afb"
+  integrity sha1-8TDe0X50OVrn9eJlJ3yZV36JWvs=
   dependencies:
     bluebird "^3.5.0"
     cls-bluebird "^2.1.0"
