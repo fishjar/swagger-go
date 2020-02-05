@@ -49,6 +49,57 @@
 | x-isRichText   | boolean       | ../properties/{field}/  | 是否使用富文本编辑器       |
 | x-increment    | boolean       | ../properties/{field}/  | 是否子增长字段             |
 
+## 数据类型映射关系
+
+| Common      | `type`    | `format`       | Mysql       | Sequelize     | SQLAlchemy              | gorm      |
+| ----------- | --------- | -------------- | ----------- | ------------- | ----------------------- | --------- |
+| integer     | `integer` | `int4`         | TINYINT     | TINYINT       | -                       | int       |
+| integer     | `integer` | `int8`         | SMALLINT    | SMALLINT      | SMALLINT/SmallInteger   | int       |
+| integer     | `integer` | `int16`        | MEDIUMINT   | MEDIUMINT     | -                       | int       |
+| integer     | `integer` | `int32`        | INTEGER     | INTEGER       | Integer/INT/INTEGER     | int       |
+| long        | `integer` | `int64`        | BIGINT      | BIGINT        | BigInteger/BIGINT       | int       |
+| float       | `number`  | `float`        | FLOAT       | FLOAT         | Float/FLOAT             | float32   |
+| double      | `number`  | `double`       | DOUBLE      | DOUBLE        | -                       | float32   |
+| double      | `number`  | `decimal`      | DECIMAL     | DECIMAL       | DECIMAL/Numeric         | float32   |
+| string      | `string`  | `char`         | CHAR        | CHAR          | String/CHAR             | string    |
+| string      | `string`  | `string`       | VARCHAR     | STRING        | String/VARCHAR          | string    |
+| string      | `string`  | `text`         | TEXT        | TEXT          | Text/TEXT/CLOB          | string    |
+| date        | `string`  | `date`         | DATE        | DATEONLY      | Date/DATE               | time.Time |
+| dateTime    | `string`  | `date-time`    | DATETIME    | DATE          | DateTime/DATETIME       | time.Time |
+| dateTime    | `string`  | `date-time(6)` | DATETIME(6) | DATE(6)       | DateTime/DATETIME       | time.Time |
+| dateTime    | `string`  | `time-stamp`   | TIMESTAMP   | -             | TIMESTAMP               | -         |
+| email       | `string`  | `email`        | VARCHAR     | STRING        | VARCHAR                 | string    |
+| uri         | `string`  | `uri`          | VARCHAR     | STRING        | VARCHAR                 | string    |
+| uri         | `string`  | `hostname`     | VARCHAR     | STRING        | VARCHAR                 | string    |
+| uri         | `string`  | `ipv4`         | VARCHAR     | STRING        | VARCHAR                 | string    |
+| uri         | `string`  | `ipv6`         | VARCHAR     | STRING        | VARCHAR                 | string    |
+| byte        | `string`  | `byte`         | VARCHAR     | STRING        | VARCHAR                 | string    |
+| binary      | `string`  | `binary`       | BLOB/BINARY | STRING.BINARY | LargeBinary/BINARY/BLOB | -         |
+| password    | `string`  | `password`     | VARCHAR     | STRING        | -                       | string    |
+| uuid        | `string`  | `uuid`         | CHAR(36)    | UUID/UUIDV1   | -                       | string    |
+| object/dict | `string`  | `json`         | JSON        | JSON          | JSON                    | string    |
+| object/dict | `object`  | `object`       | JSON        | JSON          | JSON                    | string    |
+| array       | `array`   | `array`        | JSON        | JSON          | ARRAY                   | string    |
+| boolean     | `boolean` | `boolean`      | TINYINT(1)  | BOOLEAN       | Boolean/BOOLEAN         | bool      |
+| enum        | \*        | `enum`         | ENUM        | ENUM          | Enum                    | -         |
+
+## 开发及编译打包
+
+```sh
+# 安装依赖
+yarn
+
+# 开发
+yarn dev
+
+# 编译
+yarn build
+
+# 打包
+yarn dist-linux # linux
+yarn dist-windows # windows
+```
+
 ## 模板开发说明
 
 ### 目录示意图
@@ -116,10 +167,15 @@
 
 ## 更新记录
 
+### v0.2.4(2020-02-05)
+
+- 添加了`flask`模板
+- 修改了`koa`模板
+
 ### v0.2.3(2019-11-06)
 
 - 添加了`gin`后端接口模板
-- 修复了生成代码时在线模式的小bug
+- 修复了生成代码时在线模式的小 bug
 
 ### v0.2.2(2019-10-23)
 
