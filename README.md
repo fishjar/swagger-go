@@ -187,3 +187,11 @@ yarn dist-windows # windows
 - 添加了`antd`后台系统模板
 - 修改了`koa`模板的一个小问题
 - 模板配置文件新增`modelReplaceFiles`字段
+
+## 截图
+
+![swagger go screenshot 1](/screenshot/01.png)
+![swagger go screenshot 2](/screenshot/02.png)
+![swagger go screenshot 3](/screenshot/03.png)
+![swagger go screenshot 4](/screenshot/04.png)
+![swagger go screenshot 5](/screenshot/05.png)
