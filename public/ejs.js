@@ -3744,44 +3744,44 @@ const definitions = {
 
 const dataTypes = {
   integer: {
-    int4: ["TINYINT", "TINYINT", "int"],
-    int8: ["SMALLINT", "SMALLINT", "int"],
-    int16: ["MEDIUMINT", "INTEGER", "int"],
-    int32: ["INTEGER", "INTEGER", "int"],
-    int64: ["BIGINT", "BIGINT", "int"],
+    int4: ["TINYINT", "SmallInteger", "int"],
+    int8: ["SMALLINT", "SmallInteger", "int"],
+    int16: ["MEDIUMINT", "Integer", "int"],
+    int32: ["INTEGER", "Integer", "int"],
+    int64: ["BIGINT", "BigInteger", "int"],
     "time-stamp": ["INTEGER", "TIMESTAMP", "int"],
   },
   number: {
-    float: ["FLOAT", "FLOAT", "float32"],
-    double: ["DOUBLE", "FLOAT", "float32"],
-    decimal: ["DECIMAL", "DECIMAL", "float32"],
+    float: ["FLOAT", "Float", "float32"],
+    double: ["DOUBLE", "Float", "float32"],
+    decimal: ["DECIMAL", "Numeric", "float32"],
   },
   string: {
     char: ["CHAR", "CHAR", "string"],
-    string: ["STRING", "VARCHAR", "string"],
-    text: ["TEXT", "TEXT", "string"],
-    date: ["DATEONLY", "DATE", "time.Time"],
-    "date-time": ["DATE", "DATETIME", "time.Time"],
-    // "date-time(6)": ["DATE", "DATETIME", "time.Time"],
-    email: ["STRING", "VARCHAR", "string"],
-    uri: ["STRING", "VARCHAR", "string"],
-    hostname: ["STRING", "VARCHAR", "string"],
-    ipv4: ["STRING", "VARCHAR", "string"],
-    ipv6: ["STRING", "VARCHAR", "string"],
-    byte: ["STRING", "VARCHAR", "string"],
-    binary: ["STRING.BINARY", "binary", "string"],
-    password: ["STRING", "VARCHAR", "string"],
-    uuid: ["UUID", "UUID", "string"],
+    string: ["STRING", "String", "string"],
+    text: ["TEXT", "Text", "string"],
+    date: ["DATEONLY", "Date", "time.Time"],
+    "date-time": ["DATE", "DateTime", "time.Time"],
+    // "date-time(6)": ["DATE", "DateTime", "time.Time"],
+    email: ["STRING", "String", "string"],
+    uri: ["STRING", "String", "string"],
+    hostname: ["STRING", "String", "string"],
+    ipv4: ["STRING", "String", "string"],
+    ipv6: ["STRING", "String", "string"],
+    byte: ["STRING", "String", "string"],
+    binary: ["STRING.BINARY", "LargeBinary", "string"],
+    password: ["STRING", "String", "string"],
+    uuid: ["UUID", "String", "string"],
     // json: ["JSON", "JSON", "string"],
   },
   object: {
     object: ["JSON", "JSON", "string"],
   },
   array: {
-    array: ["JSON", "JSON", "string"],
+    array: ["JSON", "ARRAY", "string"],
   },
   boolean: {
-    boolean: ["BOOLEAN", "BOOLEAN", "bool"],
+    boolean: ["BOOLEAN", "Boolean", "bool"],
   },
 };
 
@@ -4188,6 +4188,9 @@ const model = {
 };
 
 const pluralLower = model["x-plural"].toLowerCase();
-const properties = Object.entries(model.properties).map(([key,obj])=>({...obj,key}));
+const properties = Object.entries(model.properties).map(([key, obj]) => ({
+  ...obj,
+  key,
+}));
 const required = model.required || [];
-const filters = properties.filter(item=>item["x-showFilter"]);
+const filters = properties.filter(item => item["x-showFilter"]);

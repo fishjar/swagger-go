@@ -1,29 +1,36 @@
 version: "3"
 
 services:
-  koa:
+  web:
     build: .
     restart: always
     depends_on:
-      - mysql
+      - db
     ports:
       - 3000:3000
     volumes:
       - "./vol/logs:/app/dist/log"
-    networks:
-      - koarest
-  mysql:
+    # networks:
+    #   - koarest
+    command: npm start
+    env_file:
+      - ./.env.prod
+  db:
     image: mysql
     restart: always
-    networks:
-      - koarest
+    # networks:
+    #   - koarest
     volumes:
       - ./vol/mysql:/var/lib/mysql
     environment:
-      MYSQL_ROOT_PASSWORD: '123456'
-      MYSQL_DATABASE: 'testdb'
-      # MYSQL_USER: 'user'
-      # MYSQL_PASSWORD: '123456'
-    ports:
-      - 3306:3306
-    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: testdb
+      # MYSQL_USER: user
+      # MYSQL_PASSWORD: 123456
+    # ports:
+    #   - 3306:3306
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+# networks:
+#   default:
+#     external:
+#       name: koarest

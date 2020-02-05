@@ -151,7 +151,7 @@ export default function Paths({ state, dispatch }) {
           type="dashed"
           icon="plus"
         >
-          Add Association
+          Add Path
         </Button>
       </PathEdit>
     </Fragment>

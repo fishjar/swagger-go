@@ -1,0 +1,6 @@
+<% Object.entries(definitions)
+.filter(([_,model])=>model['x-isModel'])
+.forEach(([modelKey,model]) => {
+-%>
+from .<%- modelKey -%> import  <%- modelKey -%>, <%- modelKey -%>Schema
+<% }) -%>

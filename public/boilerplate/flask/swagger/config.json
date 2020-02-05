@@ -1,0 +1,16 @@
+{
+  "boilerplateLanguage": "python",
+  "templateEngine": "ejs",
+  "globalFiles": [
+    ["swagger/template/router.ejs", "flaskr/router/__init__.py"],
+    ["swagger/template/model_init.ejs", "flaskr/model/__init__.py"]
+  ],
+  "modelFiles": [
+    ["swagger/template/model.ejs", "flaskr/model/*.py"],
+    ["swagger/template/handler.ejs", "flaskr/handler/*.py"]
+  ],
+  "modelFilesCase": "default",
+  "replaceFiles": [],
+  "modelReplaceFiles": [],
+  "removeFiles": ["swagger/swagger.yaml"]
+}

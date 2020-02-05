@@ -1,6 +1,6 @@
 {
   "name": "swagger-go",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "通用、易用、强大、跨平台的可视化 Swagger 文档编辑及前、后端代码生成工具。",
   "author": "Gabe Yuan <yugang2002@gmail.com>",
   "license": "MIT",

@@ -14,10 +14,10 @@ RUN npm install --registry=https://registry.npm.taobao.org
 RUN npm run build
 
 # 使端口 3000 可供此容器外的环境使用
-EXPOSE 3000
+# EXPOSE 3000
 
 # 定义环境变量
 # ENV NODE_ENV production
 
 # 在容器启动时运行
-CMD [ "npm", "start" ]
+# CMD [ "npm", "start" ]

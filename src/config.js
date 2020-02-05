@@ -121,7 +121,7 @@ export const dataTypes = {
     object: ["JSON", "JSON", "string"],
   },
   array: {
-    array: ["JSON", "ARRAY", "string"],
+    array: ["JSON", "JSON", "string"],
   },
   boolean: {
     boolean: ["BOOLEAN", "Boolean", "bool"],
@@ -152,7 +152,7 @@ export const defaultBoilerplates = {
   flask: {
     language: "python",
     url: "fishjar/flask-rest-boilerplate",
-    disabled: true,
+    disabled: false,
   },
   gin: {
     language: "go",

@@ -1,174 +1,189 @@
-# KOA REST boilerplate
+# Swagger Go
 
-## 支持特性
+通用、易用、强大、跨平台的可视化 Swagger 文档编辑及前后端代码生成工具。
 
-- 基于web框架[KOA](https://github.com/koajs/koa)，以及ORM框架[sequelize](https://github.com/sequelize/sequelize)，开箱即用
-- 简易登录及`JWT`验证、续签
-- 支持开发热重启，支持ES6语法，支持babel转码及编译压缩
+## 技术栈
 
-## 缺陷（待改进）
+- Electron
+- Swagger
+- React
+- Ant Design
+- ejs
 
-- 可能存在SQL注入风险
-- 缺少文件上传、下载功能
-- 缺少单元测试
+## 主要功能
 
-## 目录结构
+- swagger 文档编辑(仅支持 2.0 版)
+  - 提供样本 swagger 文档
+  - 提供导入 swagger 功能
+  - 可以导出 swagger 文档
+- swagger 文档预览
+  - swagger 源码预览
+  - 集成 swagger UI
+- 项目代码生成
+  - 利用模板自动生成项目代码
+  - 模板来源可以是本地或 Github
+  - 包括但不限于 KOA、Ant Design Pro 等项目
 
-```sh
-├── dist                      #输出目录
-├── docker-compose.yml
-├── Dockerfile
-├── package.json
-├── package-lock.json
-├── README.md
-├── src                       #源码目录
-│   ├── app.js                #koa配置
-│   ├── config                #配置目录
-│   │   ├── config.development.js
-│   │   ├── config.production.js
-│   │   ├── config.test.js
-│   │   └── index.js
-│   ├── db                    #数据库配置及文件目录
-│   │   └── index.js
-│   ├── handler               #路由handler目录
-│   │   ├── account.js
-│   │   ├── foo.js
-│   │   └── index.js
-│   ├── log                   #日志目录
-│   ├── middleware            #中间件目录
-│   │   ├── errorHandler.js   #全局错误捕获
-│   │   ├── jwtAuth.js        #jwt认证
-│   │   ├── jwtRolling.js     #jwt刷新
-│   │   ├── koaBody.js        #请求body处理
-│   │   └── reqBodyLog.js     #请求日志
-│   ├── model                 #模型目录
-│   │   ├── foo.js
-│   │   ├── index.js
-│   │   └── user.js
-│   ├── router                #路由配置
-│   │   └── index.js
-│   ├── server.js             #启动文件
-│   └── utils                 #工具包
-│       ├── api.js            #api封装
-│       ├── index.js          #工具函数
-│       ├── jwt.js            #jwt封装
-│       ├── logger.js         #日志函数配置
-│       ├── request.js        #请求函数封装
-│       └── sign.js           #加密封装
-└── yarn.lock
-```
+## swagger 自定义字段说明
 
-## 依赖列表
+| field          | type          | path                    | notice                     |
+| -------------- | ------------- | ----------------------- | -------------------------- |
+| x-associations | boolean       | /                       | 模型关联列表               |
+| x-auto         | boolean       | /paths/{path}/{method}/ | 是否自动生成的接口         |
+| x-isModel      | boolean       | /definitions/{model}/   | 是否（数据库）模型         |
+| x-plural       | string        | /definitions/{model}/   | 复数形式                   |
+| x-tableName    | string        | /definitions/{model}/   | 表名                       |
+| x-underscored  | boolean       | /definitions/{model}/   | 数据库字段是否用下划线写法 |
+| x-paranoid     | boolean       | /definitions/{model}/   | 是否启用软删除             |
+| x-tags         | array<string> | /definitions/{model}/   | 模型生成的接口的标签       |
+| x-apis         | array<string> | /definitions/{model}/   | 模型的接口列表             |
+| x-fieldName    | string        | ../properties/{field}/  | 自定义表中字段名           |
+| x-primaryKey   | boolean       | ../properties/{field}/  | 是否主键                   |
+| x-message      | string        | ../properties/{field}/  | 表单填写提示语             |
+| x-showTable    | boolean       | ../properties/{field}/  | 数据是否显示在后台列表中   |
+| x-showFilter   | boolean       | ../properties/{field}/  | 是否在列表上部搜索过滤     |
+| x-length       | number        | ../properties/{field}/  | string 字段长度            |
+| x-enumMap      | map           | ../properties/{field}/  | 枚举类型的字典             |
+| x-description  | text          | ../properties/{field}/  | 枚举类型的说明文字         |
+| x-showSorter   | boolean       | ../properties/{field}/  | 列表中是否可排序           |
+| x-isRichText   | boolean       | ../properties/{field}/  | 是否使用富文本编辑器       |
+| x-increment    | boolean       | ../properties/{field}/  | 是否子增长字段             |
 
-```js
-"dependencies": {
-  "@koa/cors": "^2.2.2", // 跨域请求配置及处理
-  "cross-env": "^5.2.0", // 跨系统的环境设置
-  "jsonwebtoken": "^8.4.0", // JWT 认证插件
-  "koa": "^2.6.1", // 核心包
-  "koa-body": "^4.2.1", // body解析
-  "koa-compress": "^3.0.0", // gzip压缩
-  "koa-jwt": "^3.5.1", // JWT 验证
-  "koa-logger": "^3.2.0", // 日志中间件
-  "koa-qs": "^2.0.0", // querystring处理
-  "koa-router": "^7.4.0", // 路由插件
-  "mysql2": "^1.6.4", // mysql支持
-  "request": "^2.88.0", // http请求插件
-  "request-promise": "^4.2.2",
-  "sequelize": "^4.41.1", // ORM插件
-  "strip-ansi": "^5.0.0", // 输出纯净日志文本
-  "winston": "^3.1.0", // 日志框架
-  "winston-daily-rotate-file": "^3.5.1" // 日志按日期分割
-},
-"devDependencies": {
-  "babel-cli": "^6.26.0", // ES6支持
-  "babel-plugin-transform-object-rest-spread": "^6.26.0",
-  "babel-plugin-transform-runtime": "^6.23.0",
-  "babel-preset-env": "^1.7.0",
-  "babel-preset-minify": "^0.5.0", // 压缩
-  "nodemon": "^1.18.6", // 热重启
-  "rimraf": "^2.6.2", // 清空文件夹
-  "sqlite3": "^4.0.3" // sqlite支持
-},
-```
+## 数据类型映射关系
 
-## 使用指引
+| Common      | `type`    | `format`       | Mysql       | Sequelize     | SQLAlchemy              | gorm      |
+| ----------- | --------- | -------------- | ----------- | ------------- | ----------------------- | --------- |
+| integer     | `integer` | `int4`         | TINYINT     | TINYINT       | -                       | int       |
+| integer     | `integer` | `int8`         | SMALLINT    | SMALLINT      | SMALLINT/SmallInteger   | int       |
+| integer     | `integer` | `int16`        | MEDIUMINT   | MEDIUMINT     | -                       | int       |
+| integer     | `integer` | `int32`        | INTEGER     | INTEGER       | Integer/INT/INTEGER     | int       |
+| long        | `integer` | `int64`        | BIGINT      | BIGINT        | BigInteger/BIGINT       | int       |
+| float       | `number`  | `float`        | FLOAT       | FLOAT         | Float/FLOAT             | float32   |
+| double      | `number`  | `double`       | DOUBLE      | DOUBLE        | -                       | float32   |
+| double      | `number`  | `decimal`      | DECIMAL     | DECIMAL       | DECIMAL/Numeric         | float32   |
+| string      | `string`  | `char`         | CHAR        | CHAR          | String/CHAR             | string    |
+| string      | `string`  | `string`       | VARCHAR     | STRING        | String/VARCHAR          | string    |
+| string      | `string`  | `text`         | TEXT        | TEXT          | Text/TEXT/CLOB          | string    |
+| date        | `string`  | `date`         | DATE        | DATEONLY      | Date/DATE               | time.Time |
+| dateTime    | `string`  | `date-time`    | DATETIME    | DATE          | DateTime/DATETIME       | time.Time |
+| dateTime    | `string`  | `date-time(6)` | DATETIME(6) | DATE(6)       | DateTime/DATETIME       | time.Time |
+| dateTime    | `string`  | `time-stamp`   | TIMESTAMP   | -             | TIMESTAMP               | -         |
+| email       | `string`  | `email`        | VARCHAR     | STRING        | VARCHAR                 | string    |
+| uri         | `string`  | `uri`          | VARCHAR     | STRING        | VARCHAR                 | string    |
+| uri         | `string`  | `hostname`     | VARCHAR     | STRING        | VARCHAR                 | string    |
+| uri         | `string`  | `ipv4`         | VARCHAR     | STRING        | VARCHAR                 | string    |
+| uri         | `string`  | `ipv6`         | VARCHAR     | STRING        | VARCHAR                 | string    |
+| byte        | `string`  | `byte`         | VARCHAR     | STRING        | VARCHAR                 | string    |
+| binary      | `string`  | `binary`       | BLOB/BINARY | STRING.BINARY | LargeBinary/BINARY/BLOB | -         |
+| password    | `string`  | `password`     | VARCHAR     | STRING        | -                       | string    |
+| uuid        | `string`  | `uuid`         | CHAR(36)    | UUID/UUIDV1   | -                       | string    |
+| object/dict | `string`  | `json`         | JSON        | JSON          | JSON                    | string    |
+| object/dict | `object`  | `object`       | JSON        | JSON          | JSON                    | string    |
+| array       | `array`   | `array`        | JSON        | JSON          | ARRAY                   | string    |
+| boolean     | `boolean` | `boolean`      | TINYINT(1)  | BOOLEAN       | Boolean/BOOLEAN         | bool      |
+| enum        | \*        | `enum`         | ENUM        | ENUM          | Enum                    | -         |
+
+## 开发及编译打包
 
 ```sh
-# 创建并进入目录
-mkdir koa-rest-boilerplate && cd "$_"
-
-# 克隆项目
-git clone https://github.com/fishjar/koa-rest-boilerplate.git .
-
 # 安装依赖
 yarn
 
 # 开发
 yarn dev
 
-# 编译（清空dist文件夹+转码+压缩）
+# 编译
 yarn build
 
-# 启动编译后代码
-yarn start
-
-# 开发时，如有需要，运行下列命令启动一个mysql数据库服务
-sudo docker-compose -f ./src/db/docker-compose.mysql.yml up -d
-
-# 简易部署
-sudo docker-compose up -d
+# 打包
+yarn dist-linux # linux
+yarn dist-windows # windows
 ```
 
-## 模型验证参数参考
+## 模板开发说明
 
-```js
-const ValidateMe = sequelize.define("foo", {
-  foo: {
-    type: Sequelize.STRING,
-    validate: {
-      is: ["^[a-z]+$", "i"], // 只允许字母
-      is: /^[a-z]+$/i, // 与上一个示例相同,使用了真正的正则表达式
-      not: ["[a-z]", "i"], // 不允许字母
-      isEmail: true, // 检查邮件格式 (foo@bar.com)
-      isUrl: true, // 检查连接格式 (http://foo.com)
-      isIP: true, // 检查 IPv4 (129.89.23.1) 或 IPv6 格式
-      isIPv4: true, // 检查 IPv4 (129.89.23.1) 格式
-      isIPv6: true, // 检查 IPv6 格式
-      isAlpha: true, // 只允许字母
-      isAlphanumeric: true, // 只允许使用字母数字
-      isNumeric: true, // 只允许数字
-      isInt: true, // 检查是否为有效整数
-      isFloat: true, // 检查是否为有效浮点数
-      isDecimal: true, // 检查是否为任意数字
-      isLowercase: true, // 检查是否为小写
-      isUppercase: true, // 检查是否为大写
-      notNull: true, // 不允许为空
-      isNull: true, // 只允许为空
-      notEmpty: true, // 不允许空字符串
-      equals: "specific value", // 只允许一个特定值
-      contains: "foo", // 检查是否包含特定的子字符串
-      notIn: [["foo", "bar"]], // 检查是否值不是其中之一
-      isIn: [["foo", "bar"]], // 检查是否值是其中之一
-      notContains: "bar", // 不允许包含特定的子字符串
-      len: [2, 10], // 只允许长度在2到10之间的值
-      isUUID: 4, // 只允许uuids
-      isDate: true, // 只允许日期字符串
-      isAfter: "2011-11-05", // 只允许在特定日期之后的日期字符串
-      isBefore: "2011-11-05", // 只允许在特定日期之前的日期字符串
-      max: 23, // 只允许值 <= 23
-      min: 23, // 只允许值 >= 23
-      isCreditCard: true, // 检查有效的信用卡号码
+### 目录示意图
 
-      // 也可以自定义验证:
-      isEven(value) {
-        if (parseInt(value) % 2 != 0) {
-          throw new Error("Only even values are allowed!");
-          // 我们也在模型的上下文中，所以如果它存在的话,
-          // this.otherField会得到otherField的值。
-        }
-      }
-    }
-  }
-});
+```sh
+├── swagger                 # 项目根目录下需要此文件夹
+│   ├── config.json         # 必须的配置文件
+│   ├── replace
+│   │   └── initData.js
+│   └── template
+│       ├── handler.ejs
+│       ├── handlerIndex.ejs
+│       ├── model.ejs
+│       ├── modelIndex.ejs
+│       └── router.ejs
 ```
+
+### 配置示例
+
+```json
+{
+  "boilerplateLanguage": "nodejs",
+  "templateEngine": "ejs",
+  "globalFiles": [
+    ["swagger/template/router.ejs", "src/router/index.js"],
+    ["swagger/template/modelIndex.ejs", "src/model/index.js"],
+    ["swagger/template/handlerIndex.ejs", "src/handler/index.js"]
+  ],
+  "modelFiles": [
+    ["swagger/template/model.ejs", "src/model/*.js"],
+    ["swagger/template/handler.ejs", "src/handler/*.js"]
+  ],
+  "modelFilesCase": "pluralLower",
+  "replaceFiles": [["swagger/replace/initData.js", "src/utils/initData.js"]],
+  "modelReplaceFiles": [
+    ["swagger/template/style.less", "src/pages/dashboard/*/style.less"]
+  ],
+  "removeFiles": ["swagger/swagger.yaml"]
+}
+```
+
+### 配置说明
+
+```sh
+"boilerplateLanguage"       # 项目使用的开发语言
+"templateEngine"            # 使用的模板引擎
+"globalFiles"               # 全部模型文件列表，对应一个文件
+"modelFiles"                # 独立模型文件列表，对应多个（模型）文件，默认星号（*）会被模型名称代替
+"modelFilesCase"            # path的替换形式，可选值：default|lower|plural|pluralLower
+"replaceFiles"              # 需替换的文件列表
+"modelReplaceFiles"         # 去要替换的模型文件列表
+"removeFiles"               # 将删除的文件列表
+```
+
+- globalFiles 可使用对象：
+  - definitions
+  - dataFormats
+  - associations
+- modelFiles 可使用对象：
+  - modelKey
+  - model
+  - definitions
+  - dataFormats
+  - associations
+
+## 更新记录
+
+### v0.2.4(2020-0205)
+
+- 添加了`flask`模板
+- 修改了`koa`模板
+
+### v0.2.3(2019-11-06)
+
+- 添加了`gin`后端接口模板
+- 修复了生成代码时在线模式的小 bug
+
+### v0.2.2(2019-10-23)
+
+- 修复了预览时生成的`yaml`文件中`tags`包含类似`*ref_0`的 bug
+- 增加了标题动态读取`package.json`中的版本号
+
+### v0.2.1(2019-10-22)
+
+- 添加了`antd`后台系统模板
+- 修改了`koa`模板的一个小问题
+- 模板配置文件新增`modelReplaceFiles`字段

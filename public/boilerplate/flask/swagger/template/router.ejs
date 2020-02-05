@@ -1,0 +1,50 @@
+from flask import Blueprint
+from flaskr.handler import Login<% Object.entries(definitions)
+.filter(([_,model])=>model['x-isModel'])
+.forEach(([modelKey,model]) => { -%>, <%- modelKey -%><% }) -%>
+
+# 创建蓝图
+login = Blueprint("login", "Login")
+<% Object.entries(definitions)
+.filter(([_,model])=>model['x-isModel'])
+.forEach(([modelKey,model]) => {
+const modelKeyLower = modelKey.toLowerCase();
+const modelKeyPlural = model["x-plural"].toLowerCase();
+-%>
+<%- modelKeyLower -%> = Blueprint("<%- modelKeyLower -%>", "<%- modelKey -%>")
+<% }) -%>
+
+# 绑定路由
+login.add_url_rule("/login/account", view_func=Login.account, methods=("POST",))
+
+<% Object.entries(definitions)
+.filter(([_,model])=>model['x-isModel'])
+.forEach(([modelKey,model]) => {
+const modelKeyLower = modelKey.toLowerCase();
+const modelKeyPlural = model["x-plural"].toLowerCase();
+-%>
+<% if(model['x-apis'].includes('findAndCountAll')) { -%>
+<%- modelKeyLower -%>.add_url_rule("/<%- modelKeyPlural -%>", view_func=<%- modelKey -%>.findAndCountAll, methods=("GET",))
+<% } -%>
+<% if(model['x-apis'].includes('singleCreate')) { -%>
+<%- modelKeyLower -%>.add_url_rule("/<%- modelKeyPlural -%>", view_func=<%- modelKey -%>.singleCreate, methods=("POST",))
+<% } -%>
+<% if(model['x-apis'].includes('bulkUpdate')) { -%>
+<%- modelKeyLower -%>.add_url_rule("/<%- modelKeyPlural -%>", view_func=<%- modelKey -%>.bulkUpdate, methods=("PATCH",))
+<% } -%>
+<% if(model['x-apis'].includes('bulkDestroy')) { -%>
+<%- modelKeyLower -%>.add_url_rule("/<%- modelKeyPlural -%>", view_func=<%- modelKey -%>.bulkDestroy, methods=("DELETE",))
+<% } -%>
+<% if(model['x-apis'].includes('findByPk')) { -%>
+<%- modelKeyLower -%>.add_url_rule("/<%- modelKeyPlural -%>/<string:id>", view_func=<%- modelKey -%>.findByPk, methods=("GET",))
+<% } -%>
+<% if(model['x-apis'].includes('updateByPk')) { -%>
+<%- modelKeyLower -%>.add_url_rule("/<%- modelKeyPlural -%>/<string:id>", view_func=<%- modelKey -%>.updateByPk, methods=("PATCH",))
+<% } -%>
+<% if(model['x-apis'].includes('destroyByPk')) { -%>
+<%- modelKeyLower -%>.add_url_rule("/<%- modelKeyPlural -%>/<string:id>", view_func=<%- modelKey -%>.destroyByPk, methods=("DELETE",))
+<% } -%>
+<% if(model['x-apis'].includes('bulkCreate')) { -%>
+<%- modelKeyLower -%>.add_url_rule("/<%- modelKeyPlural -%>/multiple", view_func=<%- modelKey -%>.bulkCreate, methods=("POST",))
+<% } -%>
+<% }) -%>

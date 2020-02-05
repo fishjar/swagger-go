@@ -1,5 +1,6 @@
 export default {
-  DATABASE_URL: 'mysql://root:123456@127.0.0.1:3306/testdb',
+  // DATABASE_URL: 'mysql://root:123456@127.0.0.1:3306/testdb',
+  DATABASE_URL: 'mysql://root:123456@db:3306/testdb',
   DATABASE_OPT: {
     dialect: 'mysql',
     pool: {

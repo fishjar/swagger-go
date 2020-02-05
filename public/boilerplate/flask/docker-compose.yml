@@ -1,0 +1,43 @@
+version: "3"
+
+services:
+  web:
+    build: .
+    restart: always
+    # command: gunicorn -c gunicorn.py main:app
+    # 采用上面配置文件的方式启动gunicorn有问题，原因未知
+    command: |
+      gunicorn main:app
+        -b 0.0.0.0:8000
+        -w 4
+        -k gevent
+        --threads 2
+        --worker-connections 1000
+        --access-logfile flaskr/tmp/gunicorn_acess.log
+        --error-logfile flaskr/tmp/gunicorn_error.log
+        --backlog 1024
+    # environment:
+    #   FLASK_APP: flaskr
+    #   FLASK_ENV: production
+    #   DATABASE_URI: mysql+pymysql://root:123456@db:3306/testdb
+    env_file:
+      - ./.env.prod
+    depends_on:
+      - db
+    ports:
+      - 8000:8000
+    volumes:
+      - ./vol/tmp:/app/flaskr/tmp
+  db:
+    image: mysql
+    restart: always
+    volumes:
+      - ./vol/mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: testdb
+      # MYSQL_USER: user
+      # MYSQL_PASSWORD: 123456
+    ports:
+      - 3306:3306
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
