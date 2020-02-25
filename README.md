@@ -100,6 +100,11 @@ yarn dist-linux # linux
 yarn dist-windows # windows
 ```
 
+编译好的文件下载：
+
+- windows 版： `https://pan.baidu.com/s/1iGqJMy6gIjQjBMtmOlDWdg` 提取码: `1svx`
+- linux 版： `https://pan.baidu.com/s/1s3KmmI8IqPCcUflY0ds7YA` 提取码: `cghn`
+
 ## 模板开发说明
 
 ### 目录示意图
